@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Waste Mapping Portal</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Geo-Tracking and Waste Mapping Portal</h1>
+        <p>Smart Waste Reporting and Location Tracking System</p>
+    </header>
+
+    <main>
+        <section class="stats">
+
+    <div class="card">
+        <h3>Total Reports</h3>
+        <p id="totalReports">0</p>
+    </div>
+
+    <div class="card">
+        <h3>Plastic</h3>
+        <p id="plasticCount">0</p>
+    </div>
+
+    <div class="card">
+        <h3>Organic</h3>
+        <p id="organicCount">0</p>
+    </div>
+
+    <div class="card">
+        <h3>Electronic</h3>
+        <p id="electronicCount">0</p>
+    </div>
+
+</section>
+
+        <section class="report-box">
+
+            <h2>Report Waste</h2>
+
+            <label>Waste Type</label>
+
+            <select id="wasteType">
+                <option value="">Select Waste Type</option>
+                <option value="Plastic">Plastic</option>
+                <option value="Organic">Organic</option>
+                <option value="Electronic">Electronic</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label>Description</label>
+
+            <textarea id="description"
+                placeholder="Enter waste description"></textarea>
+
+            <button onclick="getLocation()">
+                📍 Get My Location
+            </button>
+
+            <p id="location">Location not detected</p>
+
+            <button onclick="submitReport()">
+                Submit Waste Report
+            </button>
+
+        </section>
+
+        <section class="dashboard">
+
+            <h2>Waste Reports</h2>
+
+            <div id="reports">
+                <p>No reports available.</p>
+            </div>
+
+        </section>
+
+        <section class="dashboard">
+
+    <h2>Waste Location Map</h2>
+
+    <div id="map"></div>
+
+</section>
+
+    </main>
+
+    <footer>
+        <p>© 2026 Waste Mapping Portal</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
