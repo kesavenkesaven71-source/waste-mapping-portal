@@ -1,3 +1,7 @@
+/* =====================================================
+   GLOBAL
+===================================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -10,10 +14,123 @@ body {
     color: #222;
 }
 
-header {
-    background: #176b45;
+
+/* =====================================================
+   LOGIN PAGE
+===================================================== */
+
+#loginPage {
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 25px;
+
+    background: linear-gradient(
+        135deg,
+        #176b45,
+        #0f4f32
+    );
+
     color: white;
+
     text-align: center;
+}
+
+#loginPage h2 {
+    color: white;
+
+    font-size: 32px;
+
+    margin-bottom: 8px;
+}
+
+#loginPage p {
+    margin-bottom: 20px;
+}
+
+#loginPage input {
+    display: block;
+
+    width: 320px;
+    max-width: 90%;
+
+    margin: 10px auto;
+
+    padding: 13px 15px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    font-size: 16px;
+
+    outline: none;
+}
+
+#loginPage input:focus {
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 255, 255, 0.3);
+}
+
+#loginPage button {
+    width: 320px;
+    max-width: 90%;
+
+    margin-top: 12px;
+
+    padding: 13px 20px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: #176b45;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+#loginPage button:hover {
+    background: #e8f5e9;
+
+    transform: translateY(-1px);
+}
+
+#loginMessage {
+    margin-top: 15px;
+
+    font-weight: bold;
+
+    color: #ffdddd;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header {
+    position: relative;
+
+    background: #176b45;
+
+    color: white;
+
+    text-align: center;
+
     padding: 25px;
 }
 
@@ -21,92 +138,201 @@ header h1 {
     margin-bottom: 8px;
 }
 
+
+/* =====================================================
+   LOGOUT BUTTON
+===================================================== */
+
+.logout-btn {
+    position: absolute;
+
+    top: 20px;
+    right: 20px;
+
+    margin: 0;
+
+    padding: 10px 16px;
+
+    background: #dc3545;
+
+    color: white;
+
+    border-radius: 7px;
+
+    font-weight: bold;
+}
+
+.logout-btn:hover {
+    background: #b02a37;
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
 main {
     width: 90%;
+
     max-width: 900px;
+
     margin: 30px auto;
 }
 
+
+/* =====================================================
+   SECTIONS
+===================================================== */
+
 section {
     background: white;
+
     padding: 25px;
+
     margin-bottom: 25px;
+
     border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+    box-shadow:
+        0 3px 10px
+        rgba(0, 0, 0, 0.1);
 }
 
 h2 {
     margin-bottom: 20px;
+
     color: #176b45;
 }
 
+
+/* =====================================================
+   FORM
+===================================================== */
+
 label {
     display: block;
+
     margin-top: 15px;
+
     margin-bottom: 6px;
+
     font-weight: bold;
 }
 
 select,
 textarea {
     width: 100%;
+
     padding: 12px;
+
     border: 1px solid #ccc;
+
     border-radius: 6px;
+
     font-size: 15px;
+
+    outline: none;
+}
+
+select:focus,
+textarea:focus {
+    border-color: #176b45;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(23, 107, 69, 0.12);
 }
 
 textarea {
     height: 100px;
+
     resize: none;
 }
 
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
 button {
     margin-top: 18px;
+
     padding: 12px 20px;
+
     border: none;
+
     border-radius: 6px;
+
     background: #176b45;
+
     color: white;
+
     font-size: 15px;
+
     cursor: pointer;
+
+    transition: 0.2s;
 }
 
 button:hover {
     background: #0f4f32;
 }
 
+
+/* =====================================================
+   LOCATION
+===================================================== */
+
 #location {
     margin-top: 15px;
+
     color: #555;
+
+    font-size: 14px;
 }
 
-footer {
-    text-align: center;
-    padding: 20px;
-    background: #222;
-    color: white;
-}
-#map {
-    height: 400px;
-    width: 100%;
-    border-radius: 10px;
-}
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
 .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
     gap: 15px;
+
     background: transparent;
+
     box-shadow: none;
+
     padding: 0;
 }
 
 .card {
     background: white;
+
     padding: 20px;
+
     text-align: center;
+
     border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+    box-shadow:
+        0 3px 10px
+        rgba(0, 0, 0, 0.1);
+
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 6px 15px
+        rgba(0, 0, 0, 0.12);
 }
 
 .card h3 {
@@ -115,41 +341,128 @@ footer {
 
 .card p {
     font-size: 30px;
+
     font-weight: bold;
+
     margin-top: 10px;
 }
 
-#loginPage {
+
+/* =====================================================
+   REPORTS
+===================================================== */
+
+#reports {
+    line-height: 1.6;
+}
+
+#reports hr {
+    border: 0;
+
+    border-top:
+        1px solid #ddd;
+
+    margin: 15px 0;
+}
+
+
+/* =====================================================
+   MAP
+===================================================== */
+
+#map {
+    height: 400px;
+
+    width: 100%;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
     text-align: center;
-    max-width: 400px;
-    margin: 80px auto;
-    padding: 30px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+
+    padding: 20px;
+
+    background: #222;
+
+    color: white;
 }
 
-#loginPage input {
-    display: block;
-    width: 90%;
-    margin: 15px auto;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
 
-#loginPage button {
-    padding: 12px 30px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
+/* =====================================================
+   TABLET / MOBILE
+===================================================== */
 
-#loginMessage {
-    color: red;
-}
 @media (max-width: 700px) {
+
     .stats {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    header {
+        padding:
+            25px 15px 70px;
+    }
+
+    header h1 {
+        font-size: 24px;
+    }
+
+    header p {
+        font-size: 14px;
+    }
+
+    .logout-btn {
+        top: auto;
+
+        bottom: 18px;
+
+        right: 50%;
+
+        transform:
+            translateX(50%);
+    }
+
+    main {
+        width: 94%;
+    }
+
+    section {
+        padding: 20px;
+    }
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 450px) {
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    #loginPage h2 {
+        font-size: 26px;
+    }
+
+    #loginPage input,
+    #loginPage button {
+        width: 100%;
+
+        max-width: 320px;
+    }
+
+    #map {
+        height: 320px;
     }
 }
