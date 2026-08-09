@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,105 +15,249 @@
 </head>
 
 <body>
+
+    <!-- =========================
+         LOGIN PAGE
+    ========================== -->
+
     <div id="loginPage">
-    <h2>Waste Mapping Portal</h2>
 
-    <input type="text" id="username" placeholder="Username">
+        <h2>🌱 Waste Mapping Portal</h2>
 
-    <input type="password" id="password" placeholder="Password">
+        <p>Please login to continue</p>
 
-    <button onclick="login()">Login</button>
+        <input
+            type="text"
+            id="username"
+            placeholder="Username"
+            autocomplete="username"
+        >
 
-    <p id="loginMessage"></p>
-</div>
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
 
-    <header>
-        <h1>Geo-Tracking and Waste Mapping Portal</h1>
-        <p>Smart Waste Reporting and Location Tracking System</p>
-    </header>
+        <button onclick="login()">
+            Login
+        </button>
 
-    <main>
-        <section class="stats">
+        <p id="loginMessage"></p>
 
-    <div class="card">
-        <h3>Total Reports</h3>
-        <p id="totalReports">0</p>
     </div>
 
-    <div class="card">
-        <h3>Plastic</h3>
-        <p id="plasticCount">0</p>
-    </div>
 
-    <div class="card">
-        <h3>Organic</h3>
-        <p id="organicCount">0</p>
-    </div>
+    <!-- =========================
+         WASTE PORTAL
+    ========================== -->
 
-    <div class="card">
-        <h3>Electronic</h3>
-        <p id="electronicCount">0</p>
-    </div>
+    <div id="portalPage" style="display: none;">
 
-</section>
+        <!-- HEADER -->
 
-        <section class="report-box">
+        <header>
 
-            <h2>Report Waste</h2>
+            <h1>
+                Geo-Tracking and Waste Mapping Portal
+            </h1>
 
-            <label>Waste Type</label>
+            <p>
+                Smart Waste Reporting and Location Tracking System
+            </p>
 
-            <select id="wasteType">
-                <option value="">Select Waste Type</option>
-                <option value="Plastic">Plastic</option>
-                <option value="Organic">Organic</option>
-                <option value="Electronic">Electronic</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <label>Description</label>
-
-            <textarea id="description"
-                placeholder="Enter waste description"></textarea>
-
-            <button onclick="getLocation()">
-                📍 Get My Location
+            <button
+                onclick="logout()"
+                class="logout-btn">
+                🚪 Logout
             </button>
 
-            <p id="location">Location not detected</p>
+        </header>
 
-            <button onclick="submitReport()">
-                Submit Waste Report
-            </button>
 
-        </section>
+        <!-- MAIN -->
 
-        <section class="dashboard">
+        <main>
 
-            <h2>Waste Reports</h2>
+            <!-- =========================
+                 STATISTICS
+            ========================== -->
 
-            <div id="reports">
-                <p>No reports available.</p>
-            </div>
+            <section class="stats">
 
-        </section>
+                <div class="card">
 
-        <section class="dashboard">
+                    <h3>Total Reports</h3>
 
-    <h2>Waste Location Map</h2>
+                    <p id="totalReports">
+                        0
+                    </p>
 
-    <div id="map"></div>
+                </div>
 
-</section>
 
-    </main>
+                <div class="card">
 
-    <footer>
-        <p>© 2026 Waste Mapping Portal</p>
-    </footer>
+                    <h3>Plastic</h3>
+
+                    <p id="plasticCount">
+                        0
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Organic</h3>
+
+                    <p id="organicCount">
+                        0
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Electronic</h3>
+
+                    <p id="electronicCount">
+                        0
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 REPORT WASTE
+            ========================== -->
+
+            <section class="report-box">
+
+                <h2>
+                    Report Waste
+                </h2>
+
+
+                <label for="wasteType">
+                    Waste Type
+                </label>
+
+                <select id="wasteType">
+
+                    <option value="">
+                        Select Waste Type
+                    </option>
+
+                    <option value="Plastic">
+                        Plastic
+                    </option>
+
+                    <option value="Organic">
+                        Organic
+                    </option>
+
+                    <option value="Electronic">
+                        Electronic
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    placeholder="Enter waste description">
+                </textarea>
+
+
+                <button onclick="getLocation()">
+                    📍 Get My Location
+                </button>
+
+
+                <p id="location">
+                    Location not detected
+                </p>
+
+
+                <button onclick="submitReport()">
+                    Submit Waste Report
+                </button>
+
+            </section>
+
+
+            <!-- =========================
+                 WASTE REPORTS
+            ========================== -->
+
+            <section class="dashboard">
+
+                <h2>
+                    Waste Reports
+                </h2>
+
+                <div id="reports">
+
+                    <p>
+                        No reports available.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 MAP
+            ========================== -->
+
+            <section class="dashboard">
+
+                <h2>
+                    Waste Location Map
+                </h2>
+
+                <div id="map"></div>
+
+            </section>
+
+        </main>
+
+
+        <!-- FOOTER -->
+
+        <footer>
+
+            <p>
+                © 2026 Waste Mapping Portal
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <!-- Leaflet JS -->
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js"></script>
+
+    <!-- Main JavaScript -->
+
+    <script src="script.js"></script>
 
 </body>
+
 </html>
