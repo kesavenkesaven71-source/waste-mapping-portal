@@ -269,7 +269,18 @@ function loadSavedReports() {
     });
 }
 
+function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("loginMessage");
 
+    if (username === "admin" && password === "1234") {
+        document.getElementById("loginPage").style.display = "none";
+        message.innerText = "";
+    } else {
+        message.innerText = "Invalid username or password";
+    }
+}
 // -----------------------------
 // PAGE LOAD
 // -----------------------------
@@ -277,8 +288,4 @@ function loadSavedReports() {
 window.onload = function() {
 
     displayReports();
-
-    updateStats();
-
-    loadSavedReports();
-};
+    
