@@ -1,4 +1,9 @@
 // =====================================================
+// WASTE MAPPING PORTAL - MAIN JAVASCRIPT
+// =====================================================
+
+
+// =====================================================
 // VARIABLES
 // =====================================================
 
@@ -8,32 +13,9 @@ let longitude = null;
 let selectedPhoto = "";
 
 let reports =
-    JSON.parse(
-        localStorage.getItem("wasteReports")
-    ) || [];
+    JSON.parse(localStorage.getItem("wasteReports")) || [];
 
-
-// =====================================================
-// MAP
-// =====================================================
-
-let map = L.map("map").setView(
-    [9.9252, 78.1198],
-    13
-);
-
-L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        attribution:
-            "© OpenStreetMap contributors"
-    }
-).addTo(map);
-
-
-// =====================================================
-// CHARTS
-// =====================================================
+let map = null;
 
 let wasteChart = null;
 let statusChart = null;
@@ -54,11 +36,17 @@ function login() {
     const message =
         document.getElementById("loginMessage");
 
-    if (username === "admin" && password === "1234") {
 
-        document.getElementById("loginPage").style.display = "none";
+    if (
+        username === "admin" &&
+        password === "admin123"
+    ) {
 
-        document.getElementById("portalPage").style.display = "block";
+        document.getElementById("loginPage").style.display =
+            "none";
+
+        document.getElementById("portalPage").style.display =
+            "block";
 
         sessionStorage.setItem(
             "wastePortalLoggedIn",
@@ -67,19 +55,18 @@ function login() {
 
         message.innerText = "";
 
-        // Refresh map after dashboard becomes visible
-        setTimeout(function () {
-            if (typeof map !== "undefined") {
-                map.invalidateSize();
-            }
-        }, 500);
+        initializePortal();
 
     } else {
 
         message.innerText =
             "❌ Invalid username or password";
+
+        message.style.color =
+            "#dc3545";
     }
 }
+
 
 // =====================================================
 // LOGOUT
@@ -91,28 +78,20 @@ function logout() {
         "wastePortalLoggedIn"
     );
 
+    document.getElementById("portalPage").style.display =
+        "none";
 
-    document.getElementById(
-        "portalPage"
-    ).style.display = "none";
+    document.getElementById("loginPage").style.display =
+        "flex";
 
+    document.getElementById("username").value =
+        "";
 
-    document.getElementById(
-        "loginPage"
-    ).style.display = "flex";
+    document.getElementById("password").value =
+        "";
 
-
-    document.getElementById(
-        "username"
-    ).value = "";
-
-    document.getElementById(
-        "password"
-    ).value = "";
-
-    document.getElementById(
-        "loginMessage"
-    ).innerText = "";
+    document.getElementById("loginMessage").innerText =
+        "";
 }
 
 
@@ -127,16 +106,52 @@ function checkLogin() {
             "wastePortalLoggedIn"
         );
 
-
     if (loggedIn === "true") {
 
-        document.getElementById(
-            "loginPage"
-        ).style.display = "none";
+        document.getElementById("loginPage").style.display =
+            "none";
 
-        document.getElementById(
-            "portalPage"
-        ).style.display = "block";
+        document.getElementById("portalPage").style.display =
+            "block";
+
+        initializePortal();
+
+    } else {
+
+        document.getElementById("loginPage").style.display =
+            "flex";
+
+        document.getElementById("portalPage").style.display =
+            "none";
+    }
+}
+
+
+// =====================================================
+// INITIALIZE PORTAL
+// =====================================================
+
+function initializePortal() {
+
+    initializeMap();
+
+    displayReports();
+
+    updateStats();
+
+    updateAnalytics();
+
+    loadSavedReports();
+}
+
+
+// =====================================================
+// MAP INITIALIZATION
+// =====================================================
+
+function initializeMap() {
+
+    if (map !== null) {
 
         setTimeout(function () {
 
@@ -144,16 +159,38 @@ function checkLogin() {
 
         }, 300);
 
-    } else {
-
-        document.getElementById(
-            "loginPage"
-        ).style.display = "flex";
-
-        document.getElementById(
-            "portalPage"
-        ).style.display = "none";
+        return;
     }
+
+
+    const mapElement =
+        document.getElementById("map");
+
+    if (!mapElement) {
+        return;
+    }
+
+
+    map = L.map("map").setView(
+        [9.9252, 78.1198],
+        13
+    );
+
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution:
+                "© OpenStreetMap contributors"
+        }
+    ).addTo(map);
+
+
+    setTimeout(function () {
+
+        map.invalidateSize();
+
+    }, 300);
 }
 
 
@@ -165,18 +202,14 @@ function getLocation() {
 
     if (!navigator.geolocation) {
 
-        document.getElementById(
-            "location"
-        ).innerText =
-            "Location support இல்லை.";
+        document.getElementById("location").innerText =
+            "❌ Location support இல்லை.";
 
         return;
     }
 
 
-    document.getElementById(
-        "location"
-    ).innerText =
+    document.getElementById("location").innerText =
         "📍 Detecting location...";
 
 
@@ -191,20 +224,20 @@ function getLocation() {
                 position.coords.longitude;
 
 
-            document.getElementById(
-                "location"
-            ).innerText =
-                "Location: " +
+            document.getElementById("location").innerText =
+                "📍 Location: " +
                 latitude.toFixed(6) +
                 ", " +
                 longitude.toFixed(6);
 
 
+            if (map === null) {
+                initializeMap();
+            }
+
+
             map.setView(
-                [
-                    latitude,
-                    longitude
-                ],
+                [latitude, longitude],
                 16
             );
 
@@ -215,18 +248,41 @@ function getLocation() {
             ])
                 .addTo(map)
                 .bindPopup(
-                    "📍 Your Location"
+                    "📍 Your Current Location"
                 )
                 .openPopup();
+
         },
 
+        function (error) {
 
-        function () {
+            let errorMessage =
+                "❌ Location கிடைக்கவில்லை.";
 
-            document.getElementById(
-                "location"
-            ).innerText =
-                "Location கிடைக்கவில்லை.";
+            if (error.code === 1) {
+                errorMessage =
+                    "❌ Location permission denied.";
+            }
+
+            if (error.code === 2) {
+                errorMessage =
+                    "❌ Location unavailable.";
+            }
+
+            if (error.code === 3) {
+                errorMessage =
+                    "❌ Location request timed out.";
+            }
+
+
+            document.getElementById("location").innerText =
+                errorMessage;
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
     );
 }
@@ -262,6 +318,20 @@ function previewPhoto() {
             "none";
 
         preview.src = "";
+
+        return;
+    }
+
+
+    if (!file.type.startsWith("image/")) {
+
+        alert(
+            "Please select an image file."
+        );
+
+        document.getElementById(
+            "wastePhoto"
+        ).value = "";
 
         return;
     }
@@ -308,7 +378,17 @@ function submitReport() {
     if (wasteType === "") {
 
         alert(
-            "Waste type select பண்ணுங்க."
+            "⚠️ Please select waste type."
+        );
+
+        return;
+    }
+
+
+    if (description === "") {
+
+        alert(
+            "⚠️ Please enter waste description."
         );
 
         return;
@@ -321,7 +401,7 @@ function submitReport() {
     ) {
 
         alert(
-            "முதலில் Get My Location click பண்ணுங்க."
+            "📍 முதலில் Get My Location click பண்ணுங்க."
         );
 
         return;
@@ -330,8 +410,7 @@ function submitReport() {
 
     const newReport = {
 
-        id:
-            Date.now(),
+        id: Date.now(),
 
         wasteType:
             wasteType,
@@ -346,8 +425,7 @@ function submitReport() {
             longitude,
 
         date:
-            new Date()
-                .toLocaleString(),
+            new Date().toLocaleString(),
 
         status:
             "Pending",
@@ -357,7 +435,9 @@ function submitReport() {
     };
 
 
-    reports.push(newReport);
+    reports.push(
+        newReport
+    );
 
 
     localStorage.setItem(
@@ -383,7 +463,15 @@ function submitReport() {
     );
 
 
-    // Clear form
+    clearReportForm();
+}
+
+
+// =====================================================
+// CLEAR REPORT FORM
+// =====================================================
+
+function clearReportForm() {
 
     document.getElementById(
         "wasteType"
@@ -402,7 +490,6 @@ function submitReport() {
     ).innerText =
         "Location not detected";
 
-
     document.getElementById(
         "photoPreviewContainer"
     ).style.display =
@@ -411,7 +498,6 @@ function submitReport() {
     document.getElementById(
         "photoPreview"
     ).src = "";
-
 
     selectedPhoto = "";
 
@@ -422,10 +508,15 @@ function submitReport() {
 
 
 // =====================================================
-// ADD MAP MARKER
+// ADD REPORT MARKER
 // =====================================================
 
 function addReportMarker(report) {
+
+    if (map === null) {
+        initializeMap();
+    }
+
 
     const marker =
         L.marker([
@@ -435,31 +526,47 @@ function addReportMarker(report) {
         .addTo(map);
 
 
-    marker.bindPopup(
+    marker.bindPopup(`
 
-        "<b>Waste Type:</b> " +
-        report.wasteType +
+        <b>🗑️ Waste Report</b>
 
-        "<br><b>Description:</b> " +
-        (
+        <br><br>
+
+        <b>Waste Type:</b>
+        ${escapeHTML(report.wasteType)}
+
+        <br>
+
+        <b>Description:</b>
+        ${escapeHTML(
             report.description ||
             "No description"
-        ) +
+        )}
 
-        "<br><b>Status:</b> " +
-        report.status +
+        <br>
 
-        "<br><b>Date:</b> " +
-        report.date
-    );
+        <b>Status:</b>
+        ${escapeHTML(report.status)}
+
+        <br>
+
+        <b>Date:</b>
+        ${escapeHTML(report.date)}
+
+    `);
 }
 
 
 // =====================================================
-// LOAD SAVED MARKERS
+// LOAD SAVED REPORTS
 // =====================================================
 
 function loadSavedReports() {
+
+    if (map === null) {
+        return;
+    }
+
 
     reports.forEach(
         function (report) {
@@ -491,6 +598,24 @@ function getStatusClass(status) {
 
 
 // =====================================================
+// STATUS ICON
+// =====================================================
+
+function getStatusIcon(status) {
+
+    if (status === "Pending") {
+        return "🔴";
+    }
+
+    if (status === "In Progress") {
+        return "🟡";
+    }
+
+    return "🟢";
+}
+
+
+// =====================================================
 // DISPLAY REPORTS
 // =====================================================
 
@@ -502,24 +627,45 @@ function displayReports() {
         );
 
 
-    const search =
+    if (!container) {
+        return;
+    }
+
+
+    const searchElement =
         document.getElementById(
             "searchReport"
-        )?.value
-        .toLowerCase()
-        .trim() || "";
+        );
+
+    const typeElement =
+        document.getElementById(
+            "filterType"
+        );
+
+    const statusElement =
+        document.getElementById(
+            "filterStatus"
+        );
+
+
+    const search =
+        searchElement
+            ? searchElement.value
+                .toLowerCase()
+                .trim()
+            : "";
 
 
     const typeFilter =
-        document.getElementById(
-            "filterType"
-        )?.value || "All";
+        typeElement
+            ? typeElement.value
+            : "All";
 
 
     const statusFilter =
-        document.getElementById(
-            "filterStatus"
-        )?.value || "All";
+        statusElement
+            ? statusElement.value
+            : "All";
 
 
     const filteredReports =
@@ -578,8 +724,6 @@ function displayReports() {
     }
 
 
-    // Latest report first
-
     filteredReports
         .slice()
         .reverse()
@@ -590,6 +734,7 @@ function displayReports() {
                     document.createElement(
                         "div"
                     );
+
 
                 card.className =
                     "report-card";
@@ -604,13 +749,13 @@ function displayReports() {
                             class="report-photo"
                             alt="Waste photo"
                         >
-                      `
+                    `
 
                     : `
                         <div class="report-photo">
                             📷 No Photo
                         </div>
-                      `;
+                    `;
 
 
                 card.innerHTML = `
@@ -622,21 +767,28 @@ function displayReports() {
                     <div class="report-info">
 
                         <h3>
-                            ${report.wasteType}
+                            ${escapeHTML(
+                                report.wasteType
+                            )}
                         </h3>
 
                         <p>
+
                             <strong>
                                 Description:
                             </strong>
 
                             ${
-                                report.description ||
-                                "No description"
+                                escapeHTML(
+                                    report.description ||
+                                    "No description"
+                                )
                             }
+
                         </p>
 
                         <p>
+
                             <strong>
                                 Location:
                             </strong>
@@ -648,17 +800,23 @@ function displayReports() {
                             ${Number(
                                 report.longitude
                             ).toFixed(6)}
+
                         </p>
 
                         <p>
+
                             <strong>
                                 Date:
                             </strong>
 
-                            ${report.date}
+                            ${escapeHTML(
+                                report.date
+                            )}
+
                         </p>
 
                         <p>
+
                             <strong>
                                 Status:
                             </strong>
@@ -667,31 +825,35 @@ function displayReports() {
                                 class="status-badge
                                 ${getStatusClass(
                                     report.status
-                                )}">
+                                )}"
+                            >
+
                                 ${getStatusIcon(
                                     report.status
                                 )}
-                                ${report.status}
+
+                                ${escapeHTML(
+                                    report.status
+                                )}
+
                             </span>
+
                         </p>
 
                         <select
                             class="status-select"
-                            onchange="
-                                changeStatus(
-                                    ${report.id},
-                                    this.value
-                                )
-                            ">
+                            data-report-id="${report.id}"
+                        >
 
                             <option
                                 value="Pending"
                                 ${
                                     report.status ===
                                     "Pending"
-                                    ? "selected"
-                                    : ""
-                                }>
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
                                 🔴 Pending
                             </option>
 
@@ -700,9 +862,10 @@ function displayReports() {
                                 ${
                                     report.status ===
                                     "In Progress"
-                                    ? "selected"
-                                    : ""
-                                }>
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
                                 🟡 In Progress
                             </option>
 
@@ -711,9 +874,10 @@ function displayReports() {
                                 ${
                                     report.status ===
                                     "Collected"
-                                    ? "selected"
-                                    : ""
-                                }>
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
                                 🟢 Collected
                             </option>
 
@@ -723,29 +887,29 @@ function displayReports() {
                 `;
 
 
+                const statusSelect =
+                    card.querySelector(
+                        ".status-select"
+                    );
+
+
+                statusSelect.addEventListener(
+                    "change",
+                    function () {
+
+                        changeStatus(
+                            report.id,
+                            this.value
+                        );
+                    }
+                );
+
+
                 container.appendChild(
                     card
                 );
             }
         );
-}
-
-
-// =====================================================
-// STATUS ICON
-// =====================================================
-
-function getStatusIcon(status) {
-
-    if (status === "Pending") {
-        return "🔴";
-    }
-
-    if (status === "In Progress") {
-        return "🟡";
-    }
-
-    return "🟢";
 }
 
 
@@ -762,8 +926,8 @@ function changeStatus(
         reports.find(
             function (item) {
 
-                return item.id ===
-                    reportId;
+                return Number(item.id) ===
+                    Number(reportId);
             }
         );
 
@@ -785,6 +949,8 @@ function changeStatus(
 
     displayReports();
 
+    updateStats();
+
     updateAnalytics();
 }
 
@@ -796,9 +962,7 @@ function changeStatus(
 function updateStats() {
 
     let plastic = 0;
-
     let organic = 0;
-
     let electronic = 0;
 
 
@@ -812,16 +976,14 @@ function updateStats() {
                 plastic++;
             }
 
-
-            if (
+            else if (
                 report.wasteType ===
                 "Organic"
             ) {
                 organic++;
             }
 
-
-            if (
+            else if (
                 report.wasteType ===
                 "Electronic"
             ) {
@@ -854,27 +1016,38 @@ function updateStats() {
     ).innerText =
         electronic;
 }
-
-
 // =====================================================
 // ANALYTICS
 // =====================================================
 
 function updateAnalytics() {
 
+    const wasteCanvas =
+        document.getElementById(
+            "wasteChart"
+        );
+
+    const statusCanvas =
+        document.getElementById(
+            "statusChart"
+        );
+
+
+    if (
+        !wasteCanvas ||
+        !statusCanvas
+    ) {
+        return;
+    }
+
+
     let plastic = 0;
-
     let organic = 0;
-
     let electronic = 0;
-
     let other = 0;
 
-
     let pending = 0;
-
     let inProgress = 0;
-
     let collected = 0;
 
 
@@ -931,22 +1104,9 @@ function updateAnalytics() {
     );
 
 
-    const wasteCanvas =
-        document.getElementById(
-            "wasteChart"
-        );
-
-
-    const statusCanvas =
-        document.getElementById(
-            "statusChart"
-        );
-
-
     if (wasteChart) {
         wasteChart.destroy();
     }
-
 
     if (statusChart) {
         statusChart.destroy();
@@ -988,9 +1148,100 @@ function updateAnalytics() {
                 },
 
                 options: {
+
                     responsive: true,
 
+                    maintainAspectRatio: true,
+
                     plugins: {
+
                         legend: {
                             position: "bottom"
                         }
+                    }
+                }
+            }
+        );
+
+
+    statusChart =
+        new Chart(
+            statusCanvas,
+            {
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+                        "Pending",
+                        "In Progress",
+                        "Collected"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                pending,
+                                inProgress,
+                                collected
+                            ],
+
+                            backgroundColor: [
+                                "#dc3545",
+                                "#ffc107",
+                                "#28a745"
+                            ]
+                        }
+                    ]
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: true,
+
+                    plugins: {
+
+                        legend: {
+                            position: "bottom"
+                        }
+                    }
+                }
+            }
+        );
+}
+
+
+// =====================================================
+// ESCAPE HTML
+// =====================================================
+
+function escapeHTML(value) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.textContent =
+        value == null
+            ? ""
+            : String(value);
+
+    return div.innerHTML;
+}
+
+
+// =====================================================
+// PAGE LOAD
+// =====================================================
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        checkLogin();
+
+    }
+);
