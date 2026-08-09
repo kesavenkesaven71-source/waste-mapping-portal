@@ -119,6 +119,35 @@ footer {
     margin-top: 10px;
 }
 
+#loginPage {
+    text-align: center;
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+#loginPage input {
+    display: block;
+    width: 90%;
+    margin: 15px auto;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+#loginPage button {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#loginMessage {
+    color: red;
+}
 @media (max-width: 700px) {
     .stats {
         grid-template-columns: repeat(2, 1fr);
