@@ -46,70 +46,40 @@ let statusChart = null;
 function login() {
 
     const username =
-        document
-            .getElementById("username")
-            .value
-            .trim();
+        document.getElementById("username").value.trim();
 
     const password =
-        document
-            .getElementById("password")
-            .value
-            .trim();
+        document.getElementById("password").value.trim();
 
     const message =
-        document.getElementById(
-            "loginMessage"
-        );
+        document.getElementById("loginMessage");
 
+    if (username === "admin" && password === "1234") {
 
-    if (
-        username === "admin" &&
-        password === "1234"
-    ) {
+        document.getElementById("loginPage").style.display = "none";
 
-        document.getElementById(
-            "loginPage"
-        ).style.display = "none";
-
-
-        document.getElementById(
-            "portalPage"
-        ).style.display = "block";
-
+        document.getElementById("portalPage").style.display = "block";
 
         sessionStorage.setItem(
             "wastePortalLoggedIn",
             "true"
         );
 
-
         message.innerText = "";
 
-
+        // Refresh map after dashboard becomes visible
         setTimeout(function () {
-
-            map.invalidateSize();
-
-        }, 300);
-
-
-        displayReports();
-
-        updateStats();
-
-        updateAnalytics();
+            if (typeof map !== "undefined") {
+                map.invalidateSize();
+            }
+        }, 500);
 
     } else {
 
         message.innerText =
             "❌ Invalid username or password";
-
-        message.style.color =
-            "#dc3545";
     }
 }
-
 
 // =====================================================
 // LOGOUT
