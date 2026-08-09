@@ -7,22 +7,30 @@
 
     <title>Waste Mapping Portal</title>
 
+    <!-- Main CSS -->
     <link rel="stylesheet" href="style.css">
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-    <!-- =========================
-         LOGIN PAGE
-    ========================== -->
+<!-- =====================================================
+     LOGIN PAGE
+===================================================== -->
 
-    <div id="loginPage">
+<div id="loginPage">
 
-        <h2>🌱 Waste Mapping Portal</h2>
+    <div class="login-box">
+
+        <div class="login-icon">🌱</div>
+
+        <h2>Waste Mapping Portal</h2>
 
         <p>Please login to continue</p>
 
@@ -41,116 +49,195 @@
         >
 
         <button onclick="login()">
-            Login
+            🔐 Login
         </button>
 
         <p id="loginMessage"></p>
 
     </div>
 
+</div>
 
-    <!-- =========================
-         WASTE PORTAL
-    ========================== -->
 
-    <div id="portalPage" style="display: none;">
+<!-- =====================================================
+     MAIN PORTAL
+===================================================== -->
 
-        <!-- HEADER -->
+<div id="portalPage" style="display:none;">
 
-        <header>
+    <!-- HEADER -->
 
-            <h1>
-                Geo-Tracking and Waste Mapping Portal
-            </h1>
+    <header>
+
+        <div>
+            <h1>Geo-Tracking and Waste Mapping Portal</h1>
 
             <p>
                 Smart Waste Reporting and Location Tracking System
             </p>
+        </div>
 
-            <button
-                onclick="logout()"
-                class="logout-btn">
-                🚪 Logout
+        <button
+            class="logout-btn"
+            onclick="logout()">
+            🚪 Logout
+        </button>
+
+    </header>
+
+
+    <main>
+
+        <!-- =================================================
+             DASHBOARD STATISTICS
+        ================================================== -->
+
+        <section class="stats">
+
+            <div class="card">
+                <span class="card-icon">📋</span>
+                <h3>Total Reports</h3>
+                <p id="totalReports">0</p>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">♻️</span>
+                <h3>Plastic</h3>
+                <p id="plasticCount">0</p>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">🌱</span>
+                <h3>Organic</h3>
+                <p id="organicCount">0</p>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">💻</span>
+                <h3>Electronic</h3>
+                <p id="electronicCount">0</p>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REPORT WASTE
+        ================================================== -->
+
+        <section class="report-box">
+
+            <h2>📝 Report Waste</h2>
+
+            <label for="wasteType">
+                Waste Type
+            </label>
+
+            <select id="wasteType">
+
+                <option value="">
+                    Select Waste Type
+                </option>
+
+                <option value="Plastic">
+                    Plastic
+                </option>
+
+                <option value="Organic">
+                    Organic
+                </option>
+
+                <option value="Electronic">
+                    Electronic
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <label for="description">
+                Description
+            </label>
+
+            <textarea
+                id="description"
+                placeholder="Enter waste description">
+            </textarea>
+
+
+            <!-- PHOTO -->
+
+            <label for="wastePhoto">
+                📸 Waste Photo
+            </label>
+
+            <input
+                type="file"
+                id="wastePhoto"
+                accept="image/*"
+                onchange="previewPhoto()"
+            >
+
+            <div id="photoPreviewContainer">
+
+                <img
+                    id="photoPreview"
+                    alt="Waste photo preview"
+                >
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <button onclick="getLocation()">
+                📍 Get My Location
             </button>
 
-        </header>
+            <p id="location">
+                Location not detected
+            </p>
 
 
-        <!-- MAIN -->
+            <button
+                class="submit-btn"
+                onclick="submitReport()">
 
-        <main>
+                📤 Submit Waste Report
 
-            <!-- =========================
-                 STATISTICS
-            ========================== -->
+            </button>
 
-            <section class="stats">
-
-                <div class="card">
-
-                    <h3>Total Reports</h3>
-
-                    <p id="totalReports">
-                        0
-                    </p>
-
-                </div>
+        </section>
 
 
-                <div class="card">
+        <!-- =================================================
+             REPORTS + SEARCH/FILTER
+        ================================================== -->
 
-                    <h3>Plastic</h3>
+        <section class="dashboard">
 
-                    <p id="plasticCount">
-                        0
-                    </p>
-
-                </div>
+            <h2>📋 Waste Reports</h2>
 
 
-                <div class="card">
+            <div class="filter-area">
 
-                    <h3>Organic</h3>
-
-                    <p id="organicCount">
-                        0
-                    </p>
-
-                </div>
-
-
-                <div class="card">
-
-                    <h3>Electronic</h3>
-
-                    <p id="electronicCount">
-                        0
-                    </p>
-
-                </div>
-
-            </section>
+                <input
+                    type="text"
+                    id="searchReport"
+                    placeholder="🔎 Search reports..."
+                    oninput="displayReports()"
+                >
 
 
-            <!-- =========================
-                 REPORT WASTE
-            ========================== -->
+                <select
+                    id="filterType"
+                    onchange="displayReports()">
 
-            <section class="report-box">
-
-                <h2>
-                    Report Waste
-                </h2>
-
-
-                <label for="wasteType">
-                    Waste Type
-                </label>
-
-                <select id="wasteType">
-
-                    <option value="">
-                        Select Waste Type
+                    <option value="All">
+                        All Waste Types
                     </option>
 
                     <option value="Plastic">
@@ -172,92 +259,107 @@
                 </select>
 
 
-                <label for="description">
-                    Description
-                </label>
+                <select
+                    id="filterStatus"
+                    onchange="displayReports()">
 
-                <textarea
-                    id="description"
-                    placeholder="Enter waste description">
-                </textarea>
+                    <option value="All">
+                        All Status
+                    </option>
 
+                    <option value="Pending">
+                        🔴 Pending
+                    </option>
 
-                <button onclick="getLocation()">
-                    📍 Get My Location
-                </button>
+                    <option value="In Progress">
+                        🟡 In Progress
+                    </option>
 
+                    <option value="Collected">
+                        🟢 Collected
+                    </option>
 
-                <p id="location">
-                    Location not detected
-                </p>
+                </select>
 
-
-                <button onclick="submitReport()">
-                    Submit Waste Report
-                </button>
-
-            </section>
+            </div>
 
 
-            <!-- =========================
-                 WASTE REPORTS
-            ========================== -->
+            <div id="reports">
 
-            <section class="dashboard">
+                <p>No reports available.</p>
 
-                <h2>
-                    Waste Reports
-                </h2>
+            </div>
 
-                <div id="reports">
+        </section>
 
-                    <p>
-                        No reports available.
-                    </p>
+
+        <!-- =================================================
+             ANALYTICS
+        ================================================== -->
+
+        <section class="analytics">
+
+            <h2>📊 Waste Analytics</h2>
+
+            <div class="charts">
+
+                <div class="chart-box">
+
+                    <h3>Waste Type Distribution</h3>
+
+                    <canvas id="wasteChart"></canvas>
 
                 </div>
 
-            </section>
+
+                <div class="chart-box">
+
+                    <h3>Waste Status</h3>
+
+                    <canvas id="statusChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </section>
 
 
-            <!-- =========================
-                 MAP
-            ========================== -->
+        <!-- =================================================
+             MAP
+        ================================================== -->
 
-            <section class="dashboard">
+        <section class="dashboard">
 
-                <h2>
-                    Waste Location Map
-                </h2>
+            <h2>🗺️ Waste Location Map</h2>
 
-                <div id="map"></div>
+            <div id="map"></div>
 
-            </section>
+        </section>
 
-        </main>
+    </main>
 
 
-        <!-- FOOTER -->
+    <!-- FOOTER -->
 
-        <footer>
+    <footer>
 
-            <p>
-                © 2026 Waste Mapping Portal
-            </p>
+        <p>
+            © 2026 Waste Mapping Portal
+        </p>
 
-        </footer>
+    </footer>
 
-    </div>
+</div>
 
 
-    <!-- Leaflet JS -->
+<!-- Leaflet JS -->
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Main JavaScript -->
+<!-- Main JavaScript -->
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
-
 </html>
