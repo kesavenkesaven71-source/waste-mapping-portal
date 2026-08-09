@@ -5,6 +5,8 @@
 let latitude = null;
 let longitude = null;
 
+let selectedPhoto = "";
+
 let reports =
     JSON.parse(
         localStorage.getItem("wasteReports")
@@ -30,6 +32,14 @@ L.tileLayer(
 
 
 // =====================================================
+// CHARTS
+// =====================================================
+
+let wasteChart = null;
+let statusChart = null;
+
+
+// =====================================================
 // LOGIN
 // =====================================================
 
@@ -44,7 +54,8 @@ function login() {
     const password =
         document
             .getElementById("password")
-            .value;
+            .value
+            .trim();
 
     const message =
         document.getElementById(
@@ -52,55 +63,50 @@ function login() {
         );
 
 
-    // Correct login
     if (
         username === "admin" &&
         password === "1234"
     ) {
 
-        // Hide login page
         document.getElementById(
             "loginPage"
         ).style.display = "none";
 
 
-        // Show portal
         document.getElementById(
             "portalPage"
         ).style.display = "block";
 
 
-        // Save login session
         sessionStorage.setItem(
             "wastePortalLoggedIn",
             "true"
         );
 
 
-        // Clear message
         message.innerText = "";
 
 
-        // Fix map display
         setTimeout(function () {
 
             map.invalidateSize();
 
-        }, 200);
+        }, 300);
 
 
         displayReports();
 
         updateStats();
 
+        updateAnalytics();
+
     } else {
 
-        // Wrong login
         message.innerText =
             "❌ Invalid username or password";
 
         message.style.color =
-            "#ffdddd";
+            "#dc3545";
     }
 }
 
@@ -111,25 +117,21 @@ function login() {
 
 function logout() {
 
-    // Remove login session
     sessionStorage.removeItem(
         "wastePortalLoggedIn"
     );
 
 
-    // Hide portal
     document.getElementById(
         "portalPage"
     ).style.display = "none";
 
 
-    // Show login
     document.getElementById(
         "loginPage"
     ).style.display = "flex";
 
 
-    // Clear inputs
     document.getElementById(
         "username"
     ).value = "";
@@ -138,8 +140,6 @@ function logout() {
         "password"
     ).value = "";
 
-
-    // Clear message
     document.getElementById(
         "loginMessage"
     ).innerText = "";
@@ -147,7 +147,7 @@ function logout() {
 
 
 // =====================================================
-// CHECK LOGIN
+// LOGIN CHECK
 // =====================================================
 
 function checkLogin() {
@@ -160,30 +160,25 @@ function checkLogin() {
 
     if (loggedIn === "true") {
 
-        // Already logged in
         document.getElementById(
             "loginPage"
         ).style.display = "none";
-
 
         document.getElementById(
             "portalPage"
         ).style.display = "block";
 
-
         setTimeout(function () {
 
             map.invalidateSize();
 
-        }, 200);
+        }, 300);
 
     } else {
 
-        // Not logged in
         document.getElementById(
             "loginPage"
         ).style.display = "flex";
-
 
         document.getElementById(
             "portalPage"
@@ -209,6 +204,12 @@ function getLocation() {
     }
 
 
+    document.getElementById(
+        "location"
+    ).innerText =
+        "📍 Detecting location...";
+
+
     navigator.geolocation.getCurrentPosition(
 
         function (position) {
@@ -229,7 +230,6 @@ function getLocation() {
                 longitude.toFixed(6);
 
 
-            // Move map
             map.setView(
                 [
                     latitude,
@@ -239,7 +239,6 @@ function getLocation() {
             );
 
 
-            // User location marker
             L.marker([
                 latitude,
                 longitude
@@ -264,7 +263,63 @@ function getLocation() {
 
 
 // =====================================================
-// SUBMIT WASTE REPORT
+// PHOTO PREVIEW
+// =====================================================
+
+function previewPhoto() {
+
+    const file =
+        document.getElementById(
+            "wastePhoto"
+        ).files[0];
+
+    const preview =
+        document.getElementById(
+            "photoPreview"
+        );
+
+    const container =
+        document.getElementById(
+            "photoPreviewContainer"
+        );
+
+
+    if (!file) {
+
+        selectedPhoto = "";
+
+        container.style.display =
+            "none";
+
+        preview.src = "";
+
+        return;
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function (event) {
+
+        selectedPhoto =
+            event.target.result;
+
+        preview.src =
+            selectedPhoto;
+
+        container.style.display =
+            "block";
+    };
+
+
+    reader.readAsDataURL(file);
+}
+
+
+// =====================================================
+// SUBMIT REPORT
 // =====================================================
 
 function submitReport() {
@@ -280,7 +335,6 @@ function submitReport() {
         ).value.trim();
 
 
-    // Check waste type
     if (wasteType === "") {
 
         alert(
@@ -291,7 +345,6 @@ function submitReport() {
     }
 
 
-    // Check location
     if (
         latitude === null ||
         longitude === null
@@ -305,8 +358,10 @@ function submitReport() {
     }
 
 
-    // Create report
     const newReport = {
+
+        id:
+            Date.now(),
 
         wasteType:
             wasteType,
@@ -322,12 +377,18 @@ function submitReport() {
 
         date:
             new Date()
-                .toLocaleString()
+                .toLocaleString(),
+
+        status:
+            "Pending",
+
+        photo:
+            selectedPhoto
     };
 
 
-    // Save report
     reports.push(newReport);
+
 
     localStorage.setItem(
         "wasteReports",
@@ -335,29 +396,16 @@ function submitReport() {
     );
 
 
-    // Add marker
-    L.marker([
-        latitude,
-        longitude
-    ])
-        .addTo(map)
-        .bindPopup(
-
-            "<b>Waste Type:</b> " +
-            wasteType +
-
-            "<br><b>Description:</b> " +
-            (
-                description ||
-                "No description"
-            )
-        );
+    addReportMarker(
+        newReport
+    );
 
 
-    // Refresh dashboard
     displayReports();
 
     updateStats();
+
+    updateAnalytics();
 
 
     alert(
@@ -366,6 +414,7 @@ function submitReport() {
 
 
     // Clear form
+
     document.getElementById(
         "wasteType"
     ).value = "";
@@ -375,14 +424,99 @@ function submitReport() {
     ).value = "";
 
     document.getElementById(
+        "wastePhoto"
+    ).value = "";
+
+    document.getElementById(
         "location"
     ).innerText =
         "Location not detected";
 
 
+    document.getElementById(
+        "photoPreviewContainer"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "photoPreview"
+    ).src = "";
+
+
+    selectedPhoto = "";
+
     latitude = null;
 
     longitude = null;
+}
+
+
+// =====================================================
+// ADD MAP MARKER
+// =====================================================
+
+function addReportMarker(report) {
+
+    const marker =
+        L.marker([
+            Number(report.latitude),
+            Number(report.longitude)
+        ])
+        .addTo(map);
+
+
+    marker.bindPopup(
+
+        "<b>Waste Type:</b> " +
+        report.wasteType +
+
+        "<br><b>Description:</b> " +
+        (
+            report.description ||
+            "No description"
+        ) +
+
+        "<br><b>Status:</b> " +
+        report.status +
+
+        "<br><b>Date:</b> " +
+        report.date
+    );
+}
+
+
+// =====================================================
+// LOAD SAVED MARKERS
+// =====================================================
+
+function loadSavedReports() {
+
+    reports.forEach(
+        function (report) {
+
+            addReportMarker(
+                report
+            );
+        }
+    );
+}
+
+
+// =====================================================
+// STATUS CLASS
+// =====================================================
+
+function getStatusClass(status) {
+
+    if (status === "Pending") {
+        return "status-pending";
+    }
+
+    if (status === "In Progress") {
+        return "status-progress";
+    }
+
+    return "status-collected";
 }
 
 
@@ -392,89 +526,296 @@ function submitReport() {
 
 function displayReports() {
 
-    const reportsContainer =
+    const container =
         document.getElementById(
             "reports"
         );
 
 
-    reportsContainer.innerHTML = "";
+    const search =
+        document.getElementById(
+            "searchReport"
+        )?.value
+        .toLowerCase()
+        .trim() || "";
 
 
-    if (reports.length === 0) {
+    const typeFilter =
+        document.getElementById(
+            "filterType"
+        )?.value || "All";
 
-        reportsContainer.innerHTML =
-            "<p>No reports available.</p>";
+
+    const statusFilter =
+        document.getElementById(
+            "filterStatus"
+        )?.value || "All";
+
+
+    const filteredReports =
+        reports.filter(
+            function (report) {
+
+                const searchText = (
+
+                    report.wasteType +
+                    " " +
+                    report.description +
+                    " " +
+                    report.date
+
+                ).toLowerCase();
+
+
+                const matchesSearch =
+                    searchText.includes(
+                        search
+                    );
+
+
+                const matchesType =
+                    typeFilter === "All" ||
+                    report.wasteType ===
+                    typeFilter;
+
+
+                const matchesStatus =
+                    statusFilter === "All" ||
+                    report.status ===
+                    statusFilter;
+
+
+                return (
+                    matchesSearch &&
+                    matchesType &&
+                    matchesStatus
+                );
+            }
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (
+        filteredReports.length === 0
+    ) {
+
+        container.innerHTML =
+            "<p>No matching reports found.</p>";
 
         return;
     }
 
 
-    reports.forEach(
-        function (report) {
+    // Latest report first
 
-            const reportBox =
-                document.createElement(
-                    "div"
+    filteredReports
+        .slice()
+        .reverse()
+        .forEach(
+            function (report) {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+                card.className =
+                    "report-card";
+
+
+                const photoHTML =
+                    report.photo
+
+                    ? `
+                        <img
+                            src="${report.photo}"
+                            class="report-photo"
+                            alt="Waste photo"
+                        >
+                      `
+
+                    : `
+                        <div class="report-photo">
+                            📷 No Photo
+                        </div>
+                      `;
+
+
+                card.innerHTML = `
+
+                    <div>
+                        ${photoHTML}
+                    </div>
+
+                    <div class="report-info">
+
+                        <h3>
+                            ${report.wasteType}
+                        </h3>
+
+                        <p>
+                            <strong>
+                                Description:
+                            </strong>
+
+                            ${
+                                report.description ||
+                                "No description"
+                            }
+                        </p>
+
+                        <p>
+                            <strong>
+                                Location:
+                            </strong>
+
+                            ${Number(
+                                report.latitude
+                            ).toFixed(6)},
+
+                            ${Number(
+                                report.longitude
+                            ).toFixed(6)}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Date:
+                            </strong>
+
+                            ${report.date}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Status:
+                            </strong>
+
+                            <span
+                                class="status-badge
+                                ${getStatusClass(
+                                    report.status
+                                )}">
+                                ${getStatusIcon(
+                                    report.status
+                                )}
+                                ${report.status}
+                            </span>
+                        </p>
+
+                        <select
+                            class="status-select"
+                            onchange="
+                                changeStatus(
+                                    ${report.id},
+                                    this.value
+                                )
+                            ">
+
+                            <option
+                                value="Pending"
+                                ${
+                                    report.status ===
+                                    "Pending"
+                                    ? "selected"
+                                    : ""
+                                }>
+                                🔴 Pending
+                            </option>
+
+                            <option
+                                value="In Progress"
+                                ${
+                                    report.status ===
+                                    "In Progress"
+                                    ? "selected"
+                                    : ""
+                                }>
+                                🟡 In Progress
+                            </option>
+
+                            <option
+                                value="Collected"
+                                ${
+                                    report.status ===
+                                    "Collected"
+                                    ? "selected"
+                                    : ""
+                                }>
+                                🟢 Collected
+                            </option>
+
+                        </select>
+
+                    </div>
+                `;
+
+
+                container.appendChild(
+                    card
                 );
+            }
+        );
+}
 
 
-            reportBox.innerHTML = `
+// =====================================================
+// STATUS ICON
+// =====================================================
 
-                <hr>
+function getStatusIcon(status) {
 
-                <p>
-                    <strong>
-                        Waste Type:
-                    </strong>
+    if (status === "Pending") {
+        return "🔴";
+    }
 
-                    ${report.wasteType}
-                </p>
+    if (status === "In Progress") {
+        return "🟡";
+    }
 
-                <p>
-                    <strong>
-                        Description:
-                    </strong>
-
-                    ${
-                        report.description ||
-                        "No description"
-                    }
-                </p>
-
-                <p>
-                    <strong>
-                        Location:
-                    </strong>
-
-                    ${
-                        Number(
-                            report.latitude
-                        ).toFixed(6)
-                    },
-
-                    ${
-                        Number(
-                            report.longitude
-                        ).toFixed(6)
-                    }
-                </p>
-
-                <p>
-                    <strong>
-                        Date:
-                    </strong>
-
-                    ${report.date}
-                </p>
-            `;
+    return "🟢";
+}
 
 
-            reportsContainer.appendChild(
-                reportBox
-            );
-        }
+// =====================================================
+// CHANGE STATUS
+// =====================================================
+
+function changeStatus(
+    reportId,
+    newStatus
+) {
+
+    const report =
+        reports.find(
+            function (item) {
+
+                return item.id ===
+                    reportId;
+            }
+        );
+
+
+    if (!report) {
+        return;
+    }
+
+
+    report.status =
+        newStatus;
+
+
+    localStorage.setItem(
+        "wasteReports",
+        JSON.stringify(reports)
     );
+
+
+    displayReports();
+
+    updateAnalytics();
 }
 
 
@@ -484,14 +825,11 @@ function displayReports() {
 
 function updateStats() {
 
-    const totalReports =
-        reports.length;
+    let plastic = 0;
 
-    let plasticCount = 0;
+    let organic = 0;
 
-    let organicCount = 0;
-
-    let electronicCount = 0;
+    let electronic = 0;
 
 
     reports.forEach(
@@ -501,7 +839,7 @@ function updateStats() {
                 report.wasteType ===
                 "Plastic"
             ) {
-                plasticCount++;
+                plastic++;
             }
 
 
@@ -509,7 +847,7 @@ function updateStats() {
                 report.wasteType ===
                 "Organic"
             ) {
-                organicCount++;
+                organic++;
             }
 
 
@@ -517,7 +855,7 @@ function updateStats() {
                 report.wasteType ===
                 "Electronic"
             ) {
-                electronicCount++;
+                electronic++;
             }
         }
     );
@@ -526,82 +864,163 @@ function updateStats() {
     document.getElementById(
         "totalReports"
     ).innerText =
-        totalReports;
+        reports.length;
 
 
     document.getElementById(
         "plasticCount"
     ).innerText =
-        plasticCount;
+        plastic;
 
 
     document.getElementById(
         "organicCount"
     ).innerText =
-        organicCount;
+        organic;
 
 
     document.getElementById(
         "electronicCount"
     ).innerText =
-        electronicCount;
+        electronic;
 }
 
 
 // =====================================================
-// LOAD SAVED REPORTS ON MAP
+// ANALYTICS
 // =====================================================
 
-function loadSavedReports() {
+function updateAnalytics() {
+
+    let plastic = 0;
+
+    let organic = 0;
+
+    let electronic = 0;
+
+    let other = 0;
+
+
+    let pending = 0;
+
+    let inProgress = 0;
+
+    let collected = 0;
+
 
     reports.forEach(
         function (report) {
 
-            L.marker([
+            if (
+                report.wasteType ===
+                "Plastic"
+            ) {
+                plastic++;
+            }
 
-                Number(
-                    report.latitude
-                ),
+            else if (
+                report.wasteType ===
+                "Organic"
+            ) {
+                organic++;
+            }
 
-                Number(
-                    report.longitude
-                )
+            else if (
+                report.wasteType ===
+                "Electronic"
+            ) {
+                electronic++;
+            }
 
-            ])
-                .addTo(map)
-                .bindPopup(
+            else {
+                other++;
+            }
 
-                    "<b>Waste:</b> " +
 
-                    report.wasteType +
+            if (
+                report.status ===
+                "Pending"
+            ) {
+                pending++;
+            }
 
-                    "<br><b>Description:</b> " +
+            else if (
+                report.status ===
+                "In Progress"
+            ) {
+                inProgress++;
+            }
 
-                    (
-                        report.description ||
-                        "No description"
-                    )
-                );
+            else if (
+                report.status ===
+                "Collected"
+            ) {
+                collected++;
+            }
         }
     );
-}
 
 
-// =====================================================
-// PAGE LOAD
-// =====================================================
+    const wasteCanvas =
+        document.getElementById(
+            "wasteChart"
+        );
 
-window.onload = function () {
 
-    // Check login
-    checkLogin();
+    const statusCanvas =
+        document.getElementById(
+            "statusChart"
+        );
 
-    // Load reports
-    displayReports();
 
-    // Update statistics
-    updateStats();
+    if (wasteChart) {
+        wasteChart.destroy();
+    }
 
-    // Load map markers
-    loadSavedReports();
-};
+
+    if (statusChart) {
+        statusChart.destroy();
+    }
+
+
+    wasteChart =
+        new Chart(
+            wasteCanvas,
+            {
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+                        "Plastic",
+                        "Organic",
+                        "Electronic",
+                        "Other"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                plastic,
+                                organic,
+                                electronic,
+                                other
+                            ],
+
+                            backgroundColor: [
+                                "#2196f3",
+                                "#4caf50",
+                                "#9c27b0",
+                                "#ff9800"
+                            ]
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        }
