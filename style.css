@@ -16,105 +16,114 @@ body {
 
 
 /* =====================================================
-   LOGIN PAGE
+   LOGIN
 ===================================================== */
 
 #loginPage {
     min-height: 100vh;
-    width: 100%;
 
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    padding: 25px;
+    padding: 20px;
 
-    background: linear-gradient(
-        135deg,
-        #176b45,
-        #0f4f32
-    );
-
-    color: white;
-
-    text-align: center;
+    background:
+        linear-gradient(
+            135deg,
+            #176b45,
+            #0f4f32
+        );
 }
 
-#loginPage h2 {
-    color: white;
+.login-box {
+    width: 100%;
+    max-width: 420px;
 
-    font-size: 32px;
+    padding: 40px 30px;
 
+    text-align: center;
+
+    background: rgba(255,255,255,0.97);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 15px 40px
+        rgba(0,0,0,0.25);
+}
+
+.login-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.login-box h2 {
+    color: #176b45;
     margin-bottom: 8px;
 }
 
-#loginPage p {
+.login-box > p {
+    color: #666;
     margin-bottom: 20px;
 }
 
-#loginPage input {
-    display: block;
+.login-box input {
+    width: 100%;
 
-    width: 320px;
-    max-width: 90%;
+    padding: 14px;
 
-    margin: 10px auto;
+    margin: 8px 0;
 
-    padding: 13px 15px;
-
-    border: none;
+    border: 1px solid #ccc;
 
     border-radius: 8px;
 
-    font-size: 16px;
+    font-size: 15px;
 
     outline: none;
 }
 
-#loginPage input:focus {
+.login-box input:focus {
+    border-color: #176b45;
+
     box-shadow:
         0 0 0 3px
-        rgba(255, 255, 255, 0.3);
+        rgba(23,107,69,0.12);
 }
 
-#loginPage button {
-    width: 320px;
-    max-width: 90%;
+.login-box button {
+    width: 100%;
 
-    margin-top: 12px;
+    margin-top: 15px;
 
-    padding: 13px 20px;
+    padding: 14px;
 
     border: none;
 
     border-radius: 8px;
 
-    background: white;
+    background: #176b45;
 
-    color: #176b45;
+    color: white;
 
     font-size: 16px;
 
     font-weight: bold;
 
     cursor: pointer;
-
-    transition: 0.2s;
 }
 
-#loginPage button:hover {
-    background: #e8f5e9;
-
-    transform: translateY(-1px);
+.login-box button:hover {
+    background: #0f4f32;
 }
 
 #loginMessage {
-    margin-top: 15px;
+    margin-top: 15px !important;
+
+    color: #dc3545 !important;
 
     font-weight: bold;
-
-    color: #ffdddd;
 }
 
 
@@ -125,39 +134,35 @@ body {
 header {
     position: relative;
 
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
     background: #176b45;
 
     color: white;
 
-    text-align: center;
+    padding: 25px 5%;
 
-    padding: 25px;
+    text-align: center;
 }
 
 header h1 {
     margin-bottom: 8px;
 }
 
-
-/* =====================================================
-   LOGOUT BUTTON
-===================================================== */
-
 .logout-btn {
-    position: absolute;
-
-    top: 20px;
-    right: 20px;
-
     margin: 0;
 
-    padding: 10px 16px;
+    padding: 10px 18px;
 
     background: #dc3545;
 
-    color: white;
-
-    border-radius: 7px;
+    border-radius: 8px;
 
     font-weight: bold;
 }
@@ -172,16 +177,16 @@ header h1 {
 ===================================================== */
 
 main {
-    width: 90%;
+    width: 92%;
 
-    max-width: 900px;
+    max-width: 1100px;
 
     margin: 30px auto;
 }
 
 
 /* =====================================================
-   SECTIONS
+   GENERAL SECTION
 ===================================================== */
 
 section {
@@ -191,17 +196,75 @@ section {
 
     margin-bottom: 25px;
 
-    border-radius: 10px;
+    border-radius: 12px;
 
     box-shadow:
-        0 3px 10px
-        rgba(0, 0, 0, 0.1);
+        0 3px 12px
+        rgba(0,0,0,0.08);
 }
 
 h2 {
+    color: #176b45;
+
     margin-bottom: 20px;
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 18px;
+
+    padding: 0;
+
+    background: transparent;
+
+    box-shadow: none;
+}
+
+.card {
+    background: white;
+
+    padding: 22px;
+
+    text-align: center;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 3px 12px
+        rgba(0,0,0,0.08);
+
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card-icon {
+    font-size: 28px;
+}
+
+.card h3 {
+    margin-top: 8px;
 
     color: #176b45;
+}
+
+.card p {
+    font-size: 32px;
+
+    font-weight: bold;
+
+    margin-top: 8px;
 }
 
 
@@ -212,22 +275,23 @@ h2 {
 label {
     display: block;
 
-    margin-top: 15px;
+    margin-top: 16px;
 
-    margin-bottom: 6px;
+    margin-bottom: 7px;
 
     font-weight: bold;
 }
 
 select,
-textarea {
+textarea,
+input[type="text"] {
     width: 100%;
 
     padding: 12px;
 
     border: 1px solid #ccc;
 
-    border-radius: 6px;
+    border-radius: 7px;
 
     font-size: 15px;
 
@@ -235,18 +299,27 @@ textarea {
 }
 
 select:focus,
-textarea:focus {
+textarea:focus,
+input[type="text"]:focus {
     border-color: #176b45;
-
-    box-shadow:
-        0 0 0 2px
-        rgba(23, 107, 69, 0.12);
 }
 
 textarea {
     height: 100px;
 
-    resize: none;
+    resize: vertical;
+}
+
+input[type="file"] {
+    width: 100%;
+
+    padding: 10px;
+
+    border: 1px dashed #aaa;
+
+    border-radius: 7px;
+
+    background: #fafafa;
 }
 
 
@@ -261,7 +334,7 @@ button {
 
     border: none;
 
-    border-radius: 6px;
+    border-radius: 7px;
 
     background: #176b45;
 
@@ -270,12 +343,43 @@ button {
     font-size: 15px;
 
     cursor: pointer;
-
-    transition: 0.2s;
 }
 
 button:hover {
     background: #0f4f32;
+}
+
+.submit-btn {
+    background: #087f5b;
+}
+
+.submit-btn:hover {
+    background: #056b4c;
+}
+
+
+/* =====================================================
+   PHOTO PREVIEW
+===================================================== */
+
+#photoPreviewContainer {
+    display: none;
+
+    margin-top: 15px;
+
+    text-align: center;
+}
+
+#photoPreview {
+    max-width: 250px;
+
+    max-height: 200px;
+
+    border-radius: 10px;
+
+    border: 2px solid #ddd;
+
+    object-fit: cover;
 }
 
 
@@ -284,7 +388,7 @@ button:hover {
 ===================================================== */
 
 #location {
-    margin-top: 15px;
+    margin-top: 12px;
 
     color: #555;
 
@@ -293,76 +397,145 @@ button:hover {
 
 
 /* =====================================================
-   STATISTICS
+   SEARCH / FILTER
 ===================================================== */
 
-.stats {
+.filter-area {
     display: grid;
 
     grid-template-columns:
-        repeat(4, 1fr);
+        2fr 1fr 1fr;
 
-    gap: 15px;
+    gap: 10px;
 
-    background: transparent;
-
-    box-shadow: none;
-
-    padding: 0;
-}
-
-.card {
-    background: white;
-
-    padding: 20px;
-
-    text-align: center;
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 3px 10px
-        rgba(0, 0, 0, 0.1);
-
-    transition: 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-
-    box-shadow:
-        0 6px 15px
-        rgba(0, 0, 0, 0.12);
-}
-
-.card h3 {
-    color: #176b45;
-}
-
-.card p {
-    font-size: 30px;
-
-    font-weight: bold;
-
-    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 
 /* =====================================================
-   REPORTS
+   REPORT CARDS
 ===================================================== */
 
-#reports {
-    line-height: 1.6;
+.report-card {
+    display: grid;
+
+    grid-template-columns:
+        120px 1fr;
+
+    gap: 18px;
+
+    padding: 18px;
+
+    margin-bottom: 15px;
+
+    border: 1px solid #e2e2e2;
+
+    border-radius: 10px;
+
+    background: #fafafa;
 }
 
-#reports hr {
-    border: 0;
+.report-photo {
+    width: 120px;
 
-    border-top:
-        1px solid #ddd;
+    height: 100px;
 
-    margin: 15px 0;
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    background: #eee;
+}
+
+.report-info h3 {
+    color: #176b45;
+
+    margin-bottom: 8px;
+}
+
+.report-info p {
+    margin: 5px 0;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-badge {
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+}
+
+.status-pending {
+    background: #ffe0e0;
+
+    color: #c62828;
+}
+
+.status-progress {
+    background: #fff0c2;
+
+    color: #8a6500;
+}
+
+.status-collected {
+    background: #d9f5df;
+
+    color: #18752a;
+}
+
+.status-select {
+    width: auto;
+
+    min-width: 150px;
+
+    padding: 7px;
+}
+
+
+/* =====================================================
+   ANALYTICS
+===================================================== */
+
+.charts {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 25px;
+}
+
+.chart-box {
+    padding: 20px;
+
+    border: 1px solid #eee;
+
+    border-radius: 10px;
+
+    background: #fff;
+}
+
+.chart-box h3 {
+    color: #176b45;
+
+    margin-bottom: 15px;
+
+    text-align: center;
+}
+
+.chart-box canvas {
+    max-height: 300px;
 }
 
 
@@ -371,7 +544,7 @@ button:hover {
 ===================================================== */
 
 #map {
-    height: 400px;
+    height: 450px;
 
     width: 100%;
 
@@ -388,7 +561,7 @@ button:hover {
 footer {
     text-align: center;
 
-    padding: 20px;
+    padding: 22px;
 
     background: #222;
 
@@ -397,38 +570,42 @@ footer {
 
 
 /* =====================================================
-   TABLET / MOBILE
+   TABLET
 ===================================================== */
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
 
     .stats {
         grid-template-columns:
             repeat(2, 1fr);
     }
 
+    .filter-area {
+        grid-template-columns: 1fr;
+    }
+
+    .charts {
+        grid-template-columns: 1fr;
+    }
+
     header {
-        padding:
-            25px 15px 70px;
-    }
-
-    header h1 {
-        font-size: 24px;
-    }
-
-    header p {
-        font-size: 14px;
+        flex-direction: column;
     }
 
     .logout-btn {
-        top: auto;
+        margin-top: 5px;
+    }
+}
 
-        bottom: 18px;
 
-        right: 50%;
+/* =====================================================
+   MOBILE
+===================================================== */
 
-        transform:
-            translateX(50%);
+@media (max-width: 500px) {
+
+    .stats {
+        grid-template-columns: 1fr;
     }
 
     main {
@@ -436,33 +613,28 @@ footer {
     }
 
     section {
-        padding: 20px;
+        padding: 18px;
     }
-}
 
+    header h1 {
+        font-size: 22px;
+    }
 
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
+    header p {
+        font-size: 13px;
+    }
 
-@media (max-width: 450px) {
-
-    .stats {
+    .report-card {
         grid-template-columns: 1fr;
     }
 
-    #loginPage h2 {
-        font-size: 26px;
-    }
-
-    #loginPage input,
-    #loginPage button {
+    .report-photo {
         width: 100%;
 
-        max-width: 320px;
+        height: 180px;
     }
 
     #map {
-        height: 320px;
+        height: 330px;
     }
 }
