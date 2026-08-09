@@ -5,14 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Waste Mapping Portal</title>
+    <title>Geo-Tracking and Waste Mapping Portal</title>
 
-    <!-- Main CSS -->
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,19 +25,7 @@
 <!-- =====================================================
      LOGIN PAGE
 ===================================================== -->
-<script>
-function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
 
-    if (username === "admin" && password === "admin123") {
-        window.location.href = "dashboard.html";
-    } else {
-        document.getElementById("loginMessage").innerText =
-            "Invalid username or password";
-    }
-}
-</script>
 <div id="loginPage">
 
     <div class="login-box">
@@ -60,7 +50,9 @@ function login() {
             autocomplete="current-password"
         >
 
-        <button onclick="login()">
+        <button
+            type="button"
+            onclick="loginPortal()">
             🔐 Login
         </button>
 
@@ -75,7 +67,7 @@ function login() {
      MAIN PORTAL
 ===================================================== -->
 
-<div id="portalPage" style="display:none;">
+<div id="portalPage" style="display: none;">
 
     <!-- HEADER -->
 
@@ -90,8 +82,9 @@ function login() {
         </div>
 
         <button
+            type="button"
             class="logout-btn"
-            onclick="logout()">
+            onclick="logoutPortal()">
             🚪 Logout
         </button>
 
@@ -205,7 +198,9 @@ function login() {
 
             <!-- LOCATION -->
 
-            <button onclick="getLocation()">
+            <button
+                type="button"
+                onclick="getLocation()">
                 📍 Get My Location
             </button>
 
@@ -214,7 +209,10 @@ function login() {
             </p>
 
 
+            <!-- SUBMIT -->
+
             <button
+                type="button"
                 class="submit-btn"
                 onclick="submitReport()">
 
@@ -226,13 +224,12 @@ function login() {
 
 
         <!-- =================================================
-             REPORTS + SEARCH/FILTER
+             REPORTS
         ================================================== -->
 
         <section class="dashboard">
 
             <h2>📋 Waste Reports</h2>
-
 
             <div class="filter-area">
 
@@ -242,7 +239,6 @@ function login() {
                     placeholder="🔎 Search reports..."
                     oninput="displayReports()"
                 >
-
 
                 <select
                     id="filterType"
@@ -365,13 +361,162 @@ function login() {
 </div>
 
 
-<!-- Leaflet JS -->
+<!-- =====================================================
+     LOGIN / LOGOUT
+===================================================== -->
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
 
-<!-- Main JavaScript -->
+function loginPortal() {
+
+    const username =
+        document.getElementById("username").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const message =
+        document.getElementById("loginMessage");
+
+
+    /* LOGIN DETAILS */
+
+    if (
+        username === "admin" &&
+        password === "admin123"
+    ) {
+
+        /* Hide Login */
+
+        document.getElementById("loginPage").style.display =
+            "none";
+
+
+        /* Show Portal */
+
+        document.getElementById("portalPage").style.display =
+            "block";
+
+
+        /* Clear Error */
+
+        message.innerText = "";
+
+
+        /* Save Login */
+
+        sessionStorage.setItem(
+            "loggedIn",
+            "true"
+        );
+
+
+        /* Initialize portal */
+
+        if (typeof initializePortal === "function") {
+            initializePortal();
+        }
+
+    }
+
+    else {
+
+        message.innerText =
+            "❌ Invalid username or password";
+
+    }
+
+}
+
+
+function logoutPortal() {
+
+    /* Remove Login */
+
+    sessionStorage.removeItem(
+        "loggedIn"
+    );
+
+
+    /* Hide Portal */
+
+    document.getElementById("portalPage").style.display =
+        "none";
+
+
+    /* Show Login */
+
+    document.getElementById("loginPage").style.display =
+        "flex";
+
+
+    /* Clear Inputs */
+
+    document.getElementById("username").value =
+        "";
+
+    document.getElementById("password").value =
+        "";
+
+    document.getElementById("loginMessage").innerText =
+        "";
+
+}
+
+
+/* =====================================================
+   CHECK LOGIN WHEN PAGE LOADS
+===================================================== */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const loggedIn =
+            sessionStorage.getItem("loggedIn");
+
+
+        if (loggedIn === "true") {
+
+            document.getElementById("loginPage").style.display =
+                "none";
+
+            document.getElementById("portalPage").style.display =
+                "block";
+
+        }
+
+        else {
+
+            document.getElementById("loginPage").style.display =
+                "flex";
+
+            document.getElementById("portalPage").style.display =
+                "none";
+
+        }
+
+    }
+);
+
+</script>
+
+
+<!-- =====================================================
+     LEAFLET JS
+===================================================== -->
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<!-- =====================================================
+     MAIN JAVASCRIPT
+===================================================== -->
 
 <script src="script.js"></script>
+
 
 </body>
 </html>
