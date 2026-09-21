@@ -1,6 +1,6 @@
 /* =====================================================
    WASTE MAPPING PORTAL
-   STEP 3.3 - COMPLETE CSS
+   COMPLETE CSS
 ===================================================== */
 
 
@@ -19,6 +19,7 @@ html {
 
 
 body {
+
     font-family:
         Arial,
         Helvetica,
@@ -29,10 +30,9 @@ body {
     color: #26332d;
 
     line-height: 1.6;
+
 }
 
-
-/* ================= GENERAL ================= */
 
 .hidden {
     display: none !important;
@@ -52,9 +52,11 @@ button {
 }
 
 
-/* ================= LOGIN PAGE ================= */
+/* =====================================================
+   AUTH PAGE
+===================================================== */
 
-.login-page {
+.auth-page {
 
     min-height: 100vh;
 
@@ -76,11 +78,11 @@ button {
 }
 
 
-.login-box {
+.auth-box {
 
     width: 100%;
 
-    max-width: 440px;
+    max-width: 450px;
 
     background: white;
 
@@ -92,32 +94,34 @@ button {
         0 15px 45px
         rgba(0, 0, 0, 0.12);
 
+}
+
+
+.auth-logo {
+
     text-align: center;
 
-}
+    font-size: 58px;
 
-
-.login-icon {
-
-    font-size: 55px;
-
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 
 }
 
 
-.login-box h1 {
+.auth-box > h1 {
+
+    text-align: center;
 
     color: #176b45;
 
-    font-size: 30px;
-
-    margin-bottom: 5px;
+    font-size: 29px;
 
 }
 
 
-.login-subtitle {
+.auth-subtitle {
+
+    text-align: center;
 
     color: #718078;
 
@@ -126,11 +130,29 @@ button {
 }
 
 
+.auth-box h2 {
+
+    color: #176b45;
+
+    margin-bottom: 5px;
+
+}
+
+
+.auth-description {
+
+    color: #7a857f;
+
+    font-size: 14px;
+
+    margin-bottom: 22px;
+
+}
+
+
 .form-group {
 
-    margin-bottom: 20px;
-
-    text-align: left;
+    margin-bottom: 18px;
 
 }
 
@@ -141,9 +163,7 @@ button {
 
     font-weight: 600;
 
-    margin-bottom: 8px;
-
-    color: #34423b;
+    margin-bottom: 7px;
 
 }
 
@@ -187,9 +207,7 @@ textarea:focus {
 
 
 textarea {
-
     resize: vertical;
-
 }
 
 
@@ -225,68 +243,71 @@ textarea {
 }
 
 
-.secondary-btn {
+.switch-text {
+
+    text-align: center;
+
+    margin-top: 20px;
+
+    color: #718078;
+
+    font-size: 14px;
+
+}
+
+
+.link-btn {
 
     border: none;
 
-    border-radius: 10px;
-
-    padding: 11px 16px;
-
-    background: #e5f4ec;
+    background: transparent;
 
     color: #176b45;
 
     font-weight: 700;
 
-}
-
-
-.secondary-btn:hover {
-
-    background: #d4ecdf;
+    padding: 0;
 
 }
 
 
-.login-error {
+.link-btn:hover {
+
+    text-decoration: underline;
+
+}
+
+
+.auth-message {
 
     min-height: 25px;
 
-    margin-top: 12px;
+    margin-top: 10px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+
+.auth-message.error {
 
     color: #d93025;
 
-    font-size: 14px;
+}
+
+
+.auth-message.success {
+
+    color: #23804b;
 
 }
 
 
-.demo-login {
-
-    margin-top: 25px;
-
-    padding: 15px;
-
-    background: #f3f8f5;
-
-    border-radius: 10px;
-
-    font-size: 14px;
-
-    color: #617067;
-
-}
-
-
-.demo-login strong {
-
-    color: #176b45;
-
-}
-
-
-/* ================= HEADER ================= */
+/* =====================================================
+   HEADER
+===================================================== */
 
 .header {
 
@@ -297,8 +318,7 @@ textarea {
     color: white;
 
     padding:
-        12px
-        5%;
+        12px 5%;
 
     display: flex;
 
@@ -345,13 +365,24 @@ textarea {
 }
 
 
+.header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
 .logout-btn {
 
     border: 1px solid
-        rgba(255, 255, 255, 0.35);
+        rgba(255,255,255,0.35);
 
     background:
-        rgba(255, 255, 255, 0.12);
+        rgba(255,255,255,0.12);
 
     color: white;
 
@@ -367,12 +398,14 @@ textarea {
 .logout-btn:hover {
 
     background:
-        rgba(255, 255, 255, 0.2);
+        rgba(255,255,255,0.22);
 
 }
 
 
-/* ================= CONTAINER ================= */
+/* =====================================================
+   MAIN
+===================================================== */
 
 .container {
 
@@ -384,8 +417,6 @@ textarea {
 
 }
 
-
-/* ================= SECTION ================= */
 
 .dashboard-section {
 
@@ -416,7 +447,7 @@ textarea {
 
     box-shadow:
         0 5px 20px
-        rgba(0, 0, 0, 0.06);
+        rgba(0,0,0,0.06);
 
 }
 
@@ -430,27 +461,16 @@ textarea {
 }
 
 
-.section-heading-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 15px;
-
-}
-
-
-/* ================= STATS ================= */
+/* =====================================================
+   STATS
+===================================================== */
 
 .stats-grid {
 
     display: grid;
 
     grid-template-columns:
-        repeat(4, 1fr);
+        repeat(4,1fr);
 
     gap: 18px;
 
@@ -473,9 +493,10 @@ textarea {
 
     box-shadow:
         0 5px 18px
-        rgba(0, 0, 0, 0.06);
+        rgba(0,0,0,0.06);
 
-    border-left: 5px solid #176b45;
+    border-left:
+        5px solid #176b45;
 
 }
 
@@ -526,14 +547,16 @@ textarea {
 }
 
 
-/* ================= STATUS SUMMARY ================= */
+/* =====================================================
+   STATUS
+===================================================== */
 
 .status-summary-grid {
 
     display: grid;
 
     grid-template-columns:
-        repeat(3, 1fr);
+        repeat(3,1fr);
 
     gap: 18px;
 
@@ -556,7 +579,7 @@ textarea {
 
     box-shadow:
         0 5px 18px
-        rgba(0, 0, 0, 0.06);
+        rgba(0,0,0,0.06);
 
 }
 
@@ -584,26 +607,31 @@ textarea {
 
 .pending-summary {
 
-    border-left: 5px solid #e7a500;
+    border-left:
+        5px solid #e7a500;
 
 }
 
 
 .progress-summary {
 
-    border-left: 5px solid #3498db;
+    border-left:
+        5px solid #3498db;
 
 }
 
 
 .collected-summary {
 
-    border-left: 5px solid #2e9d58;
+    border-left:
+        5px solid #2e9d58;
 
 }
 
 
-/* ================= REPORT FORM ================= */
+/* =====================================================
+   FORM
+===================================================== */
 
 .form-grid {
 
@@ -650,9 +678,26 @@ textarea {
 }
 
 
-.submit-report-btn {
+.secondary-btn {
 
-    margin-top: 5px;
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 11px 16px;
+
+    background: #e5f4ec;
+
+    color: #176b45;
+
+    font-weight: 700;
+
+}
+
+
+.secondary-btn:hover {
+
+    background: #d4ecdf;
 
 }
 
@@ -674,12 +719,19 @@ textarea {
 
     border-radius: 10px;
 
-    border: 1px solid #d5ddd8;
+}
+
+
+.submit-report-btn {
+
+    margin-top: 5px;
 
 }
 
 
-/* ================= MAP ================= */
+/* =====================================================
+   MAP
+===================================================== */
 
 .map-controls {
 
@@ -710,7 +762,8 @@ textarea {
 
 .heatmap-toggle {
 
-    border: 1px solid #176b45;
+    border:
+        1px solid #176b45;
 
     background: white;
 
@@ -722,10 +775,6 @@ textarea {
 
     font-weight: 700;
 
-    transition:
-        background 0.2s,
-        color 0.2s;
-
 }
 
 
@@ -734,22 +783,6 @@ textarea {
     background: #176b45;
 
     color: white;
-
-}
-
-
-.heatmap-toggle:hover {
-
-    background: #176b45;
-
-    color: white;
-
-}
-
-
-.map-wrapper {
-
-    position: relative;
 
 }
 
@@ -764,12 +797,15 @@ textarea {
 
     overflow: hidden;
 
-    z-index: 1;
-
 }
 
 
-/* ================= MAP LEGEND ================= */
+.map-wrapper {
+
+    position: relative;
+
+}
+
 
 .map-legend {
 
@@ -789,7 +825,7 @@ textarea {
 
     box-shadow:
         0 4px 15px
-        rgba(0, 0, 0, 0.2);
+        rgba(0,0,0,0.2);
 
     font-size: 13px;
 
@@ -798,9 +834,9 @@ textarea {
 
 .map-legend h4 {
 
-    margin-bottom: 8px;
-
     color: #176b45;
+
+    margin-bottom: 8px;
 
 }
 
@@ -822,7 +858,8 @@ textarea {
 
     border: none;
 
-    border-top: 1px solid #e0e6e2;
+    border-top:
+        1px solid #e0e6e2;
 
     margin: 8px 0;
 
@@ -843,34 +880,28 @@ textarea {
 
 
 .legend-dot.plastic {
-
     background: #2196f3;
-
 }
 
 
 .legend-dot.organic {
-
     background: #2e9d58;
-
 }
 
 
 .legend-dot.electronic {
-
     background: #8e44ad;
-
 }
 
 
 .legend-dot.other {
-
     background: #333;
-
 }
 
 
-/* ================= CUSTOM MAP MARKERS ================= */
+/* =====================================================
+   MARKERS
+===================================================== */
 
 .custom-waste-marker {
 
@@ -901,14 +932,13 @@ textarea {
 
     box-shadow:
         0 3px 10px
-        rgba(0, 0, 0, 0.25);
+        rgba(0,0,0,0.25);
 
-    border: 2px solid #176b45;
+    border:
+        2px solid #176b45;
 
 }
 
-
-/* ================= MAP POPUP ================= */
 
 .map-popup {
 
@@ -952,14 +982,9 @@ textarea {
 }
 
 
-.popup-status {
-
-    font-weight: 700;
-
-}
-
-
-/* ================= REPORT FILTERS ================= */
+/* =====================================================
+   REPORT FILTER
+===================================================== */
 
 .report-filters {
 
@@ -975,14 +1000,16 @@ textarea {
 }
 
 
-/* ================= REPORT CARDS ================= */
+/* =====================================================
+   REPORT CARDS
+===================================================== */
 
 .reports-container {
 
     display: grid;
 
     grid-template-columns:
-        repeat(2, 1fr);
+        repeat(2,1fr);
 
     gap: 18px;
 
@@ -991,28 +1018,14 @@ textarea {
 
 .report-card {
 
-    border: 1px solid #e1e8e4;
+    border:
+        1px solid #e1e8e4;
 
     border-radius: 14px;
 
     overflow: hidden;
 
     background: white;
-
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s;
-
-}
-
-
-.report-card:hover {
-
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 7px 20px
-        rgba(0, 0, 0, 0.08);
 
 }
 
@@ -1029,7 +1042,8 @@ textarea {
 
     gap: 10px;
 
-    border-bottom: 1px solid #edf1ef;
+    border-bottom:
+        1px solid #edf1ef;
 
 }
 
@@ -1152,8 +1166,6 @@ textarea {
 
 .report-content h3 {
 
-    color: #26332d;
-
     margin-bottom: 8px;
 
 }
@@ -1192,13 +1204,6 @@ textarea {
 }
 
 
-.report-info p:last-child {
-
-    margin-bottom: 0;
-
-}
-
-
 .report-actions {
 
     display: flex;
@@ -1227,25 +1232,18 @@ textarea {
 }
 
 
-.map-view-btn:hover {
-
-    background: #d2ebdd;
-
-}
-
-
 .status-select {
 
     flex: 1;
 
     min-width: 150px;
 
-    padding: 9px;
-
 }
 
 
-/* ================= EMPTY STATE ================= */
+/* =====================================================
+   EMPTY
+===================================================== */
 
 .empty-state {
 
@@ -1264,8 +1262,6 @@ textarea {
 
     font-size: 45px;
 
-    margin-bottom: 10px;
-
 }
 
 
@@ -1273,19 +1269,12 @@ textarea {
 
     color: #176b45;
 
-    margin-bottom: 5px;
-
 }
 
 
-.empty-state p {
-
-    color: #78837d;
-
-}
-
-
-/* ================= CHARTS ================= */
+/* =====================================================
+   CHARTS
+===================================================== */
 
 .charts-grid {
 
@@ -1303,7 +1292,8 @@ textarea {
 
     height: 350px;
 
-    border: 1px solid #e2e8e4;
+    border:
+        1px solid #e2e8e4;
 
     border-radius: 14px;
 
@@ -1330,7 +1320,9 @@ textarea {
 }
 
 
-/* ================= FOOTER ================= */
+/* =====================================================
+   FOOTER
+===================================================== */
 
 .footer {
 
@@ -1353,19 +1345,19 @@ textarea {
 
     font-size: 14px;
 
-    margin: 3px 0;
-
 }
 
 
-/* ================= RESPONSIVE ================= */
+/* =====================================================
+   RESPONSIVE
+===================================================== */
 
 @media (max-width: 1000px) {
 
     .stats-grid {
 
         grid-template-columns:
-            repeat(2, 1fr);
+            repeat(2,1fr);
 
     }
 
@@ -1421,6 +1413,13 @@ textarea {
     .secondary-btn {
 
         width: 100%;
+
+    }
+
+
+    .header-right span {
+
+        display: none;
 
     }
 
@@ -1500,6 +1499,13 @@ textarea {
     }
 
 
+    .auth-box {
+
+        padding: 30px 20px;
+
+    }
+
+
     .map-legend {
 
         right: 8px;
@@ -1509,13 +1515,6 @@ textarea {
         font-size: 11px;
 
         padding: 10px;
-
-    }
-
-
-    .login-box {
-
-        padding: 28px 20px;
 
     }
 
