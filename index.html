@@ -4,603 +4,385 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Waste Mapping Portal</title>
+    <title>Geo-Tracking and Waste Mapping Portal</title>
 
-    <!-- Leaflet CSS -->
+    <!-- Leaflet -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
+    />
 
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- ================= AUTH PAGE ================= -->
+<!-- =====================================================
+     AUTH PAGE
+===================================================== -->
 
-    <div id="authPage" class="auth-page">
+<div id="authPage" class="auth-page">
 
-        <div class="auth-box">
+    <div class="auth-box">
 
-            <div class="auth-logo">♻️</div>
+        <div class="auth-logo">
+            ♻️
+        </div>
 
-            <h1>Waste Mapping Portal</h1>
+        <h1>Waste Mapping Portal</h1>
 
-            <p class="auth-subtitle">
-                Geo-Tracking & Smart Waste Management
+        <p class="auth-subtitle">
+            Geo-Tracking & Smart Waste Management
+        </p>
+
+        <!-- LOGIN -->
+
+        <div id="loginSection">
+
+            <h2>🔐 Login</h2>
+
+            <form id="loginForm">
+
+                <div class="input-group">
+                    <label>Username</label>
+                    <input
+                        type="text"
+                        id="loginUsername"
+                        placeholder="Enter username"
+                        required
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Enter password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="primary-btn">
+                    Login
+                </button>
+
+            </form>
+
+            <p id="loginMessage" class="auth-message"></p>
+
+            <p class="switch-auth">
+                Don't have an account?
+                <button type="button" onclick="showSignup()">
+                    Create Account
+                </button>
             </p>
 
-
-            <!-- LOGIN -->
-
-            <div id="loginSection">
-
-                <h2>Welcome Back 👋</h2>
-
-                <p class="auth-description">
-                    Login to access your waste management portal.
-                </p>
-
-                <form id="loginForm">
-
-                    <div class="form-group">
-                        <label for="loginUsername">
-                            Username
-                        </label>
-
-                        <input
-                            type="text"
-                            id="loginUsername"
-                            placeholder="Enter username"
-                            required
-                        >
-                    </div>
+        </div>
 
 
-                    <div class="form-group">
-                        <label for="loginPassword">
-                            Password
-                        </label>
+        <!-- SIGN UP -->
 
-                        <input
-                            type="password"
-                            id="loginPassword"
-                            placeholder="Enter password"
-                            required
-                        >
-                    </div>
+        <div id="signupSection" class="hidden">
 
+            <h2>📝 Create Account</h2>
 
-                    <button
-                        type="submit"
-                        class="primary-btn"
+            <form id="signupForm">
+
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input
+                        type="text"
+                        id="signupName"
+                        placeholder="Enter your name"
+                        required
                     >
-                        🔐 Login
-                    </button>
+                </div>
 
-                    <p
-                        id="loginMessage"
-                        class="auth-message"
-                    ></p>
-
-                </form>
-
-
-                <p class="switch-text">
-                    Don't have an account?
-                    <button
-                        type="button"
-                        id="showSignupBtn"
-                        class="link-btn"
+                <div class="input-group">
+                    <label>Username</label>
+                    <input
+                        type="text"
+                        id="signupUsername"
+                        placeholder="Create username"
+                        required
                     >
-                        Create Account
-                    </button>
-                </p>
+                </div>
 
-            </div>
-
-
-            <!-- SIGN UP -->
-
-            <div
-                id="signupSection"
-                class="hidden"
-            >
-
-                <h2>Create Account 🚀</h2>
-
-                <p class="auth-description">
-                    Create your own account to use the portal.
-                </p>
-
-
-                <form id="signupForm">
-
-                    <div class="form-group">
-
-                        <label for="signupName">
-                            Full Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="signupName"
-                            placeholder="Enter your name"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="signupUsername">
-                            Username
-                        </label>
-
-                        <input
-                            type="text"
-                            id="signupUsername"
-                            placeholder="Create a username"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="signupPassword">
-                            Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="signupPassword"
-                            placeholder="Create a password"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="signupConfirmPassword">
-                            Confirm Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="signupConfirmPassword"
-                            placeholder="Re-enter password"
-                            required
-                        >
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="primary-btn"
+                <div class="input-group">
+                    <label>Password</label>
+                    <input
+                        type="password"
+                        id="signupPassword"
+                        placeholder="Create password"
+                        required
                     >
-                        ✅ Create Account
-                    </button>
+                </div>
 
-
-                    <p
-                        id="signupMessage"
-                        class="auth-message"
-                    ></p>
-
-                </form>
-
-
-                <p class="switch-text">
-
-                    Already have an account?
-
-                    <button
-                        type="button"
-                        id="showLoginBtn"
-                        class="link-btn"
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input
+                        type="password"
+                        id="signupConfirmPassword"
+                        placeholder="Confirm password"
+                        required
                     >
-                        Login
-                    </button>
+                </div>
 
-                </p>
+                <button type="submit" class="primary-btn">
+                    Create Account
+                </button>
 
-            </div>
+            </form>
+
+            <p id="signupMessage" class="auth-message"></p>
+
+            <p class="switch-auth">
+                Already have an account?
+                <button type="button" onclick="showLogin()">
+                    Login
+                </button>
+            </p>
 
         </div>
 
     </div>
 
+</div>
 
-    <!-- ================= PORTAL ================= -->
 
-    <div
-        id="portal"
-        class="portal hidden"
-    >
+<!-- =====================================================
+     MAIN PORTAL
+===================================================== -->
 
-        <!-- HEADER -->
+<div id="portalPage" class="hidden">
 
-        <header class="header">
+    <!-- HEADER -->
 
-            <div class="header-left">
+    <header class="header">
 
-                <span class="header-logo">
-                    ♻️
-                </span>
+        <div class="header-left">
+
+            <div class="header-logo">
+                ♻️
+            </div>
+
+            <div>
+                <h1>Waste Mapping Portal</h1>
+                <span>Smart Waste Management System</span>
+            </div>
+
+        </div>
+
+        <div class="header-right">
+
+            <span id="currentUserName">
+                User
+            </span>
+
+            <button
+                class="logout-btn"
+                onclick="logoutUser()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <!-- =================================================
+             DASHBOARD STATS
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+                <h2>📊 Dashboard</h2>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-icon">🗑️</div>
+                    <div>
+                        <h3 id="totalReports">0</h3>
+                        <p>Total Reports</p>
+                    </div>
+                </div>
+
+                <div class="stat-card plastic-card">
+                    <div class="stat-icon">🔵</div>
+                    <div>
+                        <h3 id="plasticCount">0</h3>
+                        <p>Plastic Waste</p>
+                    </div>
+                </div>
+
+                <div class="stat-card organic-card">
+                    <div class="stat-icon">🟢</div>
+                    <div>
+                        <h3 id="organicCount">0</h3>
+                        <p>Organic Waste</p>
+                    </div>
+                </div>
+
+                <div class="stat-card electronic-card">
+                    <div class="stat-icon">🟣</div>
+                    <div>
+                        <h3 id="electronicCount">0</h3>
+                        <p>Electronic Waste</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SMART PRIORITY DASHBOARD
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
 
                 <div>
+                    <h2>🚨 Smart Priority Dashboard</h2>
 
-                    <h1>
-                        Waste Mapping Portal
-                    </h1>
-
-                    <p>
-                        Geo-Tracking & Waste Management
+                    <p class="section-description">
+                        Automatically identifies reports that need faster attention.
                     </p>
+                </div>
+
+            </div>
+
+            <div class="priority-grid">
+
+                <div class="priority-card urgent">
+
+                    <div class="priority-icon">
+                        🔴
+                    </div>
+
+                    <div>
+                        <h3 id="highPriorityCount">0</h3>
+                        <p>High Priority</p>
+                    </div>
+
+                </div>
+
+
+                <div class="priority-card medium">
+
+                    <div class="priority-icon">
+                        🟠
+                    </div>
+
+                    <div>
+                        <h3 id="mediumPriorityCount">0</h3>
+                        <p>Medium Priority</p>
+                    </div>
+
+                </div>
+
+
+                <div class="priority-card normal">
+
+                    <div class="priority-icon">
+                        🟢
+                    </div>
+
+                    <div>
+                        <h3 id="lowPriorityCount">0</h3>
+                        <p>Low Priority</p>
+                    </div>
+
+                </div>
+
+
+                <div class="priority-card hotspot">
+
+                    <div class="priority-icon">
+                        🔥
+                    </div>
+
+                    <div>
+                        <h3 id="hotspotCount">0</h3>
+                        <p>Hotspot Areas</p>
+                    </div>
 
                 </div>
 
             </div>
 
+        </section>
 
-            <div class="header-right">
 
-                <span id="welcomeUser">
-                    👤 User
-                </span>
+        <!-- =================================================
+             COLLECTION STATUS
+        ================================================== -->
 
-                <button
-                    id="logoutBtn"
-                    class="logout-btn"
-                >
-                    🚪 Logout
-                </button>
+        <section class="section">
+
+            <h2>🚛 Collection Status</h2>
+
+            <div class="status-summary-grid">
+
+                <div class="status-summary pending-summary">
+                    <span>⏳</span>
+                    <div>
+                        <h3 id="pendingCount">0</h3>
+                        <p>Pending</p>
+                    </div>
+                </div>
+
+                <div class="status-summary progress-summary">
+                    <span>🚛</span>
+                    <div>
+                        <h3 id="progressCount">0</h3>
+                        <p>In Progress</p>
+                    </div>
+                </div>
+
+                <div class="status-summary collected-summary">
+                    <span>✅</span>
+                    <div>
+                        <h3 id="collectedCount">0</h3>
+                        <p>Collected</p>
+                    </div>
+                </div>
 
             </div>
 
-        </header>
+        </section>
 
 
-        <main class="container">
+        <!-- =================================================
+             REPORT WASTE
+        ================================================== -->
 
+        <section class="section">
 
-            <!-- ================= DASHBOARD ================= -->
+            <h2>📝 Report Waste</h2>
 
-            <section class="dashboard-section">
+            <form id="reportForm">
 
-                <h2>
-                    📊 Dashboard Overview
-                </h2>
+                <div class="form-grid">
 
+                    <div class="input-group">
 
-                <div class="stats-grid">
+                        <label>Waste Type</label>
 
-                    <div class="stat-card">
+                        <select id="wasteType" required>
 
-                        <div class="stat-icon">
-                            🗑️
-                        </div>
-
-                        <div>
-                            <h3 id="totalReports">
-                                0
-                            </h3>
-
-                            <p>
-                                Total Reports
-                            </p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card plastic-card">
-
-                        <div class="stat-icon">
-                            🔵
-                        </div>
-
-                        <div>
-                            <h3 id="plasticReports">
-                                0
-                            </h3>
-
-                            <p>
-                                Plastic Waste
-                            </p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card organic-card">
-
-                        <div class="stat-icon">
-                            🟢
-                        </div>
-
-                        <div>
-                            <h3 id="organicReports">
-                                0
-                            </h3>
-
-                            <p>
-                                Organic Waste
-                            </p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card electronic-card">
-
-                        <div class="stat-icon">
-                            🟣
-                        </div>
-
-                        <div>
-                            <h3 id="electronicReports">
-                                0
-                            </h3>
-
-                            <p>
-                                Electronic Waste
-                            </p>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- ================= STATUS ================= -->
-
-            <section class="dashboard-section">
-
-                <h2>
-                    📋 Collection Status
-                </h2>
-
-
-                <div class="status-summary-grid">
-
-                    <div class="status-summary pending-summary">
-
-                        <span>
-                            ⏳
-                        </span>
-
-                        <div>
-
-                            <h3 id="pendingCount">
-                                0
-                            </h3>
-
-                            <p>
-                                Pending
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-summary progress-summary">
-
-                        <span>
-                            🚛
-                        </span>
-
-                        <div>
-
-                            <h3 id="progressCount">
-                                0
-                            </h3>
-
-                            <p>
-                                In Progress
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-summary collected-summary">
-
-                        <span>
-                            ✅
-                        </span>
-
-                        <div>
-
-                            <h3 id="collectedCount">
-                                0
-                            </h3>
-
-                            <p>
-                                Collected
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- ================= REPORT WASTE ================= -->
-
-            <section class="section-card">
-
-                <h2>
-                    📝 Report Waste
-                </h2>
-
-                <p class="section-description">
-                    Submit a waste report with location and optional photo.
-                </p>
-
-
-                <form id="reportForm">
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-
-                            <label for="wasteType">
-                                Waste Type
-                            </label>
-
-                            <select
-                                id="wasteType"
-                                required
-                            >
-
-                                <option value="">
-                                    Select Waste Type
-                                </option>
-
-                                <option value="Plastic">
-                                    🔵 Plastic
-                                </option>
-
-                                <option value="Organic">
-                                    🟢 Organic
-                                </option>
-
-                                <option value="Electronic">
-                                    🟣 Electronic
-                                </option>
-
-                                <option value="Other">
-                                    ⚫ Other
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="description">
-                                Description
-                            </label>
-
-                            <textarea
-                                id="description"
-                                rows="4"
-                                placeholder="Describe the waste..."
-                                required
-                            ></textarea>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="photo">
-                            📷 Waste Photo
-                        </label>
-
-                        <input
-                            type="file"
-                            id="photo"
-                            accept="image/*"
-                        >
-
-                        <div
-                            id="photoPreview"
-                            class="photo-preview"
-                        ></div>
-
-                    </div>
-
-
-                    <div class="location-box">
-
-                        <div>
-
-                            <strong>
-                                📍 Location
-                            </strong>
-
-                            <p id="locationStatus">
-                                Location not selected
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            id="getLocationBtn"
-                            class="secondary-btn"
-                        >
-                            📍 Get My Location
-                        </button>
-
-                    </div>
-
-
-                    <input
-                        type="hidden"
-                        id="latitude"
-                    >
-
-                    <input
-                        type="hidden"
-                        id="longitude"
-                    >
-
-
-                    <button
-                        type="submit"
-                        class="primary-btn submit-report-btn"
-                    >
-                        🚮 Submit Waste Report
-                    </button>
-
-                </form>
-
-            </section>
-
-
-            <!-- ================= MAP ================= -->
-
-            <section class="section-card">
-
-                <h2>
-                    🗺️ Waste Tracking Map
-                </h2>
-
-                <p class="section-description">
-                    View waste reports and high-density waste zones.
-                </p>
-
-
-                <div class="map-controls">
-
-                    <div class="map-filters">
-
-                        <select id="mapTypeFilter">
-
-                            <option value="All">
-                                🗑️ All Waste Types
+                            <option value="">
+                                Select waste type
                             </option>
 
                             <option value="Plastic">
@@ -621,148 +403,190 @@
 
                         </select>
 
+                    </div>
 
-                        <select id="mapStatusFilter">
 
-                            <option value="All">
-                                📋 All Status
+                    <div class="input-group">
+
+                        <label>Waste Quantity</label>
+
+                        <select id="wasteQuantity">
+
+                            <option value="Small">
+                                Small
                             </option>
 
-                            <option value="Pending">
-                                ⏳ Pending
+                            <option value="Medium">
+                                Medium
                             </option>
 
-                            <option value="In Progress">
-                                🚛 In Progress
-                            </option>
-
-                            <option value="Collected">
-                                ✅ Collected
+                            <option value="Large">
+                                Large
                             </option>
 
                         </select>
 
-
-                        <button
-                            type="button"
-                            id="heatmapToggleBtn"
-                            class="heatmap-toggle active"
-                        >
-                            🔥 Heatmap ON
-                        </button>
-
                     </div>
 
                 </div>
 
 
-                <div class="map-wrapper">
+                <div class="input-group">
 
-                    <div id="map"></div>
+                    <label>Description</label>
 
-
-                    <div class="map-legend">
-
-                        <h4>
-                            🗺️ Waste Legend
-                        </h4>
-
-                        <div>
-                            <span class="legend-dot plastic"></span>
-                            Plastic
-                        </div>
-
-                        <div>
-                            <span class="legend-dot organic"></span>
-                            Organic
-                        </div>
-
-                        <div>
-                            <span class="legend-dot electronic"></span>
-                            Electronic
-                        </div>
-
-                        <div>
-                            <span class="legend-dot other"></span>
-                            Other
-                        </div>
-
-                        <hr>
-
-                        <div>
-                            🔥 Heatmap = Waste Density
-                        </div>
-
-                    </div>
+                    <textarea
+                        id="wasteDescription"
+                        rows="4"
+                        placeholder="Describe the waste..."
+                        required
+                    ></textarea>
 
                 </div>
 
-            </section>
 
+                <div class="input-group">
 
-            <!-- ================= REPORTS ================= -->
-
-            <section class="section-card">
-
-                <h2>
-                    📋 Waste Reports
-                </h2>
-
-                <p class="section-description">
-                    Search and manage submitted waste reports.
-                </p>
-
-
-                <div class="report-filters">
+                    <label>Photo</label>
 
                     <input
-                        type="text"
-                        id="searchReports"
-                        placeholder="🔍 Search reports..."
+                        type="file"
+                        id="wastePhoto"
+                        accept="image/*"
                     >
 
+                    <div
+                        id="photoPreview"
+                        class="photo-preview"
+                    ></div>
 
-                    <select id="reportTypeFilter">
+                </div>
+
+
+                <div class="location-box">
+
+                    <div>
+
+                        <strong>📍 Location</strong>
+
+                        <p id="locationText">
+                            Location not selected
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="locationBtn"
+                        class="secondary-btn"
+                    >
+                        Get Location
+                    </button>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="primary-btn submit-btn"
+                >
+                    🚀 Submit Waste Report
+                </button>
+
+            </form>
+
+            <p id="reportMessage" class="success-message"></p>
+
+        </section>
+
+
+        <!-- =================================================
+             MAP
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>🗺️ Smart Waste Map</h2>
+
+                    <p class="section-description">
+                        View waste reports, priority levels and hotspots.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="map-controls">
+
+                <div class="map-filters">
+
+                    <select id="mapTypeFilter">
 
                         <option value="All">
-                            All Types
+                            🗑️ All Waste Types
                         </option>
 
                         <option value="Plastic">
-                            Plastic
+                            🔵 Plastic
                         </option>
 
                         <option value="Organic">
-                            Organic
+                            🟢 Organic
                         </option>
 
                         <option value="Electronic">
-                            Electronic
+                            🟣 Electronic
                         </option>
 
                         <option value="Other">
-                            Other
+                            ⚫ Other
                         </option>
 
                     </select>
 
 
-                    <select id="reportStatusFilter">
+                    <select id="mapStatusFilter">
 
                         <option value="All">
-                            All Status
+                            📋 All Status
                         </option>
 
                         <option value="Pending">
-                            Pending
+                            ⏳ Pending
                         </option>
 
                         <option value="In Progress">
-                            In Progress
+                            🚛 In Progress
                         </option>
 
                         <option value="Collected">
-                            Collected
+                            ✅ Collected
+                        </option>
+
+                    </select>
+
+
+                    <select id="priorityFilter">
+
+                        <option value="All">
+                            🚨 All Priority
+                        </option>
+
+                        <option value="High">
+                            🔴 High
+                        </option>
+
+                        <option value="Medium">
+                            🟠 Medium
+                        </option>
+
+                        <option value="Low">
+                            🟢 Low
                         </option>
 
                     </select>
@@ -770,25 +594,212 @@
                 </div>
 
 
-                <div
-                    id="reportsContainer"
-                    class="reports-container"
-                ></div>
+                <button
+                    id="heatmapToggle"
+                    class="heatmap-toggle"
+                    type="button"
+                >
+                    🔥 Show Heatmap
+                </button>
 
-            </section>
-
-
-            <!-- ================= ANALYTICS ================= -->
-
-            <section class="section-card">
-
-                <h2>
-                    📈 Waste Analytics
-                </h2>
-
-                <p class="section-description">
-                    Visual summary of waste reports and collection status.
-                </p>
+            </div>
 
 
-                <div class="charts-grid">
+            <div class="map-wrapper">
+
+                <div id="map"></div>
+
+                <div class="map-legend">
+
+                    <h4>🗺️ Legend</h4>
+
+                    <div>
+                        <span class="legend-dot plastic"></span>
+                        Plastic
+                    </div>
+
+                    <div>
+                        <span class="legend-dot organic"></span>
+                        Organic
+                    </div>
+
+                    <div>
+                        <span class="legend-dot electronic"></span>
+                        Electronic
+                    </div>
+
+                    <div>
+                        <span class="legend-dot other"></span>
+                        Other
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        🔴 High Priority
+                    </div>
+
+                    <div>
+                        🟠 Medium Priority
+                    </div>
+
+                    <div>
+                        🟢 Low Priority
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>📋 Waste Reports</h2>
+
+                    <p class="section-description">
+                        Manage and update reported waste.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="report-filters">
+
+                <input
+                    type="text"
+                    id="reportSearch"
+                    placeholder="🔎 Search reports..."
+                >
+
+
+                <select id="reportTypeFilter">
+
+                    <option value="All">
+                        All Types
+                    </option>
+
+                    <option value="Plastic">
+                        Plastic
+                    </option>
+
+                    <option value="Organic">
+                        Organic
+                    </option>
+
+                    <option value="Electronic">
+                        Electronic
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <select id="reportStatusFilter">
+
+                    <option value="All">
+                        All Status
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="In Progress">
+                        In Progress
+                    </option>
+
+                    <option value="Collected">
+                        Collected
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div id="reportsContainer" class="reports-container"></div>
+
+        </section>
+
+
+        <!-- =================================================
+             ANALYTICS
+        ================================================== -->
+
+        <section class="section">
+
+            <h2>📈 Analytics</h2>
+
+            <div class="charts-grid">
+
+                <div class="chart-box">
+
+                    <h3>Waste Type Distribution</h3>
+
+                    <canvas id="wasteChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-box">
+
+                    <h3>Collection Status</h3>
+
+                    <canvas id="statusChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            ♻️ Geo-Tracking and Waste Mapping Portal
+        </p>
+
+        <p>
+            Smart Waste Management • Community Reporting
+        </p>
+
+    </footer>
+
+</div>
+
+
+<!-- =====================================================
+     LIBRARIES
+===================================================== -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Main JS -->
+<script src="script.js"></script>
+
+</body>
+</html>
