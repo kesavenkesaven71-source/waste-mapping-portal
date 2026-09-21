@@ -40,7 +40,7 @@ let portalInitialized = false;
 
 
 /* =====================================================
-   LOGIN / SIGNUP UI
+   AUTH UI
 ===================================================== */
 
 function showSignup() {
@@ -93,6 +93,18 @@ function createAccount(event) {
         document.getElementById("signupMessage");
 
 
+    if (!name || !username || !password || !confirmPassword) {
+
+        message.textContent =
+            "❌ Please fill all fields.";
+
+        message.className =
+            "auth-message error";
+
+        return;
+    }
+
+
     if (password !== confirmPassword) {
 
         message.textContent =
@@ -140,6 +152,7 @@ function createAccount(event) {
 
     users.push(newUser);
 
+
     localStorage.setItem(
         "wastePortalUsers",
         JSON.stringify(users)
@@ -153,15 +166,18 @@ function createAccount(event) {
         "auth-message success";
 
 
-    document.getElementById("signupForm").reset();
+    document
+        .getElementById("signupForm")
+        .reset();
 
 
     setTimeout(() => {
 
         showLogin();
 
-        document.getElementById("loginUsername").value =
-            username;
+        document.getElementById(
+            "loginUsername"
+        ).value = username;
 
     }, 800);
 
@@ -177,10 +193,13 @@ function loginUser(event) {
     event.preventDefault();
 
     const username =
-        document.getElementById("loginUsername").value.trim();
+        document.getElementById("loginUsername")
+            .value
+            .trim();
 
     const password =
-        document.getElementById("loginPassword").value;
+        document.getElementById("loginPassword")
+            .value;
 
     const message =
         document.getElementById("loginMessage");
@@ -208,6 +227,7 @@ function loginUser(event) {
 
 
     currentUser = user;
+
 
     localStorage.setItem(
         "wastePortalCurrentUser",
@@ -246,8 +266,16 @@ function openPortal() {
         .classList.remove("hidden");
 
 
-    document.getElementById("currentUserName").textContent =
-        `👤 ${currentUser?.name || "User"}`;
+    const currentUserName =
+        document.getElementById("currentUserName");
+
+
+    if (currentUserName) {
+
+        currentUserName.textContent =
+            `👤 ${currentUser?.name || "User"}`;
+
+    }
 
 
     initializePortal();
@@ -305,15 +333,29 @@ function initializePortal() {
 
 
 /* =====================================================
-   MAP
+   MAP INITIALIZATION
 ===================================================== */
 
 function initializeMap() {
 
-    map = L.map("map").setView(
-        [9.9252, 78.1198],
-        12
-    );
+    const mapElement =
+        document.getElementById("map");
+
+
+    if (!mapElement) {
+
+        console.error("Map element not found.");
+
+        return;
+
+    }
+
+
+    map =
+        L.map("map").setView(
+            [9.9252, 78.1198],
+            12
+        );
 
 
     L.tileLayer(
@@ -334,6 +376,7 @@ function initializeMap() {
 function getWasteIcon(type) {
 
     let emoji = "⚫";
+
 
     if (type === "Plastic") {
 
@@ -373,7 +416,7 @@ function getWasteIcon(type) {
 
 
 /* =====================================================
-   PRIORITY
+   PRIORITY CALCULATION
 ===================================================== */
 
 function calculatePriority(report) {
@@ -381,7 +424,7 @@ function calculatePriority(report) {
     let score = 0;
 
 
-    /* Waste type */
+    /* Waste Type */
 
     if (report.type === "Electronic") {
 
@@ -432,35 +475,50 @@ function calculatePriority(report) {
     }
 
 
-    /* Description keywords */
+    /* Urgent Description Keywords */
 
     const description =
         (report.description || "").toLowerCase();
 
 
     const urgentWords = [
+
         "overflow",
+
         "danger",
+
         "dangerous",
+
         "fire",
+
         "sharp",
+
         "medical",
+
         "toxic",
+
         "leak",
+
         "blocked"
+
     ];
 
 
-    if (
+    const hasUrgentWord =
         urgentWords.some(
-            word => description.includes(word)
-        )
-    ) {
+            word =>
+                description.includes(word)
+        );
+
+
+    if (hasUrgentWord) {
 
         score += 20;
 
     }
 
+
+    /* Final Priority */
 
     if (score >= 70) {
 
@@ -468,11 +526,13 @@ function calculatePriority(report) {
 
     }
 
+
     if (score >= 45) {
 
         return "Medium";
 
     }
+
 
     return "Low";
 
@@ -480,7 +540,7 @@ function calculatePriority(report) {
 
 
 /* =====================================================
-   PRIORITY COLOR
+   PRIORITY EMOJI
 ===================================================== */
 
 function getPriorityEmoji(priority) {
@@ -491,11 +551,13 @@ function getPriorityEmoji(priority) {
 
     }
 
+
     if (priority === "Medium") {
 
         return "🟠";
 
     }
+
 
     return "🟢";
 
@@ -512,38 +574,49 @@ function detectHotspots() {
 
     const radius = 0.01;
 
+
     reports.forEach(report => {
 
         if (
             report.latitude === null ||
-            report.longitude === null
+            report.latitude === undefined ||
+            report.longitude === null ||
+            report.longitude === undefined
         ) {
+
             return;
+
         }
 
 
         let nearbyCount = 0;
 
+
         reports.forEach(other => {
 
             if (
                 other.latitude === null ||
-                other.longitude === null
+                other.latitude === undefined ||
+                other.longitude === null ||
+                other.longitude === undefined
             ) {
+
                 return;
+
             }
 
 
             const latDifference =
                 Math.abs(
-                    report.latitude -
-                    other.latitude
+                    Number(report.latitude) -
+                    Number(other.latitude)
                 );
+
 
             const lngDifference =
                 Math.abs(
-                    report.longitude -
-                    other.longitude
+                    Number(report.longitude) -
+                    Number(other.longitude)
                 );
 
 
@@ -563,11 +636,14 @@ function detectHotspots() {
 
             hotspots.push({
 
-                latitude: report.latitude,
+                latitude:
+                    Number(report.latitude),
 
-                longitude: report.longitude,
+                longitude:
+                    Number(report.longitude),
 
-                count: nearbyCount
+                count:
+                    nearbyCount
 
             });
 
@@ -621,25 +697,57 @@ function updatePriorityDashboard() {
         detectHotspots();
 
 
-    document.getElementById(
-        "highPriorityCount"
-    ).textContent = high;
+    const highElement =
+        document.getElementById(
+            "highPriorityCount"
+        );
 
 
-    document.getElementById(
-        "mediumPriorityCount"
-    ).textContent = medium;
+    const mediumElement =
+        document.getElementById(
+            "mediumPriorityCount"
+        );
 
 
-    document.getElementById(
-        "lowPriorityCount"
-    ).textContent = low;
+    const lowElement =
+        document.getElementById(
+            "lowPriorityCount"
+        );
 
 
-    document.getElementById(
-        "hotspotCount"
-    ).textContent =
-        hotspots.length;
+    const hotspotElement =
+        document.getElementById(
+            "hotspotCount"
+        );
+
+
+    if (highElement) {
+
+        highElement.textContent = high;
+
+    }
+
+
+    if (mediumElement) {
+
+        mediumElement.textContent = medium;
+
+    }
+
+
+    if (lowElement) {
+
+        lowElement.textContent = low;
+
+    }
+
+
+    if (hotspotElement) {
+
+        hotspotElement.textContent =
+            hotspots.length;
+
+    }
 
 }
 
@@ -652,9 +760,13 @@ function addReportMarker(report) {
 
     if (
         report.latitude === null ||
-        report.longitude === null
+        report.latitude === undefined ||
+        report.longitude === null ||
+        report.longitude === undefined
     ) {
+
         return;
+
     }
 
 
@@ -669,8 +781,8 @@ function addReportMarker(report) {
     const marker =
         L.marker(
             [
-                report.latitude,
-                report.longitude
+                Number(report.latitude),
+                Number(report.longitude)
             ],
             {
                 icon:
@@ -685,6 +797,7 @@ function addReportMarker(report) {
                 <img
                     src="${report.photo}"
                     class="popup-photo"
+                    alt="Waste photo"
                 >
               `
             : "";
@@ -709,16 +822,22 @@ function addReportMarker(report) {
 
             <p>
                 <strong>Status:</strong>
-                ${escapeHTML(report.status)}
+                ${escapeHTML(
+                    report.status || "Pending"
+                )}
             </p>
 
             <p>
                 <strong>Quantity:</strong>
-                ${escapeHTML(report.quantity)}
+                ${escapeHTML(
+                    report.quantity || "Small"
+                )}
             </p>
 
             <p>
-                ${escapeHTML(report.description)}
+                ${escapeHTML(
+                    report.description || ""
+                )}
             </p>
 
         </div>
@@ -736,7 +855,7 @@ function addReportMarker(report) {
 
 
 /* =====================================================
-   LOAD MARKERS
+   LOAD SAVED MARKERS
 ===================================================== */
 
 function loadSavedMarkers() {
@@ -747,7 +866,11 @@ function loadSavedMarkers() {
     Object.values(reportMarkers)
         .forEach(marker => {
 
-            map.removeLayer(marker);
+            if (map.hasLayer(marker)) {
+
+                map.removeLayer(marker);
+
+            }
 
         });
 
@@ -776,22 +899,45 @@ function filterMapMarkers() {
     if (!map) return;
 
 
-    const typeFilter =
+    const typeElement =
         document.getElementById(
             "mapTypeFilter"
-        ).value;
+        );
+
+
+    const statusElement =
+        document.getElementById(
+            "mapStatusFilter"
+        );
+
+
+    const priorityElement =
+        document.getElementById(
+            "priorityFilter"
+        );
+
+
+    if (
+        !typeElement ||
+        !statusElement ||
+        !priorityElement
+    ) {
+
+        return;
+
+    }
+
+
+    const typeFilter =
+        typeElement.value;
 
 
     const statusFilter =
-        document.getElementById(
-            "mapStatusFilter"
-        ).value;
+        statusElement.value;
 
 
     const priorityFilter =
-        document.getElementById(
-            "priorityFilter"
-        ).value;
+        priorityElement.value;
 
 
     reports.forEach(report => {
@@ -814,7 +960,8 @@ function filterMapMarkers() {
 
         const statusMatch =
             statusFilter === "All" ||
-            report.status === statusFilter;
+            (report.status || "Pending") ===
+                statusFilter;
 
 
         const priorityMatch =
@@ -855,7 +1002,7 @@ function filterMapMarkers() {
 
 
 /* =====================================================
-   HEATMAP
+   HEATMAP INTENSITY
 ===================================================== */
 
 function getHeatIntensity(report) {
@@ -870,16 +1017,22 @@ function getHeatIntensity(report) {
 
     }
 
+
     if (priority === "Medium") {
 
         return 0.65;
 
     }
 
+
     return 0.35;
 
 }
 
+
+/* =====================================================
+   UPDATE HEATMAP
+===================================================== */
 
 function updateHeatmap() {
 
@@ -888,7 +1041,11 @@ function updateHeatmap() {
 
     if (heatLayer) {
 
-        map.removeLayer(heatLayer);
+        if (map.hasLayer(heatLayer)) {
+
+            map.removeLayer(heatLayer);
+
+        }
 
         heatLayer = null;
 
@@ -903,8 +1060,7 @@ function updateHeatmap() {
 
 
     if (
-        typeof L.heatLayer !==
-        "function"
+        typeof L.heatLayer !== "function"
     ) {
 
         console.warn(
@@ -916,22 +1072,45 @@ function updateHeatmap() {
     }
 
 
-    const typeFilter =
+    const typeElement =
         document.getElementById(
             "mapTypeFilter"
-        ).value;
+        );
+
+
+    const statusElement =
+        document.getElementById(
+            "mapStatusFilter"
+        );
+
+
+    const priorityElement =
+        document.getElementById(
+            "priorityFilter"
+        );
+
+
+    if (
+        !typeElement ||
+        !statusElement ||
+        !priorityElement
+    ) {
+
+        return;
+
+    }
+
+
+    const typeFilter =
+        typeElement.value;
 
 
     const statusFilter =
-        document.getElementById(
-            "mapStatusFilter"
-        ).value;
+        statusElement.value;
 
 
     const priorityFilter =
-        document.getElementById(
-            "priorityFilter"
-        ).value;
+        priorityElement.value;
 
 
     const points = [];
@@ -941,9 +1120,13 @@ function updateHeatmap() {
 
         if (
             report.latitude === null ||
-            report.longitude === null
+            report.latitude === undefined ||
+            report.longitude === null ||
+            report.longitude === undefined
         ) {
+
             return;
+
         }
 
 
@@ -958,7 +1141,8 @@ function updateHeatmap() {
 
         const statusMatch =
             statusFilter === "All" ||
-            report.status === statusFilter;
+            (report.status || "Pending") ===
+                statusFilter;
 
 
         const priorityMatch =
@@ -973,9 +1157,13 @@ function updateHeatmap() {
         ) {
 
             points.push([
-                report.latitude,
-                report.longitude,
+
+                Number(report.latitude),
+
+                Number(report.longitude),
+
                 getHeatIntensity(report)
+
             ]);
 
         }
@@ -1017,6 +1205,9 @@ function toggleHeatmap() {
         document.getElementById(
             "heatmapToggle"
         );
+
+
+    if (!button) return;
 
 
     if (heatmapEnabled) {
@@ -1079,164 +1270,3 @@ function getLocation() {
                 position.coords.latitude;
 
             longitude =
-                position.coords.longitude;
-
-
-            locationText.textContent =
-                `📍 ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-
-
-            if (currentLocationMarker) {
-
-                map.removeLayer(
-                    currentLocationMarker
-                );
-
-            }
-
-
-            currentLocationMarker =
-                L.marker(
-                    [
-                        latitude,
-                        longitude
-                    ]
-                )
-                .addTo(map)
-                .bindPopup(
-                    "📍 Selected Report Location"
-                )
-                .openPopup();
-
-
-            map.setView(
-                [
-                    latitude,
-                    longitude
-                ],
-                15
-            );
-
-        },
-
-        error => {
-
-            locationText.textContent =
-                "❌ Unable to get location.";
-
-            console.error(error);
-
-        }
-
-    );
-
-}
-
-
-/* =====================================================
-   PHOTO PREVIEW
-===================================================== */
-
-function previewPhoto(event) {
-
-    const file =
-        event.target.files[0];
-
-
-    if (!file) {
-
-        selectedPhoto = "";
-
-        document.getElementById(
-            "photoPreview"
-        ).innerHTML = "";
-
-        return;
-
-    }
-
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload = function(e) {
-
-        selectedPhoto =
-            e.target.result;
-
-
-        document.getElementById(
-            "photoPreview"
-        ).innerHTML = `
-
-            <img
-                src="${selectedPhoto}"
-                alt="Waste preview"
-            >
-
-        `;
-
-    };
-
-
-    reader.readAsDataURL(file);
-
-}
-
-
-/* =====================================================
-   SUBMIT REPORT
-===================================================== */
-
-function submitReport(event) {
-
-    event.preventDefault();
-
-
-    const type =
-        document.getElementById(
-            "wasteType"
-        ).value;
-
-
-    const quantity =
-        document.getElementById(
-            "wasteQuantity"
-        ).value;
-
-
-    const description =
-        document.getElementById(
-            "wasteDescription"
-        ).value.trim();
-
-
-    const message =
-        document.getElementById(
-            "reportMessage"
-        );
-
-
-    if (!latitude || !longitude) {
-
-        message.textContent =
-            "📍 Please get your location first.";
-
-        message.className =
-            "error-message";
-
-        return;
-
-    }
-
-
-    const report = {
-
-        id: Date.now(),
-
-        type: type,
-
-        quantity: quantity,
-
-        description: de
