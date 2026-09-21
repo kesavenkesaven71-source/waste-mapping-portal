@@ -6,21 +6,17 @@
 
     <title>Geo-Tracking and Waste Mapping Portal</title>
 
-    <!-- Leaflet CSS -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- =====================================================
-     AUTH PAGE
-===================================================== -->
+<!-- ================= AUTH ================= -->
 
 <div id="authPage" class="auth-page">
 
@@ -35,7 +31,7 @@
         </p>
 
 
-        <!-- ================= LOGIN ================= -->
+        <!-- LOGIN -->
 
         <div id="loginSection">
 
@@ -50,11 +46,9 @@
                         type="text"
                         id="loginUsername"
                         placeholder="Enter username"
-                        autocomplete="username"
                         required
                     >
                 </div>
-
 
                 <div class="input-group">
                     <label for="loginPassword">Password</label>
@@ -63,33 +57,24 @@
                         type="password"
                         id="loginPassword"
                         placeholder="Enter password"
-                        autocomplete="current-password"
                         required
                     >
                 </div>
 
-
-                <button
-                    type="submit"
-                    class="primary-btn"
-                >
+                <button type="submit" class="primary-btn">
                     Login
                 </button>
 
             </form>
 
-            <p
-                id="loginMessage"
-                class="auth-message"
-            ></p>
-
+            <p id="loginMessage" class="auth-message"></p>
 
             <p class="switch-auth">
                 Don't have an account?
 
                 <button
                     type="button"
-                    onclick="showSignup()"
+                    id="createAccountBtn"
                 >
                     Create Account
                 </button>
@@ -98,70 +83,48 @@
         </div>
 
 
-        <!-- ================= SIGN UP ================= -->
+        <!-- SIGNUP -->
 
-        <div
-            id="signupSection"
-            class="hidden"
-        >
+        <div id="signupSection" class="hidden">
 
             <h2>📝 Create Account</h2>
 
             <form id="signupForm">
 
                 <div class="input-group">
-
-                    <label for="signupName">
-                        Full Name
-                    </label>
+                    <label for="signupName">Full Name</label>
 
                     <input
                         type="text"
                         id="signupName"
                         placeholder="Enter your name"
-                        autocomplete="name"
                         required
                     >
-
                 </div>
 
-
                 <div class="input-group">
-
-                    <label for="signupUsername">
-                        Username
-                    </label>
+                    <label for="signupUsername">Username</label>
 
                     <input
                         type="text"
                         id="signupUsername"
                         placeholder="Create username"
-                        autocomplete="username"
                         required
                     >
-
                 </div>
 
-
                 <div class="input-group">
-
-                    <label for="signupPassword">
-                        Password
-                    </label>
+                    <label for="signupPassword">Password</label>
 
                     <input
                         type="password"
                         id="signupPassword"
                         placeholder="Create password"
-                        autocomplete="new-password"
                         required
                     >
-
                 </div>
 
-
                 <div class="input-group">
-
                     <label for="signupConfirmPassword">
                         Confirm Password
                     </label>
@@ -170,40 +133,27 @@
                         type="password"
                         id="signupConfirmPassword"
                         placeholder="Confirm password"
-                        autocomplete="new-password"
                         required
                     >
-
                 </div>
 
-
-                <button
-                    type="submit"
-                    class="primary-btn"
-                >
+                <button type="submit" class="primary-btn">
                     Create Account
                 </button>
 
             </form>
 
-
-            <p
-                id="signupMessage"
-                class="auth-message"
-            ></p>
-
+            <p id="signupMessage" class="auth-message"></p>
 
             <p class="switch-auth">
-
                 Already have an account?
 
                 <button
                     type="button"
-                    onclick="showLogin()"
+                    id="backToLoginBtn"
                 >
                     Login
                 </button>
-
             </p>
 
         </div>
@@ -213,41 +163,22 @@
 </div>
 
 
+<!-- ================= PORTAL ================= -->
 
-<!-- =====================================================
-     MAIN PORTAL
-===================================================== -->
-
-<div
-    id="portalPage"
-    class="hidden"
->
-
-
-    <!-- ================= HEADER ================= -->
+<div id="portalPage" class="hidden">
 
     <header class="header">
 
         <div class="header-left">
 
-            <div class="header-logo">
-                ♻️
-            </div>
+            <div class="header-logo">♻️</div>
 
             <div>
-
-                <h1>
-                    Waste Mapping Portal
-                </h1>
-
-                <span>
-                    Smart Waste Management System
-                </span>
-
+                <h1>Waste Mapping Portal</h1>
+                <span>Smart Waste Management System</span>
             </div>
 
         </div>
-
 
         <div class="header-right">
 
@@ -256,8 +187,9 @@
             </span>
 
             <button
+                id="logoutBtn"
                 class="logout-btn"
-                onclick="logoutUser()"
+                type="button"
             >
                 Logout
             </button>
@@ -267,117 +199,51 @@
     </header>
 
 
-
     <main class="container">
 
 
-        <!-- =================================================
-             DASHBOARD
-        ================================================== -->
+        <!-- DASHBOARD -->
 
         <section class="section">
 
-            <div class="section-title">
-
-                <h2>
-                    📊 Dashboard
-                </h2>
-
-            </div>
-
+            <h2>📊 Dashboard</h2>
 
             <div class="stats-grid">
 
-
-                <!-- TOTAL -->
-
                 <div class="stat-card">
-
-                    <div class="stat-icon">
-                        🗑️
-                    </div>
+                    <div class="stat-icon">🗑️</div>
 
                     <div>
-
-                        <h3 id="totalReports">
-                            0
-                        </h3>
-
-                        <p>
-                            Total Reports
-                        </p>
-
+                        <h3 id="totalReports">0</h3>
+                        <p>Total Reports</p>
                     </div>
-
                 </div>
-
-
-                <!-- PLASTIC -->
 
                 <div class="stat-card plastic-card">
-
-                    <div class="stat-icon">
-                        🔵
-                    </div>
+                    <div class="stat-icon">🔵</div>
 
                     <div>
-
-                        <h3 id="plasticCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Plastic Waste
-                        </p>
-
+                        <h3 id="plasticCount">0</h3>
+                        <p>Plastic Waste</p>
                     </div>
-
                 </div>
-
-
-                <!-- ORGANIC -->
 
                 <div class="stat-card organic-card">
-
-                    <div class="stat-icon">
-                        🟢
-                    </div>
+                    <div class="stat-icon">🟢</div>
 
                     <div>
-
-                        <h3 id="organicCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Organic Waste
-                        </p>
-
+                        <h3 id="organicCount">0</h3>
+                        <p>Organic Waste</p>
                     </div>
-
                 </div>
 
-
-                <!-- ELECTRONIC -->
-
                 <div class="stat-card electronic-card">
-
-                    <div class="stat-icon">
-                        🟣
-                    </div>
+                    <div class="stat-icon">🟣</div>
 
                     <div>
-
-                        <h3 id="electronicCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Electronic Waste
-                        </p>
-
+                        <h3 id="electronicCount">0</h3>
+                        <p>Electronic Waste</p>
                     </div>
-
                 </div>
 
             </div>
@@ -385,123 +251,48 @@
         </section>
 
 
-
-        <!-- =================================================
-             SMART PRIORITY
-        ================================================== -->
+        <!-- PRIORITY -->
 
         <section class="section">
 
-            <div class="section-title">
-
-                <div>
-
-                    <h2>
-                        🚨 Smart Priority Dashboard
-                    </h2>
-
-                    <p class="section-description">
-                        Automatically identifies reports
-                        that need faster attention.
-                    </p>
-
-                </div>
-
-            </div>
-
+            <h2>🚨 Smart Priority Dashboard</h2>
 
             <div class="priority-grid">
 
-
-                <!-- HIGH -->
-
                 <div class="priority-card urgent">
-
-                    <div class="priority-icon">
-                        🔴
-                    </div>
+                    <div class="priority-icon">🔴</div>
 
                     <div>
-
-                        <h3 id="highPriorityCount">
-                            0
-                        </h3>
-
-                        <p>
-                            High Priority
-                        </p>
-
+                        <h3 id="highPriorityCount">0</h3>
+                        <p>High Priority</p>
                     </div>
-
                 </div>
-
-
-                <!-- MEDIUM -->
 
                 <div class="priority-card medium">
-
-                    <div class="priority-icon">
-                        🟠
-                    </div>
+                    <div class="priority-icon">🟠</div>
 
                     <div>
-
-                        <h3 id="mediumPriorityCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Medium Priority
-                        </p>
-
+                        <h3 id="mediumPriorityCount">0</h3>
+                        <p>Medium Priority</p>
                     </div>
-
                 </div>
-
-
-                <!-- LOW -->
 
                 <div class="priority-card normal">
-
-                    <div class="priority-icon">
-                        🟢
-                    </div>
+                    <div class="priority-icon">🟢</div>
 
                     <div>
-
-                        <h3 id="lowPriorityCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Low Priority
-                        </p>
-
+                        <h3 id="lowPriorityCount">0</h3>
+                        <p>Low Priority</p>
                     </div>
-
                 </div>
 
-
-                <!-- HOTSPOT -->
-
                 <div class="priority-card hotspot">
-
-                    <div class="priority-icon">
-                        🔥
-                    </div>
+                    <div class="priority-icon">🔥</div>
 
                     <div>
-
-                        <h3 id="hotspotCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Hotspot Areas
-                        </p>
-
+                        <h3 id="hotspotCount">0</h3>
+                        <p>Hotspot Areas</p>
                     </div>
-
                 </div>
 
             </div>
@@ -509,75 +300,39 @@
         </section>
 
 
-
-        <!-- =================================================
-             COLLECTION STATUS
-        ================================================== -->
+        <!-- STATUS -->
 
         <section class="section">
 
-            <h2>
-                🚛 Collection Status
-            </h2>
-
+            <h2>🚛 Collection Status</h2>
 
             <div class="status-summary-grid">
 
-
                 <div class="status-summary pending-summary">
-
                     <span>⏳</span>
 
                     <div>
-
-                        <h3 id="pendingCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Pending
-                        </p>
-
+                        <h3 id="pendingCount">0</h3>
+                        <p>Pending</p>
                     </div>
-
                 </div>
 
-
                 <div class="status-summary progress-summary">
-
                     <span>🚛</span>
 
                     <div>
-
-                        <h3 id="progressCount">
-                            0
-                        </h3>
-
-                        <p>
-                            In Progress
-                        </p>
-
+                        <h3 id="progressCount">0</h3>
+                        <p>In Progress</p>
                     </div>
-
                 </div>
 
-
                 <div class="status-summary collected-summary">
-
                     <span>✅</span>
 
                     <div>
-
-                        <h3 id="collectedCount">
-                            0
-                        </h3>
-
-                        <p>
-                            Collected
-                        </p>
-
+                        <h3 id="collectedCount">0</h3>
+                        <p>Collected</p>
                     </div>
-
                 </div>
 
             </div>
@@ -585,25 +340,15 @@
         </section>
 
 
-
-        <!-- =================================================
-             REPORT WASTE
-        ================================================== -->
+        <!-- REPORT -->
 
         <section class="section">
 
-            <h2>
-                📝 Report Waste
-            </h2>
-
+            <h2>📝 Report Waste</h2>
 
             <form id="reportForm">
 
-
                 <div class="form-grid">
-
-
-                    <!-- WASTE TYPE -->
 
                     <div class="input-group">
 
@@ -611,10 +356,7 @@
                             Waste Type
                         </label>
 
-                        <select
-                            id="wasteType"
-                            required
-                        >
+                        <select id="wasteType" required>
 
                             <option value="">
                                 Select waste type
@@ -640,8 +382,6 @@
 
                     </div>
 
-
-                    <!-- QUANTITY -->
 
                     <div class="input-group">
 
@@ -670,9 +410,6 @@
                 </div>
 
 
-
-                <!-- DESCRIPTION -->
-
                 <div class="input-group">
 
                     <label for="wasteDescription">
@@ -689,9 +426,6 @@
                 </div>
 
 
-
-                <!-- PHOTO -->
-
                 <div class="input-group">
 
                     <label for="wastePhoto">
@@ -704,31 +438,22 @@
                         accept="image/*"
                     >
 
-                    <div
-                        id="photoPreview"
-                        class="photo-preview"
-                    ></div>
+                    <div id="photoPreview"></div>
 
                 </div>
 
-
-
-                <!-- LOCATION -->
 
                 <div class="location-box">
 
                     <div>
 
-                        <strong>
-                            📍 Location
-                        </strong>
+                        <strong>📍 Location</strong>
 
                         <p id="locationText">
                             Location not selected
                         </p>
 
                     </div>
-
 
                     <button
                         type="button"
@@ -741,61 +466,29 @@
                 </div>
 
 
-
-                <!-- SUBMIT -->
-
                 <button
                     type="submit"
-                    class="primary-btn submit-btn"
+                    class="primary-btn"
                 >
                     🚀 Submit Waste Report
                 </button>
 
             </form>
 
-
-            <p
-                id="reportMessage"
-                class="success-message"
-            ></p>
+            <p id="reportMessage"></p>
 
         </section>
 
 
-
-        <!-- =================================================
-             SMART MAP
-        ================================================== -->
+        <!-- MAP -->
 
         <section class="section">
 
-            <div class="section-title">
-
-                <div>
-
-                    <h2>
-                        🗺️ Smart Waste Map
-                    </h2>
-
-                    <p class="section-description">
-                        View waste reports, priority levels
-                        and hotspots.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- MAP CONTROLS -->
+            <h2>🗺️ Smart Waste Map</h2>
 
             <div class="map-controls">
 
-
                 <div class="map-filters">
-
-
-                    <!-- TYPE -->
 
                     <select id="mapTypeFilter">
 
@@ -822,8 +515,6 @@
                     </select>
 
 
-                    <!-- STATUS -->
-
                     <select id="mapStatusFilter">
 
                         <option value="All">
@@ -844,8 +535,6 @@
 
                     </select>
 
-
-                    <!-- PRIORITY -->
 
                     <select id="priorityFilter">
 
@@ -870,12 +559,10 @@
                 </div>
 
 
-                <!-- HEATMAP -->
-
                 <button
                     id="heatmapToggle"
-                    class="heatmap-toggle"
                     type="button"
+                    class="heatmap-toggle"
                 >
                     🔥 Show Heatmap
                 </button>
@@ -883,29 +570,155 @@
             </div>
 
 
-
-            <!-- MAP -->
-
             <div class="map-wrapper">
 
                 <div id="map"></div>
 
-
-                <!-- LEGEND -->
-
                 <div class="map-legend">
 
-                    <h4>
-                        🗺️ Legend
-                    </h4>
+                    <h4>🗺️ Legend</h4>
+
+                    <div>🔵 Plastic</div>
+                    <div>🟢 Organic</div>
+                    <div>🟣 Electronic</div>
+                    <div>⚫ Other</div>
+
+                    <hr>
+
+                    <div>🔴 High Priority</div>
+                    <div>🟠 Medium Priority</div>
+                    <div>🟢 Low Priority</div>
+
+                </div>
+
+            </div>
+
+        </section>
 
 
-                    <div>
-                        <span class="legend-dot plastic"></span>
+        <!-- REPORTS -->
+
+        <section class="section">
+
+            <h2>📋 Waste Reports</h2>
+
+            <div class="report-filters">
+
+                <input
+                    type="text"
+                    id="reportSearch"
+                    placeholder="🔎 Search reports..."
+                >
+
+                <select id="reportTypeFilter">
+
+                    <option value="All">
+                        All Types
+                    </option>
+
+                    <option value="Plastic">
                         Plastic
-                    </div>
+                    </option>
 
-
-                    <div>
-                        <span class="legend-dot organic"></span>
+                    <option value="Organic">
                         Organic
+                    </option>
+
+                    <option value="Electronic">
+                        Electronic
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <select id="reportStatusFilter">
+
+                    <option value="All">
+                        All Status
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="In Progress">
+                        In Progress
+                    </option>
+
+                    <option value="Collected">
+                        Collected
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div id="reportsContainer"></div>
+
+        </section>
+
+
+        <!-- ANALYTICS -->
+
+        <section class="section">
+
+            <h2>📈 Analytics</h2>
+
+            <div class="charts-grid">
+
+                <div class="chart-box">
+
+                    <h3>Waste Type Distribution</h3>
+
+                    <canvas id="wasteChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-box">
+
+                    <h3>Collection Status</h3>
+
+                    <canvas id="statusChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            ♻️ Geo-Tracking and Waste Mapping Portal
+        </p>
+
+        <p>
+            Smart Waste Management • Community Reporting
+        </p>
+
+    </footer>
+
+</div>
+
+
+<!-- LIBRARIES -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="script.js"></script>
+
+</body>
+</html>
