@@ -3,20 +3,25 @@
    ===================================================== */
 
 
-/* ================= GLOBAL VARIABLES ================= */
+/* =====================================================
+   GLOBAL VARIABLES
+   ===================================================== */
 
 let latitude = null;
+
 let longitude = null;
 
 let selectedPhoto = "";
 
-let reports = JSON.parse(
-    localStorage.getItem("wasteReports")
-) || [];
+let reports =
+    JSON.parse(
+        localStorage.getItem("wasteReports")
+    ) || [];
 
 let map = null;
 
 let wasteChart = null;
+
 let statusChart = null;
 
 let reportMarkers = [];
@@ -24,62 +29,91 @@ let reportMarkers = [];
 let portalInitialized = false;
 
 
-/* ================= INITIALIZE PORTAL ================= */
+
+/* =====================================================
+   INITIALIZE PORTAL
+   ===================================================== */
 
 function initializePortal() {
+
 
     if (portalInitialized) {
 
         updateStats();
+
         displayReports();
+
         updateAnalytics();
 
+        filterMapMarkers();
+
         return;
+
     }
+
 
     portalInitialized = true;
 
+
     initializeMap();
+
 
     updateStats();
 
+
     displayReports();
+
 
     updateAnalytics();
 
+
     loadSavedMarkers();
+
 
 }
 
 
-/* ================= MAP ================= */
+
+/* =====================================================
+   INITIALIZE MAP
+   ===================================================== */
 
 function initializeMap() {
 
+
     if (map !== null) {
+
         return;
+
     }
 
-    map = L.map("map").setView(
-        [9.9252, 78.1198],
-        13
-    );
+
+    map =
+        L.map("map").setView(
+            [9.9252, 78.1198],
+            13
+        );
 
 
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
             attribution:
-                '&copy; OpenStreetMap contributors'
+                "&copy; OpenStreetMap contributors"
         }
     ).addTo(map);
+
 
 }
 
 
-/* ================= GET LOCATION ================= */
+
+/* =====================================================
+   GET LOCATION
+   ===================================================== */
 
 function getLocation() {
+
 
     if (!navigator.geolocation) {
 
@@ -88,11 +122,15 @@ function getLocation() {
         );
 
         return;
+
     }
 
 
     const locationText =
-        document.getElementById("locationText");
+        document.getElementById(
+            "locationText"
+        );
+
 
     locationText.textContent =
         "📡 Getting location...";
@@ -100,10 +138,13 @@ function getLocation() {
 
     navigator.geolocation.getCurrentPosition(
 
+
         function (position) {
+
 
             latitude =
                 position.coords.latitude;
+
 
             longitude =
                 position.coords.longitude;
@@ -115,67 +156,93 @@ function getLocation() {
 
             if (map) {
 
+
                 map.setView(
                     [latitude, longitude],
                     16
                 );
 
 
-                L.marker([
-                    latitude,
-                    longitude
-                ])
+                L.marker(
+                    [
+                        latitude,
+                        longitude
+                    ]
+                )
                 .addTo(map)
                 .bindPopup(
                     "📍 Your Current Location"
                 )
                 .openPopup();
 
+
             }
+
 
         },
 
+
         function () {
+
 
             locationText.textContent =
                 "❌ Unable to get location.";
+
 
             alert(
                 "Please allow location permission."
             );
 
+
         },
+
 
         {
             enableHighAccuracy: true,
             timeout: 10000
         }
 
+
     );
+
 
 }
 
 
-/* ================= PHOTO PREVIEW ================= */
+
+/* =====================================================
+   PHOTO PREVIEW
+   ===================================================== */
 
 function previewPhoto(event) {
+
 
     const file =
         event.target.files[0];
 
+
     const preview =
-        document.getElementById("photoPreview");
+        document.getElementById(
+            "photoPreview"
+        );
 
 
     if (!file) {
 
+
         selectedPhoto = "";
 
-        preview.classList.add("hidden");
+
+        preview.classList.add(
+            "hidden"
+        );
+
 
         preview.src = "";
 
+
         return;
+
     }
 
 
@@ -183,49 +250,79 @@ function previewPhoto(event) {
         new FileReader();
 
 
-    reader.onload = function (e) {
+    reader.onload =
+        function (e) {
 
-        selectedPhoto = e.target.result;
 
-        preview.src = selectedPhoto;
+            selectedPhoto =
+                e.target.result;
 
-        preview.classList.remove("hidden");
 
-    };
+            preview.src =
+                selectedPhoto;
+
+
+            preview.classList.remove(
+                "hidden"
+            );
+
+
+        };
 
 
     reader.readAsDataURL(file);
 
+
 }
 
 
-/* ================= SUBMIT REPORT ================= */
+
+/* =====================================================
+   SUBMIT REPORT
+   ===================================================== */
 
 function submitReport(event) {
+
 
     event.preventDefault();
 
 
     const type =
-        document.getElementById("wasteType").value;
+        document.getElementById(
+            "wasteType"
+        ).value;
+
 
     const description =
-        document.getElementById("description").value.trim();
+        document.getElementById(
+            "description"
+        ).value
+        .trim();
 
 
     if (!type) {
 
-        alert("Please select waste type.");
+
+        alert(
+            "Please select waste type."
+        );
+
 
         return;
+
     }
 
 
     if (!description) {
 
-        alert("Please enter description.");
+
+        alert(
+            "Please enter description."
+        );
+
 
         return;
+
     }
 
 
@@ -234,32 +331,51 @@ function submitReport(event) {
         longitude === null
     ) {
 
+
         alert(
             "Please get your location before submitting."
         );
 
+
         return;
+
     }
 
 
     const report = {
 
-        id: Date.now(),
 
-        type: type,
+        id:
+            Date.now(),
 
-        description: description,
 
-        latitude: latitude,
+        type:
+            type,
 
-        longitude: longitude,
 
-        photo: selectedPhoto,
+        description:
+            description,
 
-        status: "Pending",
+
+        latitude:
+            latitude,
+
+
+        longitude:
+            longitude,
+
+
+        photo:
+            selectedPhoto,
+
+
+        status:
+            "Pending",
+
 
         createdAt:
             new Date().toLocaleString()
+
 
     };
 
@@ -278,35 +394,43 @@ function submitReport(event) {
 
     updateStats();
 
+
     displayReports();
+
 
     updateAnalytics();
 
 
-    document.getElementById(
-        "reportForm"
-    ).reset();
+    filterMapMarkers();
 
 
-    document.getElementById(
-        "photoPreview"
-    ).classList.add("hidden");
+
+    document
+        .getElementById("reportForm")
+        .reset();
 
 
-    document.getElementById(
-        "photoPreview"
-    ).src = "";
+    document
+        .getElementById("photoPreview")
+        .classList.add("hidden");
 
 
-    document.getElementById(
-        "locationText"
-    ).textContent =
+    document
+        .getElementById("photoPreview")
+        .src = "";
+
+
+    document
+        .getElementById("locationText")
+        .textContent =
         "Location not selected";
 
 
     selectedPhoto = "";
 
+
     latitude = null;
+
 
     longitude = null;
 
@@ -315,12 +439,17 @@ function submitReport(event) {
         "✅ Waste report submitted successfully!"
     );
 
+
 }
 
 
-/* ================= WASTE ICON ================= */
+
+/* =====================================================
+   WASTE ICON
+   ===================================================== */
 
 function getWasteIcon(type) {
+
 
     let emoji = "⚫";
 
@@ -331,17 +460,20 @@ function getWasteIcon(type) {
 
     }
 
+
     else if (type === "Organic") {
 
         emoji = "🟢";
 
     }
 
+
     else if (type === "Electronic") {
 
         emoji = "🟣";
 
     }
+
 
     else {
 
@@ -350,31 +482,45 @@ function getWasteIcon(type) {
     }
 
 
+
     return L.divIcon({
 
         className:
             "custom-waste-marker",
 
+
         html: `
+
             <div class="waste-marker">
                 ${emoji}
             </div>
+
         `,
 
-        iconSize: [35, 35],
 
-        iconAnchor: [17, 17],
+        iconSize:
+            [35, 35],
 
-        popupAnchor: [0, -17]
+
+        iconAnchor:
+            [17, 17],
+
+
+        popupAnchor:
+            [0, -17]
 
     });
 
 }
 
 
-/* ================= STATUS ICON ================= */
+
+/* =====================================================
+   STATUS ICON
+   ===================================================== */
 
 function getStatusIcon(status) {
+
 
     if (status === "Pending") {
 
@@ -382,11 +528,13 @@ function getStatusIcon(status) {
 
     }
 
+
     if (status === "In Progress") {
 
         return "🚛";
 
     }
+
 
     if (status === "Collected") {
 
@@ -394,32 +542,45 @@ function getStatusIcon(status) {
 
     }
 
+
     return "📋";
 
 }
 
 
-/* ================= ADD MAP MARKER ================= */
+
+/* =====================================================
+   ADD REPORT MARKER
+   ===================================================== */
 
 function addReportMarker(report) {
 
+
     if (!map) {
+
         return;
+
     }
 
 
     const marker =
         L.marker(
+
             [
                 report.latitude,
                 report.longitude
             ],
+
             {
                 icon:
-                    getWasteIcon(report.type)
+                    getWasteIcon(
+                        report.type
+                    )
             }
+
         )
         .addTo(map);
+
 
 
     const popupHTML = `
@@ -427,23 +588,43 @@ function addReportMarker(report) {
         <div class="map-popup">
 
             <h3>
-                ${escapeHTML(report.type)} Waste
+                ${escapeHTML(report.type)}
+                Waste
             </h3>
 
+
             <p>
-                <strong>Status:</strong>
+
+                <strong>
+                    Status:
+                </strong>
+
                 ${getStatusIcon(report.status)}
+
                 ${escapeHTML(report.status)}
+
             </p>
 
-            <p>
-                ${escapeHTML(report.description)}
-            </p>
 
             <p>
+
+                ${escapeHTML(
+                    report.description
+                )}
+
+            </p>
+
+
+            <p>
+
                 <small>
-                    ${escapeHTML(report.createdAt)}
+
+                    ${escapeHTML(
+                        report.createdAt
+                    )}
+
                 </small>
+
             </p>
 
         </div>
@@ -451,97 +632,268 @@ function addReportMarker(report) {
     `;
 
 
-    marker.bindPopup(popupHTML);
+    marker.bindPopup(
+        popupHTML
+    );
 
 
     reportMarkers.push({
 
-        id: report.id,
+        id:
+            report.id,
 
-        marker: marker
+        marker:
+            marker
 
     });
+
 
 }
 
 
-/* ================= LOAD SAVED MARKERS ================= */
+
+/* =====================================================
+   LOAD SAVED MARKERS
+   ===================================================== */
 
 function loadSavedMarkers() {
 
+
     if (!map) {
+
         return;
+
     }
 
 
-    reportMarkers.forEach(item => {
+    reportMarkers.forEach(
+        item => {
 
-        map.removeLayer(item.marker);
+            map.removeLayer(
+                item.marker
+            );
 
-    });
+        }
+    );
 
 
     reportMarkers = [];
 
 
-    reports.forEach(report => {
+    reports.forEach(
+        report => {
 
-        addReportMarker(report);
+            addReportMarker(
+                report
+            );
 
-    });
+        }
+    );
+
+
+    /* Apply active filters */
+
+    filterMapMarkers();
+
 
 }
 
 
-/* ================= ESCAPE HTML ================= */
+
+/* =====================================================
+   SMART MAP FILTER
+   ===================================================== */
+
+function filterMapMarkers() {
+
+
+    if (!map) {
+
+        return;
+
+    }
+
+
+    const typeFilter =
+        document.getElementById(
+            "mapTypeFilter"
+        )?.value || "All";
+
+
+    const statusFilter =
+        document.getElementById(
+            "mapStatusFilter"
+        )?.value || "All";
+
+
+
+    reportMarkers.forEach(
+        item => {
+
+
+            const report =
+                reports.find(
+                    r =>
+                        r.id === item.id
+                );
+
+
+            if (!report) {
+
+                return;
+
+            }
+
+
+
+            const typeMatch =
+
+                typeFilter === "All" ||
+
+                report.type ===
+                    typeFilter;
+
+
+
+            const statusMatch =
+
+                statusFilter === "All" ||
+
+                report.status ===
+                    statusFilter;
+
+
+
+            if (
+                typeMatch &&
+                statusMatch
+            ) {
+
+
+                if (
+                    !map.hasLayer(
+                        item.marker
+                    )
+                ) {
+
+                    item.marker.addTo(
+                        map
+                    );
+
+                }
+
+
+            } else {
+
+
+                if (
+                    map.hasLayer(
+                        item.marker
+                    )
+                ) {
+
+                    map.removeLayer(
+                        item.marker
+                    );
+
+                }
+
+            }
+
+
+        }
+    );
+
+
+}
+
+
+
+/* =====================================================
+   ESCAPE HTML
+   ===================================================== */
 
 function escapeHTML(value) {
 
+
     return String(value)
 
-        .replace(/&/g, "&amp;")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
 
-        .replace(/</g, "&lt;")
+        .replace(
+            /</g,
+            "&lt;"
+        )
 
-        .replace(/>/g, "&gt;")
+        .replace(
+            />/g,
+            "&gt;"
+        )
 
-        .replace(/"/g, "&quot;")
+        .replace(
+            /"/g,
+            "&quot;"
+        )
 
-        .replace(/'/g, "&#039;");
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
 
 }
 
 
-/* ================= STATUS CLASS ================= */
+
+/* =====================================================
+   STATUS CLASS
+   ===================================================== */
 
 function getStatusClass(status) {
 
-    if (status === "Pending") {
+
+    if (
+        status === "Pending"
+    ) {
 
         return "status-pending";
 
     }
 
-    if (status === "In Progress") {
+
+    if (
+        status === "In Progress"
+    ) {
 
         return "status-progress";
 
     }
 
-    if (status === "Collected") {
+
+    if (
+        status === "Collected"
+    ) {
 
         return "status-collected";
 
     }
+
 
     return "";
 
 }
 
 
-/* ================= DISPLAY REPORTS ================= */
+
+/* =====================================================
+   DISPLAY REPORTS
+   ===================================================== */
 
 function displayReports() {
+
 
     const container =
         document.getElementById(
@@ -569,48 +921,68 @@ function displayReports() {
         ).value;
 
 
+
     const filteredReports =
-        reports.filter(report => {
-
-            const matchesSearch =
-
-                report.type
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                report.description
-                    .toLowerCase()
-                    .includes(search);
+        reports.filter(
+            report => {
 
 
-            const matchesType =
+                const matchesSearch =
 
-                typeFilter === "All" ||
+                    report.type
+                        .toLowerCase()
+                        .includes(
+                            search
+                        )
 
-                report.type === typeFilter;
+                    ||
 
-
-            const matchesStatus =
-
-                statusFilter === "All" ||
-
-                report.status === statusFilter;
-
-
-            return (
-
-                matchesSearch &&
-                matchesType &&
-                matchesStatus
-
-            );
-
-        });
+                    report.description
+                        .toLowerCase()
+                        .includes(
+                            search
+                        );
 
 
-    if (filteredReports.length === 0) {
+
+                const matchesType =
+
+                    typeFilter === "All" ||
+
+                    report.type ===
+                        typeFilter;
+
+
+
+                const matchesStatus =
+
+                    statusFilter === "All" ||
+
+                    report.status ===
+                        statusFilter;
+
+
+
+                return (
+
+                    matchesSearch &&
+
+                    matchesType &&
+
+                    matchesStatus
+
+                );
+
+
+            }
+        );
+
+
+
+    if (
+        filteredReports.length === 0
+    ) {
+
 
         container.innerHTML = `
 
@@ -632,160 +1004,284 @@ function displayReports() {
 
         `;
 
+
         return;
+
     }
 
 
+
     container.innerHTML =
-        filteredReports.map(report => `
+
+        filteredReports
+            .map(
+                report => `
 
         <div class="report-card">
+
 
             <div class="report-header">
 
                 <h3>
-                    ${getStatusIcon(report.status)}
-                    ${escapeHTML(report.type)} Waste
+
+                    ${getStatusIcon(
+                        report.status
+                    )}
+
+                    ${escapeHTML(
+                        report.type
+                    )}
+
+                    Waste
+
                 </h3>
 
-                <span class="
-                    report-status
-                    ${getStatusClass(report.status)}
-                ">
-                    ${escapeHTML(report.status)}
+
+                <span
+                    class="
+                        report-status
+                        ${getStatusClass(
+                            report.status
+                        )}
+                    "
+                >
+
+                    ${escapeHTML(
+                        report.status
+                    )}
+
                 </span>
 
             </div>
 
 
+
             ${
                 report.photo
+
                 ?
+
                 `
+
                     <img
+
                         src="${report.photo}"
+
                         class="report-image"
+
                         alt="Waste photo"
+
                     >
+
                 `
+
                 :
+
                 `
+
                     <div class="no-image">
+
                         📷 No Photo
+
                     </div>
+
                 `
             }
 
 
+
             <p class="report-description">
 
-                ${escapeHTML(report.description)}
+                ${escapeHTML(
+                    report.description
+                )}
 
             </p>
 
 
+
             <div class="report-details">
 
-                <p>
-                    📍
-                    ${report.latitude.toFixed(5)},
-                    ${report.longitude.toFixed(5)}
-                </p>
 
                 <p>
-                    🕒
-                    ${escapeHTML(report.createdAt)}
+
+                    📍
+
+                    ${report.latitude.toFixed(
+                        5
+                    )},
+
+                    ${report.longitude.toFixed(
+                        5
+                    )}
+
                 </p>
+
+
+                <p>
+
+                    🕒
+
+                    ${escapeHTML(
+                        report.createdAt
+                    )}
+
+                </p>
+
 
             </div>
 
 
+
             <div class="report-actions">
 
+
                 <button
+
                     class="map-btn"
-                    onclick="focusReportOnMap(${report.id})"
+
+                    onclick="
+                        focusReportOnMap(
+                            ${report.id}
+                        )
+                    "
+
                 >
+
                     📍 View on Map
+
                 </button>
 
 
+
                 <select
+
                     onchange="
                         changeStatus(
                             ${report.id},
                             this.value
                         )
                     "
+
                 >
 
+
                     <option
+
                         value="Pending"
-                        ${report.status === "Pending"
+
+                        ${
+                            report.status ===
+                            "Pending"
                             ? "selected"
-                            : ""}
+                            : ""
+                        }
+
                     >
+
                         ⏳ Pending
+
                     </option>
 
 
+
                     <option
+
                         value="In Progress"
-                        ${report.status === "In Progress"
+
+                        ${
+                            report.status ===
+                            "In Progress"
                             ? "selected"
-                            : ""}
+                            : ""
+                        }
+
                     >
+
                         🚛 In Progress
+
                     </option>
+
 
 
                     <option
+
                         value="Collected"
-                        ${report.status === "Collected"
+
+                        ${
+                            report.status ===
+                            "Collected"
                             ? "selected"
-                            : ""}
+                            : ""
+                        }
+
                     >
+
                         ✅ Collected
+
                     </option>
+
 
                 </select>
 
+
             </div>
+
 
         </div>
 
-    `).join("");
+    `
+            )
+            .join("");
+
 
 }
 
 
-/* ================= FOCUS REPORT ON MAP ================= */
 
-function focusReportOnMap(reportId) {
+/* =====================================================
+   FOCUS REPORT ON MAP
+   ===================================================== */
+
+function focusReportOnMap(
+    reportId
+) {
+
 
     const report =
         reports.find(
-            r => r.id === reportId
+            r =>
+                r.id === reportId
         );
 
 
-    if (!report || !map) {
+    if (
+        !report ||
+        !map
+    ) {
+
         return;
+
     }
 
 
     map.setView(
+
         [
             report.latitude,
             report.longitude
         ],
+
         17
+
     );
+
 
 
     const markerData =
         reportMarkers.find(
-            item => item.id === reportId
+            item =>
+                item.id === reportId
         );
 
 
@@ -795,28 +1291,37 @@ function focusReportOnMap(reportId) {
 
     }
 
+
 }
 
 
-/* ================= CHANGE STATUS ================= */
+
+/* =====================================================
+   CHANGE STATUS
+   ===================================================== */
 
 function changeStatus(
     reportId,
     newStatus
 ) {
 
+
     const report =
         reports.find(
-            r => r.id === reportId
+            r =>
+                r.id === reportId
         );
 
 
     if (!report) {
+
         return;
+
     }
 
 
-    report.status = newStatus;
+    report.status =
+        newStatus;
 
 
     localStorage.setItem(
@@ -827,18 +1332,26 @@ function changeStatus(
 
     updateStats();
 
+
     displayReports();
+
 
     updateAnalytics();
 
+
     loadSavedMarkers();
+
 
 }
 
 
-/* ================= UPDATE STATS ================= */
+
+/* =====================================================
+   UPDATE STATISTICS
+   ===================================================== */
 
 function updateStats() {
+
 
     const total =
         reports.length;
@@ -846,369 +1359,60 @@ function updateStats() {
 
     const plastic =
         reports.filter(
-            r => r.type === "Plastic"
+            r =>
+                r.type === "Plastic"
         ).length;
 
 
     const organic =
         reports.filter(
-            r => r.type === "Organic"
+            r =>
+                r.type === "Organic"
         ).length;
 
 
     const electronic =
         reports.filter(
-            r => r.type === "Electronic"
+            r =>
+                r.type === "Electronic"
         ).length;
 
 
     const pending =
         reports.filter(
-            r => r.status === "Pending"
+            r =>
+                r.status === "Pending"
         ).length;
 
 
     const inProgress =
         reports.filter(
-            r => r.status === "In Progress"
+            r =>
+                r.status === "In Progress"
         ).length;
 
 
     const collected =
         reports.filter(
-            r => r.status === "Collected"
+            r =>
+                r.status === "Collected"
         ).length;
+
 
 
     document.getElementById(
         "totalReports"
-    ).textContent = total;
+    ).textContent =
+        total;
 
 
     document.getElementById(
         "plasticCount"
-    ).textContent = plastic;
+    ).textContent =
+        plastic;
 
 
     document.getElementById(
         "organicCount"
-    ).textContent = organic;
-
-
-    document.getElementById(
-        "electronicCount"
-    ).textContent = electronic;
-
-
-    document.getElementById(
-        "pendingCount"
-    ).textContent = pending;
-
-
-    document.getElementById(
-        "progressCount"
-    ).textContent = inProgress;
-
-
-    document.getElementById(
-        "collectedCount"
-    ).textContent = collected;
-
-}
-
-
-/* ================= ANALYTICS ================= */
-
-function updateAnalytics() {
-
-    const plastic =
-        reports.filter(
-            r => r.type === "Plastic"
-        ).length;
-
-
-    const organic =
-        reports.filter(
-            r => r.type === "Organic"
-        ).length;
-
-
-    const electronic =
-        reports.filter(
-            r => r.type === "Electronic"
-        ).length;
-
-
-    const other =
-        reports.filter(
-            r => r.type === "Other"
-        ).length;
-
-
-    const pending =
-        reports.filter(
-            r => r.status === "Pending"
-        ).length;
-
-
-    const progress =
-        reports.filter(
-            r => r.status === "In Progress"
-        ).length;
-
-
-    const collected =
-        reports.filter(
-            r => r.status === "Collected"
-        ).length;
-
-
-    /* Waste Chart */
-
-    const wasteCanvas =
-        document.getElementById(
-            "wasteChart"
-        );
-
-
-    if (wasteCanvas) {
-
-        if (wasteChart) {
-
-            wasteChart.destroy();
-
-        }
-
-
-        wasteChart =
-            new Chart(
-                wasteCanvas,
-                {
-
-                    type: "doughnut",
-
-                    data: {
-
-                        labels: [
-                            "Plastic",
-                            "Organic",
-                            "Electronic",
-                            "Other"
-                        ],
-
-                        datasets: [
-
-                            {
-
-                                data: [
-                                    plastic,
-                                    organic,
-                                    electronic,
-                                    other
-                                ]
-
-                            }
-
-                        ]
-
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false
-
-                    }
-
-                }
-
-            );
-
-    }
-
-
-    /* Status Chart */
-
-    const statusCanvas =
-        document.getElementById(
-            "statusChart"
-        );
-
-
-    if (statusCanvas) {
-
-        if (statusChart) {
-
-            statusChart.destroy();
-
-        }
-
-
-        statusChart =
-            new Chart(
-                statusCanvas,
-                {
-
-                    type: "bar",
-
-                    data: {
-
-                        labels: [
-                            "Pending",
-                            "In Progress",
-                            "Collected"
-                        ],
-
-                        datasets: [
-
-                            {
-
-                                label:
-                                    "Reports",
-
-                                data: [
-                                    pending,
-                                    progress,
-                                    collected
-                                ]
-
-                            }
-
-                        ]
-
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        scales: {
-
-                            y: {
-
-                                beginAtZero: true,
-
-                                ticks: {
-
-                                    precision: 0
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            );
-
-    }
-
-}
-
-
-/* ================= DOM EVENTS ================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const locationBtn =
-            document.getElementById(
-                "locationBtn"
-            );
-
-
-        const photoInput =
-            document.getElementById(
-                "photo"
-            );
-
-
-        const reportForm =
-            document.getElementById(
-                "reportForm"
-            );
-
-
-        const searchInput =
-            document.getElementById(
-                "searchInput"
-            );
-
-
-        const typeFilter =
-            document.getElementById(
-                "typeFilter"
-            );
-
-
-        const statusFilter =
-            document.getElementById(
-                "statusFilter"
-            );
-
-
-        if (locationBtn) {
-
-            locationBtn.addEventListener(
-                "click",
-                getLocation
-            );
-
-        }
-
-
-        if (photoInput) {
-
-            photoInput.addEventListener(
-                "change",
-                previewPhoto
-            );
-
-        }
-
-
-        if (reportForm) {
-
-            reportForm.addEventListener(
-                "submit",
-                submitReport
-            );
-
-        }
-
-
-        if (searchInput) {
-
-            searchInput.addEventListener(
-                "input",
-                displayReports
-            );
-
-        }
-
-
-        if (typeFilter) {
-
-            typeFilter.addEventListener(
-                "change",
-                displayReports
-            );
-
-        }
-
-
-        if (statusFilter) {
-
-            statusFilter.addEventListener(
-                "change",
-                displayReports
-            );
-
-        }
+    ).textContent =
+        organic;
