@@ -1,6 +1,7 @@
 /* =====================================================
    WASTE MAPPING PORTAL - STEP 3.4
-   COMPLETE CORRECTED SCRIPT.JS
+   Authentication + Reports + Map + Heatmap
+   + Smart Priority + Hotspot Detection
 ===================================================== */
 
 
@@ -59,6 +60,13 @@ function showSignup() {
         .getElementById("signupSection")
         .classList.remove("hidden");
 
+    const message =
+        document.getElementById("loginMessage");
+
+    if (message) {
+        message.textContent = "";
+    }
+
 }
 
 
@@ -72,6 +80,13 @@ function showLogin() {
         .getElementById("loginSection")
         .classList.remove("hidden");
 
+    const message =
+        document.getElementById("signupMessage");
+
+    if (message) {
+        message.textContent = "";
+    }
+
 }
 
 
@@ -84,10 +99,16 @@ function createAccount(event) {
     event.preventDefault();
 
     const name =
-        document.getElementById("signupName").value.trim();
+        document
+            .getElementById("signupName")
+            .value
+            .trim();
 
     const username =
-        document.getElementById("signupUsername").value.trim();
+        document
+            .getElementById("signupUsername")
+            .value
+            .trim();
 
     const password =
         document.getElementById("signupPassword").value;
@@ -99,6 +120,8 @@ function createAccount(event) {
         document.getElementById("signupMessage");
 
 
+    /* Check empty fields */
+
     if (!name || !username || !password || !confirmPassword) {
 
         message.textContent =
@@ -108,8 +131,11 @@ function createAccount(event) {
             "auth-message error";
 
         return;
+
     }
 
+
+    /* Check password */
 
     if (password !== confirmPassword) {
 
@@ -120,32 +146,11 @@ function createAccount(event) {
             "auth-message error";
 
         return;
+
     }
 
 
-    if (username.length < 3) {
-
-        message.textContent =
-            "❌ Username must contain at least 3 characters.";
-
-        message.className =
-            "auth-message error";
-
-        return;
-    }
-
-
-    if (password.length < 4) {
-
-        message.textContent =
-            "❌ Password must contain at least 4 characters.";
-
-        message.className =
-            "auth-message error";
-
-        return;
-    }
-
+    /* Check username */
 
     const existingUser =
         users.find(
@@ -164,8 +169,11 @@ function createAccount(event) {
             "auth-message error";
 
         return;
+
     }
 
+
+    /* Create new account */
 
     const newUser = {
 
@@ -196,10 +204,14 @@ function createAccount(event) {
         "auth-message success";
 
 
+    /* Clear signup form */
+
     document
         .getElementById("signupForm")
         .reset();
 
+
+    /* Move to login */
 
     setTimeout(() => {
 
@@ -226,7 +238,6 @@ function loginUser(event) {
 
     event.preventDefault();
 
-
     const username =
         document
             .getElementById("loginUsername")
@@ -246,7 +257,7 @@ function loginUser(event) {
         users.find(
             item =>
                 item.username.toLowerCase() ===
-                    username.toLowerCase() &&
+                username.toLowerCase() &&
                 item.password === password
         );
 
@@ -260,6 +271,7 @@ function loginUser(event) {
             "auth-message error";
 
         return;
+
     }
 
 
@@ -315,13 +327,13 @@ function openPortal() {
     }
 
 
-    const currentUserName =
+    const userName =
         document.getElementById("currentUserName");
 
 
-    if (currentUserName) {
+    if (userName) {
 
-        currentUserName.textContent =
+        userName.textContent =
             `👤 ${currentUser?.name || "User"}`;
 
     }
@@ -387,21 +399,17 @@ function initializePortal() {
 
 function initializeMap() {
 
+    if (map) {
+        return;
+    }
+
+
     const mapElement =
         document.getElementById("map");
 
 
     if (!mapElement) {
-
         return;
-
-    }
-
-
-    if (map) {
-
-        return;
-
     }
 
 
@@ -476,53 +484,18 @@ function getWasteIcon(type) {
 function getWasteEmoji(type) {
 
     if (type === "Plastic") {
-
         return "🔵";
-
     }
 
     if (type === "Organic") {
-
         return "🟢";
-
     }
 
     if (type === "Electronic") {
-
         return "🟣";
-
     }
 
     return "⚫";
-
-}
-
-
-/* =====================================================
-   STATUS EMOJI
-===================================================== */
-
-function getStatusEmoji(status) {
-
-    if (status === "Pending") {
-
-        return "⏳";
-
-    }
-
-    if (status === "In Progress") {
-
-        return "🚛";
-
-    }
-
-    if (status === "Collected") {
-
-        return "✅";
-
-    }
-
-    return "📋";
 
 }
 
@@ -536,7 +509,7 @@ function calculatePriority(report) {
     let score = 0;
 
 
-    /* Waste Type */
+    /* Waste type */
 
     if (report.type === "Electronic") {
 
@@ -587,7 +560,7 @@ function calculatePriority(report) {
     }
 
 
-    /* Description */
+    /* Description keywords */
 
     const description =
         (report.description || "").toLowerCase();
@@ -616,21 +589,21 @@ function calculatePriority(report) {
     ];
 
 
-    const hasUrgentWord =
+    const containsUrgentWord =
         urgentWords.some(
             word =>
                 description.includes(word)
         );
 
 
-    if (hasUrgentWord) {
+    if (containsUrgentWord) {
 
         score += 20;
 
     }
 
 
-    /* Final Priority */
+    /* Priority */
 
     if (score >= 70) {
 
@@ -638,13 +611,11 @@ function calculatePriority(report) {
 
     }
 
-
     if (score >= 45) {
 
         return "Medium";
 
     }
-
 
     return "Low";
 
@@ -670,6 +641,19 @@ function getPriorityEmoji(priority) {
     }
 
     return "🟢";
+
+}
+
+
+/* =====================================================
+   PRIORITY CLASS
+===================================================== */
+
+function getPriorityClass(priority) {
+
+    return priority
+        .toLowerCase()
+        .replace(/\s+/g, "-");
 
 }
 
@@ -832,31 +816,23 @@ function updatePriorityDashboard() {
 
 
     if (highElement) {
-
         highElement.textContent = high;
-
     }
 
 
     if (mediumElement) {
-
         mediumElement.textContent = medium;
-
     }
 
 
     if (lowElement) {
-
         lowElement.textContent = low;
-
     }
 
 
     if (hotspotElement) {
-
         hotspotElement.textContent =
             hotspots.length;
-
     }
 
 }
@@ -869,9 +845,7 @@ function updatePriorityDashboard() {
 function addReportMarker(report) {
 
     if (!map) {
-
         return;
-
     }
 
 
@@ -939,17 +913,24 @@ function addReportMarker(report) {
 
             <p>
                 <strong>Status:</strong>
-                ${getStatusEmoji(report.status)}
                 ${escapeHTML(report.status)}
             </p>
 
             <p>
                 <strong>Quantity:</strong>
-                ${escapeHTML(report.quantity || "Small")}
+                ${escapeHTML(report.quantity)}
             </p>
 
             <p>
+                <strong>Description:</strong>
                 ${escapeHTML(report.description)}
+            </p>
+
+            <p>
+                <strong>Reported by:</strong>
+                ${escapeHTML(
+                    report.reportedBy || "User"
+                )}
             </p>
 
         </div>
@@ -973,9 +954,7 @@ function addReportMarker(report) {
 function loadSavedMarkers() {
 
     if (!map) {
-
         return;
-
     }
 
 
@@ -1013,9 +992,7 @@ function loadSavedMarkers() {
 function filterMapMarkers() {
 
     if (!map) {
-
         return;
-
     }
 
 
@@ -1037,27 +1014,22 @@ function filterMapMarkers() {
         );
 
 
-    if (
-        !typeElement ||
-        !statusElement ||
-        !priorityElement
-    ) {
-
-        return;
-
-    }
-
-
     const typeFilter =
-        typeElement.value;
+        typeElement
+            ? typeElement.value
+            : "All";
 
 
     const statusFilter =
-        statusElement.value;
+        statusElement
+            ? statusElement.value
+            : "All";
 
 
     const priorityFilter =
-        priorityElement.value;
+        priorityElement
+            ? priorityElement.value
+            : "All";
 
 
     reports.forEach(report => {
@@ -1067,9 +1039,7 @@ function filterMapMarkers() {
 
 
         if (!marker) {
-
             return;
-
         }
 
 
@@ -1140,13 +1110,11 @@ function getHeatIntensity(report) {
 
     }
 
-
     if (priority === "Medium") {
 
         return 0.65;
 
     }
-
 
     return 0.35;
 
@@ -1160,15 +1128,17 @@ function getHeatIntensity(report) {
 function updateHeatmap() {
 
     if (!map) {
-
         return;
-
     }
 
 
     if (heatLayer) {
 
-        map.removeLayer(heatLayer);
+        if (map.hasLayer(heatLayer)) {
+
+            map.removeLayer(heatLayer);
+
+        }
 
         heatLayer = null;
 
@@ -1176,15 +1146,12 @@ function updateHeatmap() {
 
 
     if (!heatmapEnabled) {
-
         return;
-
     }
 
 
     if (
-        typeof L.heatLayer !==
-        "function"
+        typeof L.heatLayer !== "function"
     ) {
 
         console.warn(
@@ -1214,27 +1181,22 @@ function updateHeatmap() {
         );
 
 
-    if (
-        !typeElement ||
-        !statusElement ||
-        !priorityElement
-    ) {
-
-        return;
-
-    }
-
-
     const typeFilter =
-        typeElement.value;
+        typeElement
+            ? typeElement.value
+            : "All";
 
 
     const statusFilter =
-        statusElement.value;
+        statusElement
+            ? statusElement.value
+            : "All";
 
 
     const priorityFilter =
-        priorityElement.value;
+        priorityElement
+            ? priorityElement.value
+            : "All";
 
 
     const points = [];
@@ -1279,23 +1241,4 @@ function updateHeatmap() {
             priorityMatch
         ) {
 
-            points.push([
-
-                Number(report.latitude),
-
-                Number(report.longitude),
-
-                getHeatIntensity(report)
-
-            ]);
-
-        }
-
-    });
-
-
-    if (points.length === 0) {
-
-        return;
-
-    }
+            points.pus
