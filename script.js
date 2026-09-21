@@ -1,60 +1,48 @@
 /* =====================================================
    WASTE MAPPING PORTAL
-   STEP 3.4 - COMPLETE FIXED VERSION
-
-   Features:
-   - Signup / Login
-   - Dashboard statistics
-   - Waste reporting
-   - Photo preview
-   - Location
-   - Leaflet map
-   - Waste markers
-   - Map filters
-   - Smart priority
-   - Hotspot detection
-   - Heatmap
-   - Reports search/filter
-   - Status update
-   - Analytics charts
+   STEP 3.4 - COMPLETE VERSION
+   Authentication + Reports + Map + Heatmap
+   Smart Priority + Hotspot Detection + Analytics
 ===================================================== */
 
 
 /* =====================================================
-   AUTHENTICATION DATA
+   AUTHENTICATION
 ===================================================== */
 
 let users =
     JSON.parse(localStorage.getItem("wastePortalUsers")) || [];
 
 let currentUser =
-    JSON.parse(localStorage.getItem("wastePortalCurrentUser")) || null;
+    JSON.parse(
+        localStorage.getItem("wastePortalCurrentUser")
+    ) || null;
 
 
 /* =====================================================
-   REPORT DATA
+   REPORTS
 ===================================================== */
 
 /*
-   Old reports may have used:
+   Supports both old reports using:
    report.type
 
-   New version uses:
+   and new reports using:
    report.wasteType
-
-   This converts old data automatically.
 */
 
 let reports =
-    (JSON.parse(localStorage.getItem("wasteReports")) || []).map(
-        report => ({
-            ...report,
-            wasteType:
-                report.wasteType ||
-                report.type ||
-                "Other"
-        })
-    );
+    (
+        JSON.parse(
+            localStorage.getItem("wasteReports")
+        ) || []
+    ).map(report => ({
+        ...report,
+        wasteType:
+            report.wasteType ||
+            report.type ||
+            "Other"
+    }));
 
 
 /* =====================================================
@@ -62,15 +50,12 @@ let reports =
 ===================================================== */
 
 let map = null;
-
 let heatLayer = null;
-
 let heatmapEnabled = false;
 
 let selectedPhoto = "";
 
 let latitude = null;
-
 let longitude = null;
 
 let currentLocationMarker = null;
@@ -78,28 +63,13 @@ let currentLocationMarker = null;
 let reportMarkers = {};
 
 let wasteChart = null;
-
 let statusChart = null;
 
 let portalInitialized = false;
 
 
 /* =====================================================
-   SAVE REPORTS
-===================================================== */
-
-function saveReports() {
-
-    localStorage.setItem(
-        "wasteReports",
-        JSON.stringify(reports)
-    );
-
-}
-
-
-/* =====================================================
-   SAVE USERS
+   SAVE DATA
 ===================================================== */
 
 function saveUsers() {
@@ -107,6 +77,16 @@ function saveUsers() {
     localStorage.setItem(
         "wastePortalUsers",
         JSON.stringify(users)
+    );
+
+}
+
+
+function saveReports() {
+
+    localStorage.setItem(
+        "wasteReports",
+        JSON.stringify(reports)
     );
 
 }
@@ -148,11 +128,11 @@ function showSignup() {
 
 function showLogin() {
 
-    const loginSection =
-        document.getElementById("loginSection");
-
     const signupSection =
         document.getElementById("signupSection");
+
+    const loginSection =
+        document.getElementById("loginSection");
 
     if (signupSection) {
         signupSection.classList.add("hidden");
@@ -193,18 +173,18 @@ function createAccount(event) {
             .trim();
 
     const password =
-        document.getElementById("signupPassword").value;
+        document
+            .getElementById("signupPassword")
+            .value;
 
     const confirmPassword =
-        document.getElementById(
-            "signupConfirmPassword"
-        ).value;
+        document
+            .getElementById("signupConfirmPassword")
+            .value;
 
     const message =
         document.getElementById("signupMessage");
 
-
-    /* Check fields */
 
     if (
         !name ||
@@ -223,8 +203,6 @@ function createAccount(event) {
     }
 
 
-    /* Check password */
-
     if (password !== confirmPassword) {
 
         message.textContent =
@@ -237,12 +215,10 @@ function createAccount(event) {
     }
 
 
-    /* Check username */
-
     const existingUser =
         users.find(
             user =>
-                user.username.toLowerCase() ===
+                String(user.username).toLowerCase() ===
                 username.toLowerCase()
         );
 
@@ -258,8 +234,6 @@ function createAccount(event) {
         return;
     }
 
-
-    /* Create user */
 
     const newUser = {
 
@@ -291,8 +265,6 @@ function createAccount(event) {
         .reset();
 
 
-    /* Move to login */
-
     setTimeout(() => {
 
         showLogin();
@@ -304,15 +276,6 @@ function createAccount(event) {
 
         if (loginUsername) {
             loginUsername.value = username;
-        }
-
-        const loginPassword =
-            document.getElementById(
-                "loginPassword"
-            );
-
-        if (loginPassword) {
-            loginPassword.focus();
         }
 
     }, 800);
@@ -335,7 +298,9 @@ function loginUser(event) {
             .trim();
 
     const password =
-        document.getElementById("loginPassword").value;
+        document
+            .getElementById("loginPassword")
+            .value;
 
     const message =
         document.getElementById("loginMessage");
@@ -344,7 +309,7 @@ function loginUser(event) {
     const user =
         users.find(
             item =>
-                item.username.toLowerCase() ===
+                String(item.username).toLowerCase() ===
                     username.toLowerCase() &&
                 item.password === password
         );
@@ -462,17 +427,15 @@ function initializePortal() {
 
     updateStats();
 
+    updatePriorityDashboard();
+
     displayReports();
 
     updateAnalytics();
 
-    updatePriorityDashboard();
-
     loadSavedMarkers();
 
     filterMapMarkers();
-
-    updateHeatmap();
 
 }
 
@@ -593,13 +556,13 @@ function calculatePriority(report) {
     let score = 0;
 
 
-    /* Waste type */
-
     const wasteType =
         report.wasteType ||
         report.type ||
         "Other";
 
+
+    /* Waste type */
 
     if (wasteType === "Electronic") {
 
@@ -652,44 +615,37 @@ function calculatePriority(report) {
     }
 
 
-    /* Description */
+    /* Urgent keywords */
 
     const description =
-        (report.description || "")
-            .toLowerCase();
+        String(
+            report.description || ""
+        ).toLowerCase();
 
 
     const urgentWords = [
 
         "overflow",
-
         "danger",
-
         "dangerous",
-
         "fire",
-
         "sharp",
-
         "medical",
-
         "toxic",
-
         "leak",
-
         "blocked"
 
     ];
 
 
-    const containsUrgentWord =
+    const urgent =
         urgentWords.some(
             word =>
                 description.includes(word)
         );
 
 
-    if (containsUrgentWord) {
+    if (urgent) {
 
         score += 20;
 
@@ -699,15 +655,11 @@ function calculatePriority(report) {
     /* Final priority */
 
     if (score >= 70) {
-
         return "High";
-
     }
 
     if (score >= 45) {
-
         return "Medium";
-
     }
 
     return "Low";
@@ -748,14 +700,10 @@ function detectHotspots() {
     reports.forEach(report => {
 
         if (
-            report.latitude === null ||
-            report.latitude === undefined ||
-            report.longitude === null ||
-            report.longitude === undefined
+            report.latitude == null ||
+            report.longitude == null
         ) {
-
             return;
-
         }
 
 
@@ -765,14 +713,10 @@ function detectHotspots() {
         reports.forEach(other => {
 
             if (
-                other.latitude === null ||
-                other.latitude === undefined ||
-                other.longitude === null ||
-                other.longitude === undefined
+                other.latitude == null ||
+                other.longitude == null
             ) {
-
                 return;
-
             }
 
 
@@ -834,9 +778,7 @@ function detectHotspots() {
 function updatePriorityDashboard() {
 
     let high = 0;
-
     let medium = 0;
-
     let low = 0;
 
 
@@ -850,9 +792,7 @@ function updatePriorityDashboard() {
 
             high++;
 
-        } else if (
-            priority === "Medium"
-        ) {
+        } else if (priority === "Medium") {
 
             medium++;
 
@@ -869,43 +809,25 @@ function updatePriorityDashboard() {
         detectHotspots();
 
 
-    const highElement =
-        document.getElementById(
-            "highPriorityCount"
-        );
+    setText(
+        "highPriorityCount",
+        high
+    );
 
-    const mediumElement =
-        document.getElementById(
-            "mediumPriorityCount"
-        );
+    setText(
+        "mediumPriorityCount",
+        medium
+    );
 
-    const lowElement =
-        document.getElementById(
-            "lowPriorityCount"
-        );
+    setText(
+        "lowPriorityCount",
+        low
+    );
 
-    const hotspotElement =
-        document.getElementById(
-            "hotspotCount"
-        );
-
-
-    if (highElement) {
-        highElement.textContent = high;
-    }
-
-    if (mediumElement) {
-        mediumElement.textContent = medium;
-    }
-
-    if (lowElement) {
-        lowElement.textContent = low;
-    }
-
-    if (hotspotElement) {
-        hotspotElement.textContent =
-            hotspots.length;
-    }
+    setText(
+        "hotspotCount",
+        hotspots.length
+    );
 
 }
 
@@ -922,14 +844,10 @@ function addReportMarker(report) {
 
 
     if (
-        report.latitude === null ||
-        report.latitude === undefined ||
-        report.longitude === null ||
-        report.longitude === undefined
+        report.latitude == null ||
+        report.longitude == null
     ) {
-
         return;
-
     }
 
 
@@ -941,10 +859,6 @@ function addReportMarker(report) {
 
     const priority =
         calculatePriority(report);
-
-
-    const priorityEmoji =
-        getPriorityEmoji(priority);
 
 
     const marker =
@@ -985,7 +899,7 @@ function addReportMarker(report) {
 
             <p>
                 <strong>Priority:</strong>
-                ${priorityEmoji}
+                ${getPriorityEmoji(priority)}
                 ${priority}
             </p>
 
@@ -1032,7 +946,7 @@ function addReportMarker(report) {
 
 
 /* =====================================================
-   LOAD SAVED MARKERS
+   LOAD MARKERS
 ===================================================== */
 
 function loadSavedMarkers() {
@@ -1080,38 +994,22 @@ function filterMapMarkers() {
     }
 
 
-    const typeElement =
+    const typeFilter =
         document.getElementById(
             "mapTypeFilter"
-        );
-
-    const statusElement =
-        document.getElementById(
-            "mapStatusFilter"
-        );
-
-    const priorityElement =
-        document.getElementById(
-            "priorityFilter"
-        );
-
-
-    const typeFilter =
-        typeElement
-            ? typeElement.value
-            : "All";
+        )?.value || "All";
 
 
     const statusFilter =
-        statusElement
-            ? statusElement.value
-            : "All";
+        document.getElementById(
+            "mapStatusFilter"
+        )?.value || "All";
 
 
     const priorityFilter =
-        priorityElement
-            ? priorityElement.value
-            : "All";
+        document.getElementById(
+            "priorityFilter"
+        )?.value || "All";
 
 
     reports.forEach(report => {
@@ -1159,17 +1057,13 @@ function filterMapMarkers() {
         if (visible) {
 
             if (!map.hasLayer(marker)) {
-
                 marker.addTo(map);
-
             }
 
         } else {
 
             if (map.hasLayer(marker)) {
-
                 map.removeLayer(marker);
-
             }
 
         }
@@ -1205,4 +1099,106 @@ function getHeatIntensity(report) {
 }
 
 
-/* ===
+/* =====================================================
+   UPDATE HEATMAP
+===================================================== */
+
+function updateHeatmap() {
+
+    if (!map) {
+        return;
+    }
+
+
+    if (heatLayer) {
+
+        if (map.hasLayer(heatLayer)) {
+            map.removeLayer(heatLayer);
+        }
+
+        heatLayer = null;
+
+    }
+
+
+    if (!heatmapEnabled) {
+        return;
+    }
+
+
+    if (
+        typeof L.heatLayer !== "function"
+    ) {
+
+        console.warn(
+            "Leaflet heat plugin not loaded."
+        );
+
+        return;
+
+    }
+
+
+    const typeFilter =
+        document.getElementById(
+            "mapTypeFilter"
+        )?.value || "All";
+
+
+    const statusFilter =
+        document.getElementById(
+            "mapStatusFilter"
+        )?.value || "All";
+
+
+    const priorityFilter =
+        document.getElementById(
+            "priorityFilter"
+        )?.value || "All";
+
+
+    const points = [];
+
+
+    reports.forEach(report => {
+
+        if (
+            report.latitude == null ||
+            report.longitude == null
+        ) {
+            return;
+        }
+
+
+        const wasteType =
+            report.wasteType ||
+            report.type ||
+            "Other";
+
+
+        const priority =
+            calculatePriority(report);
+
+
+        const typeMatch =
+            typeFilter === "All" ||
+            wasteType === typeFilter;
+
+
+        const statusMatch =
+            statusFilter === "All" ||
+            report.status === statusFilter;
+
+
+        const priorityMatch =
+            priorityFilter === "All" ||
+            priority === priorityFilter;
+
+
+        if (
+            typeMatch &&
+            statusMatch &&
+            priorityMatch
+        ) {
+
+            points.push([
