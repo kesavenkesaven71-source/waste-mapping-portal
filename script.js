@@ -1,54 +1,48 @@
 /* =====================================================
-   SMART WASTE MANAGEMENT PORTAL
-   ===================================================== */
+   WASTE MAPPING PORTAL
+   STEP 3.3 - WASTE HEATMAP
+===================================================== */
 
 
-/* =====================================================
-   GLOBAL VARIABLES
-   ===================================================== */
+/* ================= GLOBAL VARIABLES ================= */
 
 let latitude = null;
-
 let longitude = null;
 
-let selectedPhoto = "";
+let selectedPhoto = null;
 
 let reports =
-    JSON.parse(
-        localStorage.getItem("wasteReports")
-    ) || [];
+    JSON.parse(localStorage.getItem("wasteReports")) || [];
 
 let map = null;
 
-let wasteChart = null;
+let heatLayer = null;
 
+let heatmapEnabled = true;
+
+let wasteChart = null;
 let statusChart = null;
 
 let reportMarkers = [];
 
+let currentLocationMarker = null;
+
 let portalInitialized = false;
 
 
-
-/* =====================================================
-   INITIALIZE PORTAL
-   ===================================================== */
+/* ================= INITIALIZE PORTAL ================= */
 
 function initializePortal() {
-
 
     if (portalInitialized) {
 
         updateStats();
-
         displayReports();
-
         updateAnalytics();
-
-        filterMapMarkers();
+        loadSavedMarkers();
+        updateHeatmap();
 
         return;
-
     }
 
 
@@ -57,105 +51,105 @@ function initializePortal() {
 
     initializeMap();
 
-
     updateStats();
-
 
     displayReports();
 
-
     updateAnalytics();
-
 
     loadSavedMarkers();
 
+    updateHeatmap();
 
 }
 
 
-
-/* =====================================================
-   INITIALIZE MAP
-   ===================================================== */
+/* ================= INITIALIZE MAP ================= */
 
 function initializeMap() {
 
-
-    if (map !== null) {
-
+    if (map) {
         return;
-
     }
 
 
-    map =
-        L.map("map").setView(
-            [9.9252, 78.1198],
-            13
-        );
+    /*
+     * Default location:
+     * Madurai, Tamil Nadu
+     */
+    map = L.map("map").setView(
+        [9.9252, 78.1198],
+        12
+    );
 
 
+    /*
+     * OpenStreetMap tiles
+     */
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
             attribution:
-                "&copy; OpenStreetMap contributors"
+                '&copy; OpenStreetMap contributors'
         }
     ).addTo(map);
 
 
+    /*
+     * Small map control
+     */
+    L.control.scale().addTo(map);
+
 }
 
 
-
-/* =====================================================
-   GET LOCATION
-   ===================================================== */
+/* ================= GET LOCATION ================= */
 
 function getLocation() {
+
+    const status =
+        document.getElementById("locationStatus");
 
 
     if (!navigator.geolocation) {
 
-        alert(
-            "❌ Geolocation is not supported by your browser."
-        );
+        status.textContent =
+            "❌ Geolocation is not supported.";
 
         return;
-
     }
 
 
-    const locationText =
-        document.getElementById(
-            "locationText"
-        );
-
-
-    locationText.textContent =
-        "📡 Getting location...";
+    status.textContent =
+        "📍 Getting your location...";
 
 
     navigator.geolocation.getCurrentPosition(
 
-
         function (position) {
-
 
             latitude =
                 position.coords.latitude;
-
 
             longitude =
                 position.coords.longitude;
 
 
-            locationText.textContent =
-                `📍 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            document.getElementById("latitude").value =
+                latitude;
+
+            document.getElementById("longitude").value =
+                longitude;
 
 
+            status.textContent =
+                `✅ Location selected: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+
+
+            /*
+             * Move map
+             */
             if (map) {
-
 
                 map.setView(
                     [latitude, longitude],
@@ -163,86 +157,82 @@ function getLocation() {
                 );
 
 
-                L.marker(
-                    [
-                        latitude,
-                        longitude
-                    ]
-                )
-                .addTo(map)
-                .bindPopup(
-                    "📍 Your Current Location"
-                )
-                .openPopup();
+                /*
+                 * Remove previous location marker
+                 */
+                if (currentLocationMarker) {
 
+                    map.removeLayer(
+                        currentLocationMarker
+                    );
+
+                }
+
+
+                /*
+                 * Add current location marker
+                 */
+                currentLocationMarker =
+                    L.marker(
+                        [latitude, longitude]
+                    )
+                    .addTo(map)
+                    .bindPopup(
+                        "📍 Your Current Location"
+                    )
+                    .openPopup();
 
             }
 
-
         },
 
+        function (error) {
 
-        function () {
-
-
-            locationText.textContent =
+            let message =
                 "❌ Unable to get location.";
 
+            if (error.code === 1) {
+                message =
+                    "❌ Location permission denied.";
+            }
 
-            alert(
-                "Please allow location permission."
-            );
+            if (error.code === 2) {
+                message =
+                    "❌ Location unavailable.";
+            }
 
+            if (error.code === 3) {
+                message =
+                    "❌ Location request timed out.";
+            }
 
-        },
+            status.textContent = message;
 
-
-        {
-            enableHighAccuracy: true,
-            timeout: 10000
         }
 
-
     );
-
 
 }
 
 
-
-/* =====================================================
-   PHOTO PREVIEW
-   ===================================================== */
+/* ================= PHOTO PREVIEW ================= */
 
 function previewPhoto(event) {
-
 
     const file =
         event.target.files[0];
 
-
     const preview =
-        document.getElementById(
-            "photoPreview"
-        );
+        document.getElementById("photoPreview");
 
 
     if (!file) {
 
+        selectedPhoto = null;
 
-        selectedPhoto = "";
-
-
-        preview.classList.add(
-            "hidden"
-        );
-
-
-        preview.src = "";
-
+        preview.innerHTML = "";
 
         return;
-
     }
 
 
@@ -250,206 +240,181 @@ function previewPhoto(event) {
         new FileReader();
 
 
-    reader.onload =
-        function (e) {
+    reader.onload = function (e) {
+
+        selectedPhoto =
+            e.target.result;
 
 
-            selectedPhoto =
-                e.target.result;
+        preview.innerHTML = `
+            <img
+                src="${selectedPhoto}"
+                alt="Waste preview"
+            >
+        `;
 
-
-            preview.src =
-                selectedPhoto;
-
-
-            preview.classList.remove(
-                "hidden"
-            );
-
-
-        };
+    };
 
 
     reader.readAsDataURL(file);
 
-
 }
 
 
-
-/* =====================================================
-   SUBMIT REPORT
-   ===================================================== */
+/* ================= SUBMIT REPORT ================= */
 
 function submitReport(event) {
-
 
     event.preventDefault();
 
 
-    const type =
-        document.getElementById(
-            "wasteType"
-        ).value;
-
+    const wasteType =
+        document.getElementById("wasteType").value;
 
     const description =
-        document.getElementById(
-            "description"
-        ).value
-        .trim();
+        document.getElementById("description").value.trim();
 
 
-    if (!type) {
+    /*
+     * Validate waste type
+     */
+    if (!wasteType) {
 
-
-        alert(
-            "Please select waste type."
-        );
-
+        alert("Please select a waste type.");
 
         return;
-
     }
 
 
+    /*
+     * Validate description
+     */
     if (!description) {
 
-
-        alert(
-            "Please enter description."
-        );
-
+        alert("Please enter a description.");
 
         return;
-
     }
 
 
+    /*
+     * Validate location
+     */
     if (
         latitude === null ||
         longitude === null
     ) {
 
-
         alert(
-            "Please get your location before submitting."
+            "Please get your location before submitting the report."
         );
 
-
         return;
-
     }
 
 
     const report = {
 
-
         id:
-            Date.now(),
-
+            Date.now().toString(),
 
         type:
-            type,
-
+            wasteType,
 
         description:
             description,
 
-
         latitude:
             latitude,
-
 
         longitude:
             longitude,
 
-
         photo:
             selectedPhoto,
-
 
         status:
             "Pending",
 
-
         createdAt:
             new Date().toLocaleString()
-
 
     };
 
 
+    /*
+     * Add report
+     */
     reports.unshift(report);
 
 
-    localStorage.setItem(
-        "wasteReports",
-        JSON.stringify(reports)
-    );
+    /*
+     * Save
+     */
+    saveReports();
 
 
-    addReportMarker(report);
+    /*
+     * Reset form
+     */
+    document.getElementById("reportForm").reset();
 
 
-    updateStats();
+    document.getElementById("photoPreview")
+        .innerHTML = "";
 
 
-    displayReports();
-
-
-    updateAnalytics();
-
-
-    filterMapMarkers();
-
-
-
-    document
-        .getElementById("reportForm")
-        .reset();
-
-
-    document
-        .getElementById("photoPreview")
-        .classList.add("hidden");
-
-
-    document
-        .getElementById("photoPreview")
-        .src = "";
-
-
-    document
-        .getElementById("locationText")
+    document.getElementById("locationStatus")
         .textContent =
         "Location not selected";
 
 
-    selectedPhoto = "";
-
+    selectedPhoto = null;
 
     latitude = null;
-
-
     longitude = null;
+
+
+    document.getElementById("latitude").value = "";
+    document.getElementById("longitude").value = "";
+
+
+    /*
+     * Refresh everything
+     */
+    updateStats();
+
+    displayReports();
+
+    updateAnalytics();
+
+    loadSavedMarkers();
+
+    updateHeatmap();
 
 
     alert(
         "✅ Waste report submitted successfully!"
     );
 
+}
+
+
+/* ================= SAVE REPORTS ================= */
+
+function saveReports() {
+
+    localStorage.setItem(
+        "wasteReports",
+        JSON.stringify(reports)
+    );
 
 }
 
 
-
-/* =====================================================
-   WASTE ICON
-   ===================================================== */
+/* ================= WASTE ICON ================= */
 
 function getWasteIcon(type) {
-
 
     let emoji = "⚫";
 
@@ -458,29 +423,15 @@ function getWasteIcon(type) {
 
         emoji = "🔵";
 
-    }
-
-
-    else if (type === "Organic") {
+    } else if (type === "Organic") {
 
         emoji = "🟢";
 
-    }
-
-
-    else if (type === "Electronic") {
+    } else if (type === "Electronic") {
 
         emoji = "🟣";
 
     }
-
-
-    else {
-
-        emoji = "⚫";
-
-    }
-
 
 
     return L.divIcon({
@@ -488,23 +439,17 @@ function getWasteIcon(type) {
         className:
             "custom-waste-marker",
 
-
         html: `
-
             <div class="waste-marker">
                 ${emoji}
             </div>
-
         `,
-
 
         iconSize:
             [35, 35],
 
-
         iconAnchor:
             [17, 17],
-
 
         popupAnchor:
             [0, -17]
@@ -514,127 +459,80 @@ function getWasteIcon(type) {
 }
 
 
-
-/* =====================================================
-   STATUS ICON
-   ===================================================== */
-
-function getStatusIcon(status) {
-
-
-    if (status === "Pending") {
-
-        return "⏳";
-
-    }
-
-
-    if (status === "In Progress") {
-
-        return "🚛";
-
-    }
-
-
-    if (status === "Collected") {
-
-        return "✅";
-
-    }
-
-
-    return "📋";
-
-}
-
-
-
-/* =====================================================
-   ADD REPORT MARKER
-   ===================================================== */
+/* ================= ADD REPORT MARKER ================= */
 
 function addReportMarker(report) {
 
-
     if (!map) {
-
         return;
+    }
 
+
+    if (
+        report.latitude === null ||
+        report.longitude === null
+    ) {
+        return;
     }
 
 
     const marker =
         L.marker(
-
             [
-                report.latitude,
-                report.longitude
+                Number(report.latitude),
+                Number(report.longitude)
             ],
-
             {
                 icon:
-                    getWasteIcon(
-                        report.type
-                    )
+                    getWasteIcon(report.type)
             }
-
-        )
-        .addTo(map);
+        );
 
 
+    const photoHTML =
+        report.photo
+            ? `
+                <img
+                    src="${report.photo}"
+                    class="popup-photo"
+                    alt="Waste photo"
+                >
+            `
+            : "";
 
-    const popupHTML = `
+
+    marker.bindPopup(`
 
         <div class="map-popup">
 
             <h3>
-                ${escapeHTML(report.type)}
-                Waste
+                ${getWasteEmoji(report.type)}
+                ${escapeHTML(report.type)} Waste
             </h3>
 
+            ${photoHTML}
 
             <p>
-
-                <strong>
-                    Status:
-                </strong>
-
-                ${getStatusIcon(report.status)}
-
-                ${escapeHTML(report.status)}
-
+                <strong>Description:</strong><br>
+                ${escapeHTML(report.description)}
             </p>
 
-
             <p>
-
-                ${escapeHTML(
-                    report.description
-                )}
-
+                <strong>Status:</strong>
+                <span class="popup-status">
+                    ${getStatusEmoji(report.status)}
+                    ${escapeHTML(report.status)}
+                </span>
             </p>
 
-
             <p>
-
-                <small>
-
-                    ${escapeHTML(
-                        report.createdAt
-                    )}
-
-                </small>
-
+                <strong>Reported:</strong><br>
+                ${escapeHTML(report.createdAt)}
             </p>
 
         </div>
 
-    `;
-
-
-    marker.bindPopup(
-        popupHTML
-    );
+    `);
 
 
     reportMarkers.push({
@@ -648,69 +546,61 @@ function addReportMarker(report) {
     });
 
 
+    marker.addTo(map);
+
 }
 
 
-
-/* =====================================================
-   LOAD SAVED MARKERS
-   ===================================================== */
+/* ================= LOAD SAVED MARKERS ================= */
 
 function loadSavedMarkers() {
 
-
     if (!map) {
-
         return;
-
     }
 
 
-    reportMarkers.forEach(
-        item => {
+    /*
+     * Remove old markers
+     */
+    reportMarkers.forEach(function (item) {
 
-            map.removeLayer(
-                item.marker
-            );
+        if (map.hasLayer(item.marker)) {
+
+            map.removeLayer(item.marker);
 
         }
-    );
+
+    });
 
 
     reportMarkers = [];
 
 
-    reports.forEach(
-        report => {
+    /*
+     * Add new markers
+     */
+    reports.forEach(function (report) {
 
-            addReportMarker(
-                report
-            );
+        addReportMarker(report);
 
-        }
-    );
+    });
 
 
-    /* Apply active filters */
-
+    /*
+     * Apply current filters
+     */
     filterMapMarkers();
-
 
 }
 
 
-
-/* =====================================================
-   SMART MAP FILTER
-   ===================================================== */
+/* ================= MAP FILTER ================= */
 
 function filterMapMarkers() {
 
-
     if (!map) {
-
         return;
-
     }
 
 
@@ -726,174 +616,307 @@ function filterMapMarkers() {
         )?.value || "All";
 
 
+    reportMarkers.forEach(function (item) {
 
-    reportMarkers.forEach(
-        item => {
-
-
-            const report =
-                reports.find(
-                    r =>
-                        r.id === item.id
-                );
+        const report =
+            reports.find(
+                function (r) {
+                    return r.id === item.id;
+                }
+            );
 
 
-            if (!report) {
-
-                return;
-
-            }
+        if (!report) {
+            return;
+        }
 
 
-
-            const typeMatch =
-
-                typeFilter === "All" ||
-
-                report.type ===
-                    typeFilter;
+        const typeMatch =
+            typeFilter === "All" ||
+            report.type === typeFilter;
 
 
-
-            const statusMatch =
-
-                statusFilter === "All" ||
-
-                report.status ===
-                    statusFilter;
+        const statusMatch =
+            statusFilter === "All" ||
+            report.status === statusFilter;
 
 
+        if (
+            typeMatch &&
+            statusMatch
+        ) {
 
             if (
-                typeMatch &&
-                statusMatch
+                !map.hasLayer(item.marker)
             ) {
 
-
-                if (
-                    !map.hasLayer(
-                        item.marker
-                    )
-                ) {
-
-                    item.marker.addTo(
-                        map
-                    );
-
-                }
-
-
-            } else {
-
-
-                if (
-                    map.hasLayer(
-                        item.marker
-                    )
-                ) {
-
-                    map.removeLayer(
-                        item.marker
-                    );
-
-                }
+                item.marker.addTo(map);
 
             }
 
+        } else {
+
+            if (
+                map.hasLayer(item.marker)
+            ) {
+
+                map.removeLayer(
+                    item.marker
+                );
+
+            }
 
         }
-    );
 
+    });
 
 }
 
 
-
 /* =====================================================
-   ESCAPE HTML
-   ===================================================== */
+   STEP 3.3
+   WASTE HEATMAP
+===================================================== */
 
-function escapeHTML(value) {
+
+/* ================= GET HEATMAP INTENSITY ================= */
+
+function getHeatIntensity(report) {
+
+    /*
+     * Different waste types can have slightly
+     * different intensity values.
+     */
+
+    let intensity = 0.6;
 
 
-    return String(value)
+    if (report.type === "Plastic") {
 
-        .replace(
-            /&/g,
-            "&amp;"
-        )
+        intensity = 0.8;
 
-        .replace(
-            /</g,
-            "&lt;"
-        )
+    } else if (report.type === "Organic") {
 
-        .replace(
-            />/g,
-            "&gt;"
-        )
+        intensity = 0.6;
 
-        .replace(
-            /"/g,
-            "&quot;"
-        )
+    } else if (report.type === "Electronic") {
 
-        .replace(
-            /'/g,
-            "&#039;"
+        intensity = 1.0;
+
+    } else if (report.type === "Other") {
+
+        intensity = 0.5;
+
+    }
+
+
+    /*
+     * Increase intensity for unresolved reports
+     */
+    if (report.status === "Pending") {
+
+        intensity += 0.2;
+
+    }
+
+
+    /*
+     * Limit maximum
+     */
+    return Math.min(
+        intensity,
+        1
+    );
+
+}
+
+
+/* ================= UPDATE HEATMAP ================= */
+
+function updateHeatmap() {
+
+    if (!map) {
+        return;
+    }
+
+
+    /*
+     * Remove old heatmap
+     */
+    if (heatLayer) {
+
+        map.removeLayer(
+            heatLayer
+        );
+
+        heatLayer = null;
+
+    }
+
+
+    /*
+     * Stop if heatmap disabled
+     */
+    if (!heatmapEnabled) {
+
+        return;
+    }
+
+
+    /*
+     * Make sure plugin loaded
+     */
+    if (
+        typeof L.heatLayer !== "function"
+    ) {
+
+        console.warn(
+            "Leaflet Heatmap plugin not loaded."
+        );
+
+        return;
+    }
+
+
+    const typeFilter =
+        document.getElementById(
+            "mapTypeFilter"
+        )?.value || "All";
+
+
+    const statusFilter =
+        document.getElementById(
+            "mapStatusFilter"
+        )?.value || "All";
+
+
+    /*
+     * Build heat points
+     */
+    const heatPoints =
+        reports
+            .filter(function (report) {
+
+                const typeMatch =
+                    typeFilter === "All" ||
+                    report.type === typeFilter;
+
+
+                const statusMatch =
+                    statusFilter === "All" ||
+                    report.status === statusFilter;
+
+
+                return (
+                    typeMatch &&
+                    statusMatch &&
+                    report.latitude !== null &&
+                    report.longitude !== null
+                );
+
+            })
+            .map(function (report) {
+
+                return [
+
+                    Number(report.latitude),
+
+                    Number(report.longitude),
+
+                    getHeatIntensity(report)
+
+                ];
+
+            });
+
+
+    /*
+     * No data
+     */
+    if (heatPoints.length === 0) {
+
+        return;
+
+    }
+
+
+    /*
+     * Create heat layer
+     */
+    heatLayer =
+        L.heatLayer(
+            heatPoints,
+            {
+
+                radius: 35,
+
+                blur: 25,
+
+                maxZoom: 17,
+
+                max: 1.0,
+
+                minOpacity: 0.35
+
+            }
+        ).addTo(map);
+
+}
+
+
+/* ================= TOGGLE HEATMAP ================= */
+
+function toggleHeatmap() {
+
+    heatmapEnabled =
+        !heatmapEnabled;
+
+
+    const button =
+        document.getElementById(
+            "heatmapToggleBtn"
         );
 
 
-}
+    if (heatmapEnabled) {
+
+        button.textContent =
+            "🔥 Heatmap ON";
+
+        button.classList.add(
+            "active"
+        );
+
+        updateHeatmap();
+
+    } else {
+
+        button.textContent =
+            "🔥 Heatmap OFF";
+
+        button.classList.remove(
+            "active"
+        );
 
 
+        if (heatLayer) {
 
-/* =====================================================
-   STATUS CLASS
-   ===================================================== */
+            map.removeLayer(
+                heatLayer
+            );
 
-function getStatusClass(status) {
+            heatLayer = null;
 
-
-    if (
-        status === "Pending"
-    ) {
-
-        return "status-pending";
-
-    }
-
-
-    if (
-        status === "In Progress"
-    ) {
-
-        return "status-progress";
-
-    }
-
-
-    if (
-        status === "Collected"
-    ) {
-
-        return "status-collected";
+        }
 
     }
-
-
-    return "";
 
 }
 
 
-
-/* =====================================================
-   DISPLAY REPORTS
-   ===================================================== */
+/* ================= DISPLAY REPORTS ================= */
 
 function displayReports() {
-
 
     const container =
         document.getElementById(
@@ -901,518 +924,252 @@ function displayReports() {
         );
 
 
+    if (!container) {
+        return;
+    }
+
+
     const search =
         document.getElementById(
-            "searchInput"
-        ).value
+            "searchReports"
+        )?.value
         .toLowerCase()
-        .trim();
+        .trim() || "";
 
 
     const typeFilter =
         document.getElementById(
-            "typeFilter"
-        ).value;
+            "reportTypeFilter"
+        )?.value || "All";
 
 
     const statusFilter =
         document.getElementById(
-            "statusFilter"
-        ).value;
-
+            "reportStatusFilter"
+        )?.value || "All";
 
 
     const filteredReports =
-        reports.filter(
-            report => {
+        reports.filter(function (report) {
+
+            const searchMatch =
+                report.description
+                    .toLowerCase()
+                    .includes(search) ||
+                report.type
+                    .toLowerCase()
+                    .includes(search) ||
+                report.status
+                    .toLowerCase()
+                    .includes(search);
 
 
-                const matchesSearch =
-
-                    report.type
-                        .toLowerCase()
-                        .includes(
-                            search
-                        )
-
-                    ||
-
-                    report.description
-                        .toLowerCase()
-                        .includes(
-                            search
-                        );
+            const typeMatch =
+                typeFilter === "All" ||
+                report.type === typeFilter;
 
 
-
-                const matchesType =
-
-                    typeFilter === "All" ||
-
-                    report.type ===
-                        typeFilter;
+            const statusMatch =
+                statusFilter === "All" ||
+                report.status === statusFilter;
 
 
+            return (
+                searchMatch &&
+                typeMatch &&
+                statusMatch
+            );
 
-                const matchesStatus =
-
-                    statusFilter === "All" ||
-
-                    report.status ===
-                        statusFilter;
-
-
-
-                return (
-
-                    matchesSearch &&
-
-                    matchesType &&
-
-                    matchesStatus
-
-                );
+        });
 
 
-            }
-        );
-
-
-
-    if (
-        filteredReports.length === 0
-    ) {
-
+    /*
+     * Empty state
+     */
+    if (filteredReports.length === 0) {
 
         container.innerHTML = `
 
             <div class="empty-state">
 
-                <div>
-                    📭
+                <div class="empty-icon">
+                    🗑️
                 </div>
 
                 <h3>
-                    No Reports Found
+                    No waste reports found
                 </h3>
 
                 <p>
-                    Try changing your search or filters.
+                    Try changing your filters
+                    or submit a new report.
                 </p>
 
             </div>
 
         `;
 
-
         return;
 
     }
 
 
-
     container.innerHTML =
-
         filteredReports
-            .map(
-                report => `
+            .map(function (report) {
+
+                return createReportCard(
+                    report
+                );
+
+            })
+            .join("");
+
+}
+
+
+/* ================= CREATE REPORT CARD ================= */
+
+function createReportCard(report) {
+
+    const photoHTML =
+        report.photo
+
+            ? `
+                <img
+                    src="${report.photo}"
+                    alt="Waste photo"
+                    class="report-image"
+                >
+            `
+
+            : `
+                <div class="no-photo">
+                    📷 No Photo
+                </div>
+            `;
+
+
+    return `
 
         <div class="report-card">
 
+            <div class="report-card-header">
 
-            <div class="report-header">
+                <div>
 
-                <h3>
+                    <span class="waste-type-badge ${getTypeClass(report.type)}">
 
-                    ${getStatusIcon(
-                        report.status
-                    )}
+                        ${getWasteEmoji(report.type)}
 
-                    ${escapeHTML(
-                        report.type
-                    )}
+                        ${escapeHTML(report.type)}
 
-                    Waste
+                    </span>
 
-                </h3>
+                </div>
 
+                <span class="status-badge ${getStatusClass(report.status)}">
 
-                <span
-                    class="
-                        report-status
-                        ${getStatusClass(
-                            report.status
-                        )}
-                    "
-                >
+                    ${getStatusEmoji(report.status)}
 
-                    ${escapeHTML(
-                        report.status
-                    )}
+                    ${escapeHTML(report.status)}
 
                 </span>
 
             </div>
 
 
-
-            ${
-                report.photo
-
-                ?
-
-                `
-
-                    <img
-
-                        src="${report.photo}"
-
-                        class="report-image"
-
-                        alt="Waste photo"
-
-                    >
-
-                `
-
-                :
-
-                `
-
-                    <div class="no-image">
-
-                        📷 No Photo
-
-                    </div>
-
-                `
-            }
+            ${photoHTML}
 
 
+            <div class="report-content">
 
-            <p class="report-description">
+                <h3>
+                    ${escapeHTML(report.type)} Waste Report
+                </h3>
 
-                ${escapeHTML(
-                    report.description
-                )}
-
-            </p>
-
-
-
-            <div class="report-details">
-
-
-                <p>
-
-                    📍
-
-                    ${report.latitude.toFixed(
-                        5
-                    )},
-
-                    ${report.longitude.toFixed(
-                        5
-                    )}
-
+                <p class="report-description">
+                    ${escapeHTML(report.description)}
                 </p>
 
 
-                <p>
+                <div class="report-info">
 
-                    🕒
+                    <p>
+                        📍
+                        <strong>Location:</strong>
+                        ${Number(report.latitude).toFixed(5)},
+                        ${Number(report.longitude).toFixed(5)}
+                    </p>
 
-                    ${escapeHTML(
-                        report.createdAt
-                    )}
+                    <p>
+                        🕒
+                        <strong>Reported:</strong>
+                        ${escapeHTML(report.createdAt)}
+                    </p>
 
-                </p>
+                </div>
 
+
+                <div class="report-actions">
+
+                    <button
+                        class="map-view-btn"
+                        onclick="focusReportOnMap('${report.id}')"
+                    >
+                        📍 View on Map
+                    </button>
+
+
+                    <select
+                        class="status-select"
+                        onchange="changeStatus('${report.id}', this.value)"
+                    >
+
+                        <option
+                            value="Pending"
+                            ${report.status === "Pending" ? "selected" : ""}
+                        >
+                            ⏳ Pending
+                        </option>
+
+                        <option
+                            value="In Progress"
+                            ${report.status === "In Progress" ? "selected" : ""}
+                        >
+                            🚛 In Progress
+                        </option>
+
+                        <option
+                            value="Collected"
+                            ${report.status === "Collected" ? "selected" : ""}
+                        >
+                            ✅ Collected
+                        </option>
+
+                    </select>
+
+                </div>
 
             </div>
-
-
-
-            <div class="report-actions">
-
-
-                <button
-
-                    class="map-btn"
-
-                    onclick="
-                        focusReportOnMap(
-                            ${report.id}
-                        )
-                    "
-
-                >
-
-                    📍 View on Map
-
-                </button>
-
-
-
-                <select
-
-                    onchange="
-                        changeStatus(
-                            ${report.id},
-                            this.value
-                        )
-                    "
-
-                >
-
-
-                    <option
-
-                        value="Pending"
-
-                        ${
-                            report.status ===
-                            "Pending"
-                            ? "selected"
-                            : ""
-                        }
-
-                    >
-
-                        ⏳ Pending
-
-                    </option>
-
-
-
-                    <option
-
-                        value="In Progress"
-
-                        ${
-                            report.status ===
-                            "In Progress"
-                            ? "selected"
-                            : ""
-                        }
-
-                    >
-
-                        🚛 In Progress
-
-                    </option>
-
-
-
-                    <option
-
-                        value="Collected"
-
-                        ${
-                            report.status ===
-                            "Collected"
-                            ? "selected"
-                            : ""
-                        }
-
-                    >
-
-                        ✅ Collected
-
-                    </option>
-
-
-                </select>
-
-
-            </div>
-
 
         </div>
 
-    `
-            )
-            .join("");
-
+    `;
 
 }
 
 
+/* ================= FOCUS REPORT ON MAP ================= */
 
-/* =====================================================
-   FOCUS REPORT ON MAP
-   ===================================================== */
-
-function focusReportOnMap(
-    reportId
-) {
-
+function focusReportOnMap(reportId) {
 
     const report =
         reports.find(
-            r =>
-                r.id === reportId
+            function (r) {
+                return r.id === reportId;
+            }
         );
 
 
-    if (
-        !report ||
-        !map
-    ) {
-
-        return;
-
-    }
-
-
-    map.setView(
-
-        [
-            report.latitude,
-            report.longitude
-        ],
-
-        17
-
-    );
-
-
-
-    const markerData =
-        reportMarkers.find(
-            item =>
-                item.id === reportId
-        );
-
-
-    if (markerData) {
-
-        markerData.marker.openPopup();
-
-    }
-
-
-}
-
-
-
-/* =====================================================
-   CHANGE STATUS
-   ===================================================== */
-
-function changeStatus(
-    reportId,
-    newStatus
-) {
-
-
-    const report =
-        reports.find(
-            r =>
-                r.id === reportId
-        );
-
-
-    if (!report) {
-
-        return;
-
-    }
-
-
-    report.status =
-        newStatus;
-
-
-    localStorage.setItem(
-        "wasteReports",
-        JSON.stringify(reports)
-    );
-
-
-    updateStats();
-
-
-    displayReports();
-
-
-    updateAnalytics();
-
-
-    loadSavedMarkers();
-
-
-}
-
-
-
-/* =====================================================
-   UPDATE STATISTICS
-   ===================================================== */
-
-function updateStats() {
-
-
-    const total =
-        reports.length;
-
-
-    const plastic =
-        reports.filter(
-            r =>
-                r.type === "Plastic"
-        ).length;
-
-
-    const organic =
-        reports.filter(
-            r =>
-                r.type === "Organic"
-        ).length;
-
-
-    const electronic =
-        reports.filter(
-            r =>
-                r.type === "Electronic"
-        ).length;
-
-
-    const pending =
-        reports.filter(
-            r =>
-                r.status === "Pending"
-        ).length;
-
-
-    const inProgress =
-        reports.filter(
-            r =>
-                r.status === "In Progress"
-        ).length;
-
-
-    const collected =
-        reports.filter(
-            r =>
-                r.status === "Collected"
-        ).length;
-
-
-
-    document.getElementById(
-        "totalReports"
-    ).textContent =
-        total;
-
-
-    document.getElementById(
-        "plasticCount"
-    ).textContent =
-        plastic;
-
-
-    document.getElementById(
-        "organicCount"
-    ).textContent =
-        organic;
+    if
