@@ -1,926 +1,617 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Geo-Tracking & Waste Mapping Portal
-    </title>
+    <title>Waste Mapping Portal</title>
 
     <!-- Leaflet CSS -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
+    />
 
-    <!-- Main CSS -->
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 
+    <!-- ================= LOGIN PAGE ================= -->
+    <div id="loginPage" class="login-page">
 
-<!-- =====================================================
-     LOGIN PAGE
-     ===================================================== -->
+        <div class="login-box">
 
-<div
-    id="loginPage"
-    class="login-page"
->
+            <div class="login-icon">♻️</div>
 
-    <div class="login-box">
+            <h1>Waste Mapping Portal</h1>
 
-        <h1>
-            ♻️ Waste Mapping Portal
-        </h1>
+            <p class="login-subtitle">
+                Geo-Tracking and Waste Management System
+            </p>
 
-        <p class="login-subtitle">
-            Geo-Tracking & Smart Waste Management
-        </p>
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="primary-btn">
+                    🔐 Login
+                </button>
+
+                <p id="loginError" class="login-error"></p>
+
+            </form>
+
+            <div class="demo-login">
+                <strong>Demo Login</strong>
+                <p>Username: <b>admin</b></p>
+                <p>Password: <b>admin123</b></p>
+            </div>
+
+        </div>
+
+    </div>
 
 
-        <form id="loginForm">
+    <!-- ================= MAIN PORTAL ================= -->
+    <div id="portal" class="portal hidden">
 
-            <label for="username">
-                Username
-            </label>
+        <!-- HEADER -->
+        <header class="header">
 
-            <input
-                type="text"
-                id="username"
-                placeholder="Enter username"
-                required
-            >
+            <div class="header-left">
+                <span class="header-logo">♻️</span>
 
+                <div>
+                    <h1>Waste Mapping Portal</h1>
+                    <p>Geo-Tracking & Waste Management</p>
+                </div>
+            </div>
 
-            <label for="password">
-                Password
-            </label>
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Enter password"
-                required
-            >
-
-
-            <button
-                type="submit"
-                class="login-btn"
-            >
-                🔐 Login
+            <button id="logoutBtn" class="logout-btn">
+                🚪 Logout
             </button>
 
+        </header>
 
-            <p
-                id="loginError"
-                class="login-error"
-            ></p>
 
-        </form>
+        <main class="container">
 
+            <!-- ================= STATISTICS ================= -->
+            <section class="dashboard-section">
 
-        <p class="demo-login">
-            Demo:
-            <b>admin</b>
-            /
-            <b>admin123</b>
-        </p>
+                <h2>📊 Dashboard Overview</h2>
 
-    </div>
+                <div class="stats-grid">
 
-</div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🗑️</div>
+                        <div>
+                            <h3 id="totalReports">0</h3>
+                            <p>Total Reports</p>
+                        </div>
+                    </div>
 
+                    <div class="stat-card plastic-card">
+                        <div class="stat-icon">🔵</div>
+                        <div>
+                            <h3 id="plasticReports">0</h3>
+                            <p>Plastic Waste</p>
+                        </div>
+                    </div>
 
+                    <div class="stat-card organic-card">
+                        <div class="stat-icon">🟢</div>
+                        <div>
+                            <h3 id="organicReports">0</h3>
+                            <p>Organic Waste</p>
+                        </div>
+                    </div>
 
-<!-- =====================================================
-     PORTAL
-     ===================================================== -->
+                    <div class="stat-card electronic-card">
+                        <div class="stat-icon">🟣</div>
+                        <div>
+                            <h3 id="electronicReports">0</h3>
+                            <p>Electronic Waste</p>
+                        </div>
+                    </div>
 
-<div
-    id="portalPage"
-    class="portal-page hidden"
->
+                </div>
 
+            </section>
 
-<!-- =====================================================
-     HEADER
-     ===================================================== -->
 
-<header class="main-header">
+            <!-- ================= STATUS SUMMARY ================= -->
+            <section class="dashboard-section">
 
-    <div>
+                <h2>📋 Collection Status</h2>
 
-        <h1>
-            ♻️ Smart Waste Management Portal
-        </h1>
+                <div class="status-summary-grid">
 
-        <p>
-            Geo-Tracking and Waste Mapping System
-        </p>
+                    <div class="status-summary pending-summary">
+                        <span>⏳</span>
+                        <div>
+                            <h3 id="pendingCount">0</h3>
+                            <p>Pending</p>
+                        </div>
+                    </div>
 
-    </div>
+                    <div class="status-summary progress-summary">
+                        <span>🚛</span>
+                        <div>
+                            <h3 id="progressCount">0</h3>
+                            <p>In Progress</p>
+                        </div>
+                    </div>
 
+                    <div class="status-summary collected-summary">
+                        <span>✅</span>
+                        <div>
+                            <h3 id="collectedCount">0</h3>
+                            <p>Collected</p>
+                        </div>
+                    </div>
 
-    <button
-        id="logoutBtn"
-        class="logout-btn"
-    >
-        🚪 Logout
-    </button>
+                </div>
 
-</header>
+            </section>
 
 
+            <!-- ================= REPORT WASTE ================= -->
+            <section class="section-card">
 
-<main class="container">
+                <h2>📝 Report Waste</h2>
 
-
-<!-- =====================================================
-     MAIN STATISTICS
-     ===================================================== -->
-
-<section class="stats-grid">
-
-
-    <div class="stat-card">
-
-        <span class="stat-icon">
-            📋
-        </span>
-
-        <div>
-
-            <h3>
-                Total Reports
-            </h3>
-
-            <p id="totalReports">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="stat-card">
-
-        <span class="stat-icon">
-            🔵
-        </span>
-
-        <div>
-
-            <h3>
-                Plastic
-            </h3>
-
-            <p id="plasticCount">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="stat-card">
-
-        <span class="stat-icon">
-            🟢
-        </span>
-
-        <div>
-
-            <h3>
-                Organic
-            </h3>
-
-            <p id="organicCount">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="stat-card">
-
-        <span class="stat-icon">
-            🟣
-        </span>
-
-        <div>
-
-            <h3>
-                Electronic
-            </h3>
-
-            <p id="electronicCount">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     STATUS SUMMARY
-     ===================================================== -->
-
-<section class="status-summary">
-
-
-    <div class="status-card pending-card">
-
-        <span>
-            ⏳
-        </span>
-
-        <div>
-
-            <h3>
-                Pending
-            </h3>
-
-            <p id="pendingCount">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="status-card progress-card">
-
-        <span>
-            🚛
-        </span>
-
-        <div>
-
-            <h3>
-                In Progress
-            </h3>
-
-            <p id="progressCount">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="status-card collected-card">
-
-        <span>
-            ✅
-        </span>
-
-        <div>
-
-            <h3>
-                Collected
-            </h3>
-
-            <p id="collectedCount">
-                0
-            </p>
-
-        </div>
-
-    </div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     REPORT WASTE
-     ===================================================== -->
-
-<section class="section-card">
-
-
-    <div class="section-title">
-
-        <div>
-
-            <h2>
-                📍 Report Waste
-            </h2>
-
-            <p>
-                Add a new waste report with location and photo.
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <form
-        id="reportForm"
-        class="report-form"
-    >
-
-
-        <div class="form-group">
-
-            <label for="wasteType">
-                Waste Type
-            </label>
-
-
-            <select
-                id="wasteType"
-                required
-            >
-
-                <option value="">
-                    Select waste type
-                </option>
-
-                <option value="Plastic">
-                    🔵 Plastic
-                </option>
-
-                <option value="Organic">
-                    🟢 Organic
-                </option>
-
-                <option value="Electronic">
-                    🟣 Electronic
-                </option>
-
-                <option value="Other">
-                    ⚫ Other
-                </option>
-
-            </select>
-
-        </div>
-
-
-
-        <div class="form-group">
-
-            <label for="description">
-                Description
-            </label>
-
-
-            <textarea
-                id="description"
-                rows="4"
-                placeholder="Describe the waste..."
-                required
-            ></textarea>
-
-        </div>
-
-
-
-        <div class="form-group">
-
-            <label for="photo">
-                Waste Photo
-            </label>
-
-
-            <input
-                type="file"
-                id="photo"
-                accept="image/*"
-            >
-
-
-            <img
-                id="photoPreview"
-                class="photo-preview hidden"
-                alt="Photo preview"
-            >
-
-        </div>
-
-
-
-        <div class="location-box">
-
-
-            <div>
-
-                <strong>
-                    📍 Location
-                </strong>
-
-                <p id="locationText">
-                    Location not selected
+                <p class="section-description">
+                    Submit a waste report with location and optional photo.
                 </p>
 
-            </div>
+                <form id="reportForm">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="wasteType">
+                                Waste Type
+                            </label>
+
+                            <select id="wasteType" required>
+
+                                <option value="">
+                                    Select Waste Type
+                                </option>
+
+                                <option value="Plastic">
+                                    🔵 Plastic
+                                </option>
+
+                                <option value="Organic">
+                                    🟢 Organic
+                                </option>
+
+                                <option value="Electronic">
+                                    🟣 Electronic
+                                </option>
+
+                                <option value="Other">
+                                    ⚫ Other
+                                </option>
+
+                            </select>
+
+                        </div>
 
 
-            <button
-                type="button"
-                id="locationBtn"
-                class="location-btn"
-            >
-                📍 Get My Location
-            </button>
+                        <div class="form-group">
+
+                            <label for="description">
+                                Description
+                            </label>
+
+                            <textarea
+                                id="description"
+                                rows="4"
+                                placeholder="Describe the waste..."
+                                required
+                            ></textarea>
+
+                        </div>
+
+                    </div>
 
 
-        </div>
+                    <div class="form-group">
+
+                        <label for="photo">
+                            📷 Waste Photo
+                        </label>
+
+                        <input
+                            type="file"
+                            id="photo"
+                            accept="image/*"
+                        >
+
+                        <div id="photoPreview" class="photo-preview"></div>
+
+                    </div>
 
 
+                    <div class="location-box">
 
-        <button
-            type="submit"
-            class="submit-btn"
-        >
-            🚀 Submit Waste Report
-        </button>
+                        <div>
+                            <strong>📍 Location</strong>
+
+                            <p id="locationStatus">
+                                Location not selected
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="getLocationBtn"
+                            class="secondary-btn"
+                        >
+                            📍 Get My Location
+                        </button>
+
+                    </div>
 
 
-    </form>
-
-</section>
-
+                    <input type="hidden" id="latitude">
+                    <input type="hidden" id="longitude">
 
 
-<!-- =====================================================
-     MAP
-     ===================================================== -->
+                    <button
+                        type="submit"
+                        class="primary-btn submit-report-btn"
+                    >
+                        🚮 Submit Waste Report
+                    </button>
 
-<section class="section-card">
+                </form>
+
+            </section>
 
 
-    <div class="section-title">
+            <!-- ================= MAP ================= -->
+            <section class="section-card">
 
-        <div>
+                <div class="section-heading-row">
 
-            <h2>
-                🗺️ Waste Map
-            </h2>
+                    <div>
+                        <h2>🗺️ Waste Tracking Map</h2>
+
+                        <p class="section-description">
+                            View waste reports and high-density waste zones.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- MAP CONTROLS -->
+                <div class="map-controls">
+
+                    <div class="map-filters">
+
+                        <select id="mapTypeFilter">
+
+                            <option value="All">
+                                🗑️ All Waste Types
+                            </option>
+
+                            <option value="Plastic">
+                                🔵 Plastic
+                            </option>
+
+                            <option value="Organic">
+                                🟢 Organic
+                            </option>
+
+                            <option value="Electronic">
+                                🟣 Electronic
+                            </option>
+
+                            <option value="Other">
+                                ⚫ Other
+                            </option>
+
+                        </select>
+
+
+                        <select id="mapStatusFilter">
+
+                            <option value="All">
+                                📋 All Status
+                            </option>
+
+                            <option value="Pending">
+                                ⏳ Pending
+                            </option>
+
+                            <option value="In Progress">
+                                🚛 In Progress
+                            </option>
+
+                            <option value="Collected">
+                                ✅ Collected
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            type="button"
+                            id="heatmapToggleBtn"
+                            class="heatmap-toggle"
+                        >
+                            🔥 Heatmap ON
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MAP -->
+                <div class="map-wrapper">
+
+                    <div id="map"></div>
+
+
+                    <!-- MAP LEGEND -->
+                    <div class="map-legend">
+
+                        <h4>🗺️ Waste Legend</h4>
+
+                        <div>
+                            <span class="legend-dot plastic"></span>
+                            Plastic
+                        </div>
+
+                        <div>
+                            <span class="legend-dot organic"></span>
+                            Organic
+                        </div>
+
+                        <div>
+                            <span class="legend-dot electronic"></span>
+                            Electronic
+                        </div>
+
+                        <div>
+                            <span class="legend-dot other"></span>
+                            Other
+                        </div>
+
+                        <hr>
+
+                        <div>
+                            🔥 Heatmap = Waste Density
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= REPORTS ================= -->
+            <section class="section-card">
+
+                <div class="section-heading-row">
+
+                    <div>
+                        <h2>📋 Waste Reports</h2>
+
+                        <p class="section-description">
+                            Search and manage submitted waste reports.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="report-filters">
+
+                    <input
+                        type="text"
+                        id="searchReports"
+                        placeholder="🔍 Search reports..."
+                    >
+
+
+                    <select id="reportTypeFilter">
+
+                        <option value="All">
+                            All Types
+                        </option>
+
+                        <option value="Plastic">
+                            Plastic
+                        </option>
+
+                        <option value="Organic">
+                            Organic
+                        </option>
+
+                        <option value="Electronic">
+                            Electronic
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+
+                    <select id="reportStatusFilter">
+
+                        <option value="All">
+                            All Status
+                        </option>
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="In Progress">
+                            In Progress
+                        </option>
+
+                        <option value="Collected">
+                            Collected
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div id="reportsContainer" class="reports-container"></div>
+
+            </section>
+
+
+            <!-- ================= ANALYTICS ================= -->
+            <section class="section-card">
+
+                <h2>📈 Waste Analytics</h2>
+
+                <p class="section-description">
+                    Visual summary of waste reports and collection status.
+                </p>
+
+                <div class="charts-grid">
+
+                    <div class="chart-box">
+                        <h3>Waste Type Distribution</h3>
+                        <canvas id="wasteChart"></canvas>
+                    </div>
+
+                    <div class="chart-box">
+                        <h3>Collection Status</h3>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- FOOTER -->
+        <footer class="footer">
 
             <p>
-                Filter and view waste reports by type and status.
+                ♻️ Waste Mapping Portal
             </p>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- MAP FILTERS -->
-
-    <div class="map-filters">
-
-
-        <select
-            id="mapTypeFilter"
-        >
-
-            <option value="All">
-                🗑️ All Waste Types
-            </option>
-
-            <option value="Plastic">
-                🔵 Plastic
-            </option>
-
-            <option value="Organic">
-                🟢 Organic
-            </option>
-
-            <option value="Electronic">
-                🟣 Electronic
-            </option>
-
-            <option value="Other">
-                ⚫ Other
-            </option>
-
-        </select>
-
-
-
-        <select
-            id="mapStatusFilter"
-        >
-
-            <option value="All">
-                📋 All Status
-            </option>
-
-            <option value="Pending">
-                ⏳ Pending
-            </option>
-
-            <option value="In Progress">
-                🚛 In Progress
-            </option>
-
-            <option value="Collected">
-                ✅ Collected
-            </option>
-
-        </select>
-
-
-    </div>
-
-
-
-    <div class="map-container">
-
-
-        <div id="map"></div>
-
-
-
-        <!-- MAP LEGEND -->
-
-        <div class="map-legend">
-
-            <h4>
-                🗺️ Waste Legend
-            </h4>
-
-
-            <div>
-
-                <span class="legend-dot plastic"></span>
-
-                Plastic
-
-            </div>
-
-
-            <div>
-
-                <span class="legend-dot organic"></span>
-
-                Organic
-
-            </div>
-
-
-            <div>
-
-                <span class="legend-dot electronic"></span>
-
-                Electronic
-
-            </div>
-
-
-            <div>
-
-                <span class="legend-dot other"></span>
-
-                Other
-
-            </div>
-
-        </div>
-
-
-    </div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     REPORTS
-     ===================================================== -->
-
-<section class="section-card">
-
-
-    <div class="section-title">
-
-        <div>
-
-            <h2>
-                📋 Waste Reports
-            </h2>
 
             <p>
-                Search and manage reported waste.
+                Geo-Tracking and Smart Waste Management System
             </p>
 
-        </div>
+        </footer>
 
     </div>
 
 
+    <!-- Leaflet JS -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
 
-    <!-- REPORT FILTERS -->
 
-    <div class="filters">
+    <!-- Leaflet Heatmap Plugin -->
+    <script
+        src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js">
+    </script>
 
 
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="🔎 Search reports..."
-        >
+    <!-- Chart.js -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
 
 
-        <select id="typeFilter">
+    <!-- Custom JS -->
+    <script src="script.js"></script>
 
-            <option value="All">
-                All Types
-            </option>
 
-            <option value="Plastic">
-                Plastic
-            </option>
+    <!-- LOGIN SCRIPT -->
+    <script>
 
-            <option value="Organic">
-                Organic
-            </option>
+        document.addEventListener("DOMContentLoaded", function () {
 
-            <option value="Electronic">
-                Electronic
-            </option>
+            const loginPage =
+                document.getElementById("loginPage");
 
-            <option value="Other">
-                Other
-            </option>
+            const portal =
+                document.getElementById("portal");
 
-        </select>
+            const loginForm =
+                document.getElementById("loginForm");
 
+            const loginError =
+                document.getElementById("loginError");
 
-        <select id="statusFilter">
+            const logoutBtn =
+                document.getElementById("logoutBtn");
 
-            <option value="All">
-                All Status
-            </option>
 
-            <option value="Pending">
-                Pending
-            </option>
+            /*
+             * Check previous login
+             */
+            if (localStorage.getItem("wastePortalLoggedIn") === "true") {
 
-            <option value="In Progress">
-                In Progress
-            </option>
+                loginPage.classList.add("hidden");
+                portal.classList.remove("hidden");
 
-            <option value="Collected">
-                Collected
-            </option>
-
-        </select>
-
-
-    </div>
-
-
-
-    <div
-        id="reportsContainer"
-        class="reports-container"
-    ></div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     ANALYTICS
-     ===================================================== -->
-
-<section class="section-card">
-
-
-    <div class="section-title">
-
-        <div>
-
-            <h2>
-                📊 Analytics
-            </h2>
-
-            <p>
-                Waste report statistics.
-            </p>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="charts-grid">
-
-
-        <div class="chart-box">
-
-            <h3>
-                Waste Type Distribution
-            </h3>
-
-            <canvas id="wasteChart"></canvas>
-
-        </div>
-
-
-
-        <div class="chart-box">
-
-            <h3>
-                Status Distribution
-            </h3>
-
-            <canvas id="statusChart"></canvas>
-
-        </div>
-
-
-    </div>
-
-
-</section>
-
-
-</main>
-
-
-
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
-
-<footer>
-
-    <p>
-        ♻️ Smart Waste Management Portal
-    </p>
-
-    <p>
-        Geo-Tracking & Waste Mapping System
-    </p>
-
-</footer>
-
-
-</div>
-
-
-
-<!-- =====================================================
-     EXTERNAL LIBRARIES
-     ===================================================== -->
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-></script>
-
-
-<script
-    src="https://cdn.jsdelivr.net/npm/chart.js"
-></script>
-
-
-
-<!-- MAIN JAVASCRIPT -->
-
-<script src="script.js"></script>
-
-
-
-<!-- =====================================================
-     LOGIN SYSTEM
-     ===================================================== -->
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-
-        const loginPage =
-            document.getElementById(
-                "loginPage"
-            );
-
-
-        const portalPage =
-            document.getElementById(
-                "portalPage"
-            );
-
-
-        const loginForm =
-            document.getElementById(
-                "loginForm"
-            );
-
-
-        const logoutBtn =
-            document.getElementById(
-                "logoutBtn"
-            );
-
-
-        const loginError =
-            document.getElementById(
-                "loginError"
-            );
-
-
-
-        /* Existing login */
-
-        if (
-            localStorage.getItem(
-                "wastePortalLoggedIn"
-            ) === "true"
-        ) {
-
-            loginPage.classList.add(
-                "hidden"
-            );
-
-            portalPage.classList.remove(
-                "hidden"
-            );
-
-
-            if (
-                typeof initializePortal ===
-                "function"
-            ) {
-
-                initializePortal();
+                if (typeof initializePortal === "function") {
+                    initializePortal();
+                }
 
             }
 
-        }
 
-
-
-        /* Login */
-
-        loginForm.addEventListener(
-            "submit",
-            function (event) {
+            /*
+             * Login
+             */
+            loginForm.addEventListener("submit", function (event) {
 
                 event.preventDefault();
 
-
                 const username =
-                    document
-                        .getElementById(
-                            "username"
-                        )
-                        .value
-                        .trim();
-
+                    document.getElementById("username").value.trim();
 
                 const password =
-                    document
-                        .getElementById(
-                            "password"
-                        )
-                        .value;
-
+                    document.getElementById("password").value;
 
 
                 if (
@@ -928,73 +619,46 @@ document.addEventListener(
                     password === "admin123"
                 ) {
 
-
                     localStorage.setItem(
                         "wastePortalLoggedIn",
                         "true"
                     );
 
-
-                    loginPage.classList.add(
-                        "hidden"
-                    );
-
-
-                    portalPage.classList.remove(
-                        "hidden"
-                    );
-
+                    loginPage.classList.add("hidden");
+                    portal.classList.remove("hidden");
 
                     loginError.textContent = "";
 
-
-                    if (
-                        typeof initializePortal ===
-                        "function"
-                    ) {
-
+                    if (typeof initializePortal === "function") {
                         initializePortal();
-
                     }
 
-
                 } else {
-
 
                     loginError.textContent =
                         "❌ Invalid username or password.";
 
-
                 }
 
-            }
-        );
+            });
 
 
-
-        /* Logout */
-
-        logoutBtn.addEventListener(
-            "click",
-            function () {
+            /*
+             * Logout
+             */
+            logoutBtn.addEventListener("click", function () {
 
                 localStorage.removeItem(
                     "wastePortalLoggedIn"
                 );
 
-
                 location.reload();
 
-            }
-        );
+            });
 
+        });
 
-    }
-);
-
-</script>
-
+    </script>
 
 </body>
-
 </html>
