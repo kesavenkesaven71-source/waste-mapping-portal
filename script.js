@@ -29,22 +29,24 @@ let reportMarkers = [];
 
 function initializePortal() {
 
-    // Initialize map only once
+    // Initialize map
     if (!map) {
         initializeMap();
     }
 
-    // Load reports
+    // Load data
     displayReports();
     updateStats();
     updateAnalytics();
     loadSavedMarkers();
 
-    // Fix Leaflet map size
+    // Fix Leaflet rendering
     setTimeout(function () {
+
         if (map) {
             map.invalidateSize();
         }
+
     }, 300);
 }
 
@@ -59,18 +61,21 @@ function initializeMap() {
         return;
     }
 
-    const mapElement = document.getElementById("map");
+    const mapElement =
+        document.getElementById("map");
 
     if (!mapElement) {
         console.error("Map element not found.");
         return;
     }
 
+    // Default location: Madurai
     map = L.map("map").setView(
         [9.9252, 78.1198],
         13
     );
 
+    // OpenStreetMap
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
@@ -82,20 +87,24 @@ function initializeMap() {
 
 
 // =====================================================
-// GET LOCATION
+// GET USER LOCATION
 // =====================================================
 
 function getLocation() {
 
     if (!navigator.geolocation) {
 
-        document.getElementById("location").innerText =
+        document.getElementById(
+            "location"
+        ).innerText =
             "❌ Location support is not available.";
 
         return;
     }
 
-    document.getElementById("location").innerText =
+    document.getElementById(
+        "location"
+    ).innerText =
         "📍 Detecting location...";
 
     navigator.geolocation.getCurrentPosition(
@@ -108,7 +117,9 @@ function getLocation() {
             longitude =
                 position.coords.longitude;
 
-            document.getElementById("location").innerText =
+            document.getElementById(
+                "location"
+            ).innerText =
                 "📍 Location: " +
                 latitude.toFixed(6) +
                 ", " +
@@ -128,8 +139,11 @@ function getLocation() {
                 longitude
             ])
             .addTo(map)
-            .bindPopup("📍 Your Current Location")
+            .bindPopup(
+                "📍 Your Current Location"
+            )
             .openPopup();
+
         },
 
         function (error) {
@@ -139,8 +153,28 @@ function getLocation() {
                 error
             );
 
-            document.getElementById("location").innerText =
+            let message =
                 "❌ Location could not be detected.";
+
+            if (error.code === 1) {
+                message =
+                    "❌ Location permission denied.";
+            }
+
+            else if (error.code === 2) {
+                message =
+                    "❌ Location unavailable.";
+            }
+
+            else if (error.code === 3) {
+                message =
+                    "❌ Location request timed out.";
+            }
+
+            document.getElementById(
+                "location"
+            ).innerText = message;
+
         },
 
         {
@@ -159,10 +193,14 @@ function getLocation() {
 function previewPhoto() {
 
     const file =
-        document.getElementById("wastePhoto").files[0];
+        document.getElementById(
+            "wastePhoto"
+        ).files[0];
 
     const preview =
-        document.getElementById("photoPreview");
+        document.getElementById(
+            "photoPreview"
+        );
 
     const container =
         document.getElementById(
@@ -173,7 +211,8 @@ function previewPhoto() {
 
         selectedPhoto = "";
 
-        container.style.display = "none";
+        container.style.display =
+            "none";
 
         preview.src = "";
 
@@ -182,26 +221,32 @@ function previewPhoto() {
 
     if (!file.type.startsWith("image/")) {
 
-        alert("Please select an image file.");
+        alert(
+            "Please select an image file."
+        );
 
-        document.getElementById("wastePhoto").value = "";
+        document.getElementById(
+            "wastePhoto"
+        ).value = "";
 
         return;
     }
 
-    const reader = new FileReader();
+    const reader =
+        new FileReader();
 
-    reader.onload = function (event) {
+    reader.onload =
+        function (event) {
 
-        selectedPhoto =
-            event.target.result;
+            selectedPhoto =
+                event.target.result;
 
-        preview.src =
-            selectedPhoto;
+            preview.src =
+                selectedPhoto;
 
-        container.style.display =
-            "block";
-    };
+            container.style.display =
+                "block";
+        };
 
     reader.readAsDataURL(file);
 }
@@ -214,14 +259,19 @@ function previewPhoto() {
 function submitReport() {
 
     const wasteType =
-        document.getElementById("wasteType").value;
+        document.getElementById(
+            "wasteType"
+        ).value;
 
     const description =
-        document.getElementById("description")
-            .value
-            .trim();
+        document.getElementById(
+            "description"
+        )
+        .value
+        .trim();
 
-    // Check waste type
+
+    // Validate waste type
     if (wasteType === "") {
 
         alert(
@@ -231,7 +281,8 @@ function submitReport() {
         return;
     }
 
-    // Check location
+
+    // Validate location
     if (
         latitude === null ||
         longitude === null
@@ -244,6 +295,8 @@ function submitReport() {
         return;
     }
 
+
+    // Create report
     const newReport = {
 
         id: Date.now(),
@@ -270,49 +323,132 @@ function submitReport() {
             selectedPhoto
     };
 
-    // Add report
-    reports.push(newReport);
 
-    // Save report
+    // Save
+    reports.push(
+        newReport
+    );
+
     localStorage.setItem(
         "wasteReports",
         JSON.stringify(reports)
     );
 
-    // Add marker
-    addReportMarker(newReport);
 
-    // Update dashboard
+    // Add marker
+    addReportMarker(
+        newReport
+    );
+
+
+    // Update UI
     displayReports();
+
     updateStats();
+
     updateAnalytics();
+
 
     alert(
         "✅ Waste report successfully submitted!"
     );
 
+
     // Clear form
-    document.getElementById("wasteType").value = "";
 
-    document.getElementById("description").value = "";
+    document.getElementById(
+        "wasteType"
+    ).value = "";
 
-    document.getElementById("wastePhoto").value = "";
+    document.getElementById(
+        "description"
+    ).value = "";
 
-    document.getElementById("location").innerText =
+    document.getElementById(
+        "wastePhoto"
+    ).value = "";
+
+    document.getElementById(
+        "location"
+    ).innerText =
         "Location not detected";
+
 
     document.getElementById(
         "photoPreviewContainer"
-    ).style.display = "none";
+    ).style.display =
+        "none";
 
     document.getElementById(
         "photoPreview"
     ).src = "";
 
+
     selectedPhoto = "";
 
     latitude = null;
+
     longitude = null;
+}
+
+
+// =====================================================
+// GET WASTE ICON
+// =====================================================
+
+function getWasteIcon(
+    wasteType
+) {
+
+    if (
+        wasteType === "Plastic"
+    ) {
+        return "♻️";
+    }
+
+    if (
+        wasteType === "Organic"
+    ) {
+        return "🌱";
+    }
+
+    if (
+        wasteType === "Electronic"
+    ) {
+        return "💻";
+    }
+
+    return "🗑️";
+}
+
+
+// =====================================================
+// GET STATUS ICON
+// =====================================================
+
+function getStatusIcon(
+    status
+) {
+
+    if (
+        status === "Pending"
+    ) {
+        return "🔴";
+    }
+
+    if (
+        status === "In Progress"
+    ) {
+        return "🟡";
+    }
+
+    if (
+        status === "Collected"
+    ) {
+        return "🟢";
+    }
+
+    return "⚪";
 }
 
 
@@ -320,17 +456,21 @@ function submitReport() {
 // ADD REPORT MARKER
 // =====================================================
 
-function addReportMarker(report) {
+function addReportMarker(
+    report
+) {
 
     if (!map) {
         initializeMap();
     }
+
 
     const lat =
         Number(report.latitude);
 
     const lng =
         Number(report.longitude);
+
 
     if (
         !Number.isFinite(lat) ||
@@ -339,28 +479,82 @@ function addReportMarker(report) {
         return;
     }
 
+
     const marker =
-        L.marker([lat, lng])
+        L.marker([
+            lat,
+            lng
+        ])
         .addTo(map);
 
-    marker.bindPopup(
-        "<b>♻️ Waste Type:</b> " +
-        escapeHTML(report.wasteType) +
 
-        "<br><b>📝 Description:</b> " +
-        escapeHTML(
-            report.description ||
-            "No description"
-        ) +
+    const icon =
+        getWasteIcon(
+            report.wasteType
+        );
 
-        "<br><b>📊 Status:</b> " +
-        escapeHTML(report.status) +
+    const statusIcon =
+        getStatusIcon(
+            report.status
+        );
 
-        "<br><b>📅 Date:</b> " +
-        escapeHTML(report.date)
+
+    marker.bindPopup(`
+
+        <div style="min-width:220px">
+
+            <h3>
+                ${icon}
+                ${escapeHTML(
+                    report.wasteType
+                )}
+            </h3>
+
+            <p>
+                <strong>
+                    📝 Description:
+                </strong>
+                ${escapeHTML(
+                    report.description ||
+                    "No description"
+                )}
+            </p>
+
+            <p>
+                <strong>
+                    📊 Status:
+                </strong>
+                ${statusIcon}
+                ${escapeHTML(
+                    report.status
+                )}
+            </p>
+
+            <p>
+                <strong>
+                    📅 Date:
+                </strong>
+                ${escapeHTML(
+                    report.date
+                )}
+            </p>
+
+            <p>
+                <strong>
+                    📍 Coordinates:
+                </strong><br>
+                ${lat.toFixed(6)},
+                ${lng.toFixed(6)}
+            </p>
+
+        </div>
+
+    `);
+
+
+    reportMarkers.push(
+        marker
     );
-
-    reportMarkers.push(marker);
 }
 
 
@@ -374,21 +568,29 @@ function loadSavedMarkers() {
         initializeMap();
     }
 
-    // Remove old markers
+
+    // Remove existing markers
     reportMarkers.forEach(
         function (marker) {
 
-            map.removeLayer(marker);
+            map.removeLayer(
+                marker
+            );
 
         }
     );
 
+
     reportMarkers = [];
 
+
+    // Add saved reports
     reports.forEach(
         function (report) {
 
-            addReportMarker(report);
+            addReportMarker(
+                report
+            );
 
         }
     );
@@ -399,13 +601,19 @@ function loadSavedMarkers() {
 // ESCAPE HTML
 // =====================================================
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     div.textContent =
-        value == null ? "" : String(value);
+        value == null
+            ? ""
+            : String(value);
 
     return div.innerHTML;
 }
@@ -415,43 +623,29 @@ function escapeHTML(value) {
 // STATUS CLASS
 // =====================================================
 
-function getStatusClass(status) {
+function getStatusClass(
+    status
+) {
 
-    if (status === "Pending") {
+    if (
+        status === "Pending"
+    ) {
         return "status-pending";
     }
 
-    if (status === "In Progress") {
+    if (
+        status === "In Progress"
+    ) {
         return "status-progress";
     }
 
-    if (status === "Collected") {
+    if (
+        status === "Collected"
+    ) {
         return "status-collected";
     }
 
     return "status-pending";
-}
-
-
-// =====================================================
-// STATUS ICON
-// =====================================================
-
-function getStatusIcon(status) {
-
-    if (status === "Pending") {
-        return "🔴";
-    }
-
-    if (status === "In Progress") {
-        return "🟡";
-    }
-
-    if (status === "Collected") {
-        return "🟢";
-    }
-
-    return "⚪";
 }
 
 
@@ -462,20 +656,30 @@ function getStatusIcon(status) {
 function displayReports() {
 
     const container =
-        document.getElementById("reports");
+        document.getElementById(
+            "reports"
+        );
 
     if (!container) {
         return;
     }
 
+
     const searchElement =
-        document.getElementById("searchReport");
+        document.getElementById(
+            "searchReport"
+        );
 
     const typeElement =
-        document.getElementById("filterType");
+        document.getElementById(
+            "filterType"
+        );
 
     const statusElement =
-        document.getElementById("filterStatus");
+        document.getElementById(
+            "filterStatus"
+        );
+
 
     const search =
         searchElement
@@ -484,10 +688,12 @@ function displayReports() {
                 .trim()
             : "";
 
+
     const typeFilter =
         typeElement
             ? typeElement.value
             : "All";
+
 
     const statusFilter =
         statusElement
@@ -510,18 +716,24 @@ function displayReports() {
                 )
                 .toLowerCase();
 
+
                 const matchesSearch =
-                    searchText.includes(search);
+                    searchText.includes(
+                        search
+                    );
+
 
                 const matchesType =
                     typeFilter === "All" ||
                     report.wasteType ===
                     typeFilter;
 
+
                 const matchesStatus =
                     statusFilter === "All" ||
                     report.status ===
                     statusFilter;
+
 
                 return (
                     matchesSearch &&
@@ -535,7 +747,9 @@ function displayReports() {
     container.innerHTML = "";
 
 
-    if (filteredReports.length === 0) {
+    if (
+        filteredReports.length === 0
+    ) {
 
         container.innerHTML =
             "<p>No matching reports found.</p>";
@@ -545,7 +759,6 @@ function displayReports() {
 
 
     // Latest report first
-
     filteredReports
         .slice()
         .reverse()
@@ -553,7 +766,9 @@ function displayReports() {
             function (report) {
 
                 const card =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 card.className =
                     "report-card";
@@ -562,31 +777,50 @@ function displayReports() {
                 // Photo
                 let photoHTML = "";
 
+
                 if (report.photo) {
 
                     photoHTML = `
+
                         <img
                             src="${report.photo}"
                             class="report-photo"
                             alt="Waste photo"
                         >
+
                     `;
 
-                } else {
+                }
+
+                else {
 
                     photoHTML = `
-                        <div class="report-photo">
-                            📷 No Photo
+
+                        <div class="report-photo"
+                             style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                font-size:28px;
+                             ">
+
+                            📷
+
                         </div>
+
                     `;
                 }
 
 
                 const lat =
-                    Number(report.latitude);
+                    Number(
+                        report.latitude
+                    );
 
                 const lng =
-                    Number(report.longitude);
+                    Number(
+                        report.longitude
+                    );
 
 
                 card.innerHTML = `
@@ -595,27 +829,40 @@ function displayReports() {
                         ${photoHTML}
                     </div>
 
+
                     <div class="report-info">
 
                         <h3>
+
+                            ${getWasteIcon(
+                                report.wasteType
+                            )}
+
                             ${escapeHTML(
                                 report.wasteType
                             )}
+
                         </h3>
 
+
                         <p>
+
                             <strong>
                                 Description:
                             </strong>
+
                             ${
                                 escapeHTML(
                                     report.description ||
                                     "No description"
                                 )
                             }
+
                         </p>
 
+
                         <p>
+
                             <strong>
                                 Location:
                             </strong>
@@ -631,9 +878,12 @@ function displayReports() {
                                     ? lng.toFixed(6)
                                     : "N/A"
                             }
+
                         </p>
 
+
                         <p>
+
                             <strong>
                                 Date:
                             </strong>
@@ -641,9 +891,12 @@ function displayReports() {
                             ${escapeHTML(
                                 report.date
                             )}
+
                         </p>
 
+
                         <p>
+
                             <strong>
                                 Status:
                             </strong>
@@ -663,7 +916,9 @@ function displayReports() {
                                 )}
 
                             </span>
+
                         </p>
+
 
                         <select
                             class="status-select"
@@ -677,8 +932,11 @@ function displayReports() {
                                         ? "selected"
                                         : ""
                                 }>
+
                                 🔴 Pending
+
                             </option>
+
 
                             <option
                                 value="In Progress"
@@ -688,8 +946,11 @@ function displayReports() {
                                         ? "selected"
                                         : ""
                                 }>
+
                                 🟡 In Progress
+
                             </option>
+
 
                             <option
                                 value="Collected"
@@ -699,12 +960,15 @@ function displayReports() {
                                         ? "selected"
                                         : ""
                                 }>
+
                                 🟢 Collected
+
                             </option>
 
                         </select>
 
                     </div>
+
                 `;
 
 
@@ -727,7 +991,9 @@ function displayReports() {
                 );
 
 
-                container.appendChild(card);
+                container.appendChild(
+                    card
+                );
 
             }
         );
@@ -747,8 +1013,11 @@ function changeStatus(
         reports.find(
             function (item) {
 
-                return Number(item.id) ===
-                    Number(reportId);
+                return Number(
+                    item.id
+                ) === Number(
+                    reportId
+                );
 
             }
         );
@@ -765,375 +1034,12 @@ function changeStatus(
 
     localStorage.setItem(
         "wasteReports",
-        JSON.stringify(reports)
+        JSON.stringify(
+            reports
+        )
     );
 
 
     displayReports();
 
-    updateStats();
-
-    updateAnalytics();
-
-    // Refresh markers
-    loadSavedMarkers();
-}
-
-
-// =====================================================
-// UPDATE DASHBOARD STATISTICS
-// =====================================================
-
-function updateStats() {
-
-    let plastic = 0;
-    let organic = 0;
-    let electronic = 0;
-
-
-    reports.forEach(
-        function (report) {
-
-            if (
-                report.wasteType ===
-                "Plastic"
-            ) {
-                plastic++;
-            }
-
-            else if (
-                report.wasteType ===
-                "Organic"
-            ) {
-                organic++;
-            }
-
-            else if (
-                report.wasteType ===
-                "Electronic"
-            ) {
-                electronic++;
-            }
-
-        }
-    );
-
-
-    const totalElement =
-        document.getElementById(
-            "totalReports"
-        );
-
-    const plasticElement =
-        document.getElementById(
-            "plasticCount"
-        );
-
-    const organicElement =
-        document.getElementById(
-            "organicCount"
-        );
-
-    const electronicElement =
-        document.getElementById(
-            "electronicCount"
-        );
-
-
-    if (totalElement) {
-        totalElement.innerText =
-            reports.length;
-    }
-
-    if (plasticElement) {
-        plasticElement.innerText =
-            plastic;
-    }
-
-    if (organicElement) {
-        organicElement.innerText =
-            organic;
-    }
-
-    if (electronicElement) {
-        electronicElement.innerText =
-            electronic;
-    }
-}
-
-
-// =====================================================
-// UPDATE ANALYTICS
-// =====================================================
-
-function updateAnalytics() {
-
-    // Check Chart.js
-    if (typeof Chart === "undefined") {
-
-        console.error(
-            "Chart.js is not loaded."
-        );
-
-        return;
-    }
-
-
-    let plastic = 0;
-    let organic = 0;
-    let electronic = 0;
-    let other = 0;
-
-    let pending = 0;
-    let inProgress = 0;
-    let collected = 0;
-
-
-    reports.forEach(
-        function (report) {
-
-            // Waste type
-            if (
-                report.wasteType ===
-                "Plastic"
-            ) {
-                plastic++;
-            }
-
-            else if (
-                report.wasteType ===
-                "Organic"
-            ) {
-                organic++;
-            }
-
-            else if (
-                report.wasteType ===
-                "Electronic"
-            ) {
-                electronic++;
-            }
-
-            else {
-                other++;
-            }
-
-
-            // Status
-            if (
-                report.status ===
-                "Pending"
-            ) {
-                pending++;
-            }
-
-            else if (
-                report.status ===
-                "In Progress"
-            ) {
-                inProgress++;
-            }
-
-            else if (
-                report.status ===
-                "Collected"
-            ) {
-                collected++;
-            }
-
-        }
-    );
-
-
-    const wasteCanvas =
-        document.getElementById(
-            "wasteChart"
-        );
-
-    const statusCanvas =
-        document.getElementById(
-            "statusChart"
-        );
-
-
-    if (
-        !wasteCanvas ||
-        !statusCanvas
-    ) {    
-       return;
-    }
-
-
-    // Destroy old charts
-
-    if (wasteChart) {
-
-        wasteChart.destroy();
-
-        wasteChart = null;
-    }
-
-
-    if (statusChart) {
-
-        statusChart.destroy();
-
-        statusChart = null;
-    }
-
-
-    // =================================================
-    // WASTE TYPE CHART
-    // =================================================
-
-    wasteChart =
-        new Chart(
-            wasteCanvas,
-            {
-                type: "doughnut",
-
-                data: {
-
-                    labels: [
-                        "Plastic",
-                        "Organic",
-                        "Electronic",
-                        "Other"
-                    ],
-
-                    datasets: [
-                        {
-                            data: [
-                                plastic,
-                                organic,
-                                electronic,
-                                other
-                            ],
-
-                            backgroundColor: [
-                                "#2196f3",
-                                "#4caf50",
-                                "#9c27b0",
-                                "#ff9800"
-                            ],
-
-                            borderWidth: 2
-                        }
-                    ]
-                },
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    plugins: {
-
-                        legend: {
-                            position: "bottom"
-                        }
-
-                    }
-                }
-            }
-        );
-
-
-    // =================================================
-    // STATUS CHART
-    // =================================================
-
-    statusChart =
-        new Chart(
-            statusCanvas,
-            {
-                type: "doughnut",
-
-                data: {
-
-                    labels: [
-                        "Pending",
-                        "In Progress",
-                        "Collected"
-                    ],
-
-                    datasets: [
-                        {
-                            data: [
-                                pending,
-                                inProgress,
-                                collected
-                            ],
-
-                            backgroundColor: [
-                                "#dc3545",
-                                "#ffc107",
-                                "#28a745"
-                            ],
-
-                            borderWidth: 2
-                        }
-                    ]
-                },
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    plugins: {
-
-                        legend: {
-                            position: "bottom"
-                        }
-
-                    }
-                }
-            }
-        );
-}
-
-
-// =====================================================
-// PAGE LOAD
-// =====================================================
-
-window.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const loggedIn =
-            sessionStorage.getItem(
-                "loggedIn"
-            );
-
-
-        // If already logged in
-        if (loggedIn === "true") {
-
-            const loginPage =
-                document.getElementById(
-                    "loginPage"
-                );
-
-            const portalPage =
-                document.getElementById(
-                    "portalPage"
-                );
-
-
-            loginPage.style.display =
-                "none";
-
-            portalPage.style.display =
-                "block";
-
-
-            initializePortal();
-
-        }
-
-    }
-);
+    updateStats
