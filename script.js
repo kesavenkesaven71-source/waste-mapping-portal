@@ -1,10 +1,426 @@
 /* =====================================================
    WASTE MAPPING PORTAL
-   STEP 3.3 - WASTE HEATMAP
+   SIGNUP + LOGIN + STEP 3.3 HEATMAP
 ===================================================== */
 
 
-/* ================= GLOBAL VARIABLES ================= */
+/* =====================================================
+   AUTHENTICATION
+===================================================== */
+
+let users =
+    JSON.parse(
+        localStorage.getItem("wastePortalUsers")
+    ) || [];
+
+
+let currentUser =
+    JSON.parse(
+        localStorage.getItem("wastePortalCurrentUser")
+    ) || null;
+
+
+/* ================= AUTH ELEMENTS ================= */
+
+const authPage =
+    document.getElementById("authPage");
+
+const portal =
+    document.getElementById("portal");
+
+const loginSection =
+    document.getElementById("loginSection");
+
+const signupSection =
+    document.getElementById("signupSection");
+
+
+/* ================= SHOW LOGIN ================= */
+
+function showLogin() {
+
+    loginSection.classList.remove("hidden");
+
+    signupSection.classList.add("hidden");
+
+}
+
+
+/* ================= SHOW SIGNUP ================= */
+
+function showSignup() {
+
+    loginSection.classList.add("hidden");
+
+    signupSection.classList.remove("hidden");
+
+}
+
+
+/* ================= CREATE ACCOUNT ================= */
+
+function createAccount(event) {
+
+    event.preventDefault();
+
+
+    const name =
+        document
+            .getElementById("signupName")
+            .value
+            .trim();
+
+
+    const username =
+        document
+            .getElementById("signupUsername")
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById("signupPassword")
+            .value;
+
+
+    const confirmPassword =
+        document
+            .getElementById("signupConfirmPassword")
+            .value;
+
+
+    const message =
+        document.getElementById(
+            "signupMessage"
+        );
+
+
+    message.className =
+        "auth-message";
+
+
+    /*
+     * Basic validation
+     */
+
+    if (
+        name.length < 2
+    ) {
+
+        message.textContent =
+            "❌ Please enter your name.";
+
+        message.classList.add("error");
+
+        return;
+
+    }
+
+
+    if (
+        username.length < 3
+    ) {
+
+        message.textContent =
+            "❌ Username must contain at least 3 characters.";
+
+        message.classList.add("error");
+
+        return;
+
+    }
+
+
+    if (
+        password.length < 6
+    ) {
+
+        message.textContent =
+            "❌ Password must contain at least 6 characters.";
+
+        message.classList.add("error");
+
+        return;
+
+    }
+
+
+    if (
+        password !== confirmPassword
+    ) {
+
+        message.textContent =
+            "❌ Passwords do not match.";
+
+        message.classList.add("error");
+
+        return;
+
+    }
+
+
+    /*
+     * Check existing username
+     */
+
+    const existingUser =
+        users.find(
+            user =>
+                user.username.toLowerCase() ===
+                username.toLowerCase()
+        );
+
+
+    if (existingUser) {
+
+        message.textContent =
+            "❌ Username already exists.";
+
+        message.classList.add("error");
+
+        return;
+
+    }
+
+
+    /*
+     * Create user
+     */
+
+    const newUser = {
+
+        id:
+            Date.now().toString(),
+
+        name:
+            name,
+
+        username:
+            username,
+
+        password:
+            password
+
+    };
+
+
+    users.push(newUser);
+
+
+    /*
+     * Save users
+     */
+
+    localStorage.setItem(
+        "wastePortalUsers",
+        JSON.stringify(users)
+    );
+
+
+    /*
+     * Success
+     */
+
+    message.textContent =
+        "✅ Account created successfully!";
+
+    message.classList.add("success");
+
+
+    /*
+     * Clear form
+     */
+
+    document
+        .getElementById("signupForm")
+        .reset();
+
+
+    /*
+     * After short delay,
+     * show login
+     */
+
+    setTimeout(
+        function () {
+
+            showLogin();
+
+            document
+                .getElementById(
+                    "loginUsername"
+                )
+                .value =
+                username;
+
+            document
+                .getElementById(
+                    "loginPassword"
+                )
+                .focus();
+
+        },
+        1000
+    );
+
+}
+
+
+/* ================= LOGIN ================= */
+
+function loginUser(event) {
+
+    event.preventDefault();
+
+
+    const username =
+        document
+            .getElementById("loginUsername")
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById("loginPassword")
+            .value;
+
+
+    const message =
+        document.getElementById(
+            "loginMessage"
+        );
+
+
+    message.className =
+        "auth-message";
+
+
+    /*
+     * Find user
+     */
+
+    const user =
+        users.find(
+            account =>
+                account.username.toLowerCase() ===
+                username.toLowerCase() &&
+                account.password ===
+                password
+        );
+
+
+    if (!user) {
+
+        message.textContent =
+            "❌ Incorrect username or password.";
+
+        message.classList.add("error");
+
+        return;
+
+    }
+
+
+    /*
+     * Save logged-in user
+     */
+
+    currentUser = {
+
+        id:
+            user.id,
+
+        name:
+            user.name,
+
+        username:
+            user.username
+
+    };
+
+
+    localStorage.setItem(
+        "wastePortalCurrentUser",
+        JSON.stringify(currentUser)
+    );
+
+
+    /*
+     * Show portal
+     */
+
+    openPortal();
+
+
+    /*
+     * Reset login
+     */
+
+    document
+        .getElementById("loginForm")
+        .reset();
+
+}
+
+
+/* ================= OPEN PORTAL ================= */
+
+function openPortal() {
+
+    authPage.classList.add("hidden");
+
+    portal.classList.remove("hidden");
+
+
+    /*
+     * Show username
+     */
+
+    const welcomeUser =
+        document.getElementById(
+            "welcomeUser"
+        );
+
+
+    if (currentUser) {
+
+        welcomeUser.textContent =
+            `👤 ${currentUser.name}`;
+
+    }
+
+
+    /*
+     * Initialize portal
+     */
+
+    initializePortal();
+
+}
+
+
+/* ================= LOGOUT ================= */
+
+function logoutUser() {
+
+    localStorage.removeItem(
+        "wastePortalCurrentUser"
+    );
+
+
+    currentUser = null;
+
+
+    location.reload();
+
+}
+
+
+/* =====================================================
+   WASTE PORTAL
+===================================================== */
 
 let latitude = null;
 let longitude = null;
@@ -12,7 +428,9 @@ let longitude = null;
 let selectedPhoto = null;
 
 let reports =
-    JSON.parse(localStorage.getItem("wasteReports")) || [];
+    JSON.parse(
+        localStorage.getItem("wasteReports")
+    ) || [];
 
 let map = null;
 
@@ -21,6 +439,7 @@ let heatLayer = null;
 let heatmapEnabled = true;
 
 let wasteChart = null;
+
 let statusChart = null;
 
 let reportMarkers = [];
@@ -30,19 +449,24 @@ let currentLocationMarker = null;
 let portalInitialized = false;
 
 
-/* ================= INITIALIZE PORTAL ================= */
+/* ================= INITIALIZE ================= */
 
 function initializePortal() {
 
     if (portalInitialized) {
 
         updateStats();
+
         displayReports();
+
         updateAnalytics();
+
         loadSavedMarkers();
+
         updateHeatmap();
 
         return;
+
     }
 
 
@@ -64,7 +488,7 @@ function initializePortal() {
 }
 
 
-/* ================= INITIALIZE MAP ================= */
+/* ================= MAP ================= */
 
 function initializeMap() {
 
@@ -73,42 +497,39 @@ function initializeMap() {
     }
 
 
-    /*
-     * Default location:
-     * Madurai, Tamil Nadu
-     */
-    map = L.map("map").setView(
-        [9.9252, 78.1198],
-        12
-    );
+    map =
+        L.map("map").setView(
+            [9.9252, 78.1198],
+            12
+        );
 
 
-    /*
-     * OpenStreetMap tiles
-     */
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
             attribution:
-                '&copy; OpenStreetMap contributors'
+                "&copy; OpenStreetMap contributors"
         }
     ).addTo(map);
 
 
-    /*
-     * Small map control
-     */
-    L.control.scale().addTo(map);
+    L.control
+        .scale()
+        .addTo(map);
 
 }
 
 
-/* ================= GET LOCATION ================= */
+/* =====================================================
+   LOCATION
+===================================================== */
 
 function getLocation() {
 
     const status =
-        document.getElementById("locationStatus");
+        document.getElementById(
+            "locationStatus"
+        );
 
 
     if (!navigator.geolocation) {
@@ -117,6 +538,7 @@ function getLocation() {
             "❌ Geolocation is not supported.";
 
         return;
+
     }
 
 
@@ -135,10 +557,15 @@ function getLocation() {
                 position.coords.longitude;
 
 
-            document.getElementById("latitude").value =
+            document.getElementById(
+                "latitude"
+            ).value =
                 latitude;
 
-            document.getElementById("longitude").value =
+
+            document.getElementById(
+                "longitude"
+            ).value =
                 longitude;
 
 
@@ -146,20 +573,17 @@ function getLocation() {
                 `✅ Location selected: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
 
 
-            /*
-             * Move map
-             */
             if (map) {
 
                 map.setView(
-                    [latitude, longitude],
+                    [
+                        latitude,
+                        longitude
+                    ],
                     16
                 );
 
 
-                /*
-                 * Remove previous location marker
-                 */
                 if (currentLocationMarker) {
 
                     map.removeLayer(
@@ -169,12 +593,12 @@ function getLocation() {
                 }
 
 
-                /*
-                 * Add current location marker
-                 */
                 currentLocationMarker =
                     L.marker(
-                        [latitude, longitude]
+                        [
+                            latitude,
+                            longitude
+                        ]
                     )
                     .addTo(map)
                     .bindPopup(
@@ -191,22 +615,33 @@ function getLocation() {
             let message =
                 "❌ Unable to get location.";
 
+
             if (error.code === 1) {
+
                 message =
                     "❌ Location permission denied.";
+
             }
+
 
             if (error.code === 2) {
+
                 message =
                     "❌ Location unavailable.";
+
             }
+
 
             if (error.code === 3) {
+
                 message =
                     "❌ Location request timed out.";
+
             }
 
-            status.textContent = message;
+
+            status.textContent =
+                message;
 
         }
 
@@ -215,15 +650,20 @@ function getLocation() {
 }
 
 
-/* ================= PHOTO PREVIEW ================= */
+/* =====================================================
+   PHOTO
+===================================================== */
 
 function previewPhoto(event) {
 
     const file =
         event.target.files[0];
 
+
     const preview =
-        document.getElementById("photoPreview");
+        document.getElementById(
+            "photoPreview"
+        );
 
 
     if (!file) {
@@ -233,6 +673,7 @@ function previewPhoto(event) {
         preview.innerHTML = "";
 
         return;
+
     }
 
 
@@ -240,20 +681,23 @@ function previewPhoto(event) {
         new FileReader();
 
 
-    reader.onload = function (e) {
+    reader.onload =
+        function (e) {
 
-        selectedPhoto =
-            e.target.result;
+            selectedPhoto =
+                e.target.result;
 
 
-        preview.innerHTML = `
-            <img
-                src="${selectedPhoto}"
-                alt="Waste preview"
-            >
-        `;
+            preview.innerHTML = `
 
-    };
+                <img
+                    src="${selectedPhoto}"
+                    alt="Waste preview"
+                >
+
+            `;
+
+        };
 
 
     reader.readAsDataURL(file);
@@ -261,7 +705,9 @@ function previewPhoto(event) {
 }
 
 
-/* ================= SUBMIT REPORT ================= */
+/* =====================================================
+   SUBMIT REPORT
+===================================================== */
 
 function submitReport(event) {
 
@@ -269,37 +715,40 @@ function submitReport(event) {
 
 
     const wasteType =
-        document.getElementById("wasteType").value;
+        document.getElementById(
+            "wasteType"
+        ).value;
+
 
     const description =
-        document.getElementById("description").value.trim();
+        document.getElementById(
+            "description"
+        ).value
+        .trim();
 
 
-    /*
-     * Validate waste type
-     */
     if (!wasteType) {
 
-        alert("Please select a waste type.");
+        alert(
+            "Please select a waste type."
+        );
 
         return;
+
     }
 
 
-    /*
-     * Validate description
-     */
     if (!description) {
 
-        alert("Please enter a description.");
+        alert(
+            "Please enter a description."
+        );
 
         return;
+
     }
 
 
-    /*
-     * Validate location
-     */
     if (
         latitude === null ||
         longitude === null
@@ -310,6 +759,7 @@ function submitReport(event) {
         );
 
         return;
+
     }
 
 
@@ -337,34 +787,40 @@ function submitReport(event) {
             "Pending",
 
         createdAt:
-            new Date().toLocaleString()
+            new Date().toLocaleString(),
+
+        reportedBy:
+            currentUser
+                ? currentUser.username
+                : "User"
 
     };
 
 
-    /*
-     * Add report
-     */
     reports.unshift(report);
 
 
-    /*
-     * Save
-     */
     saveReports();
 
 
-    /*
-     * Reset form
-     */
-    document.getElementById("reportForm").reset();
+    document
+        .getElementById(
+            "reportForm"
+        )
+        .reset();
 
 
-    document.getElementById("photoPreview")
+    document
+        .getElementById(
+            "photoPreview"
+        )
         .innerHTML = "";
 
 
-    document.getElementById("locationStatus")
+    document
+        .getElementById(
+            "locationStatus"
+        )
         .textContent =
         "Location not selected";
 
@@ -372,16 +828,20 @@ function submitReport(event) {
     selectedPhoto = null;
 
     latitude = null;
+
     longitude = null;
 
 
-    document.getElementById("latitude").value = "";
-    document.getElementById("longitude").value = "";
+    document.getElementById(
+        "latitude"
+    ).value = "";
 
 
-    /*
-     * Refresh everything
-     */
+    document.getElementById(
+        "longitude"
+    ).value = "";
+
+
     updateStats();
 
     displayReports();
@@ -400,7 +860,7 @@ function submitReport(event) {
 }
 
 
-/* ================= SAVE REPORTS ================= */
+/* ================= SAVE ================= */
 
 function saveReports() {
 
@@ -412,7 +872,9 @@ function saveReports() {
 }
 
 
-/* ================= WASTE ICON ================= */
+/* =====================================================
+   MARKERS
+===================================================== */
 
 function getWasteIcon(type) {
 
@@ -440,9 +902,11 @@ function getWasteIcon(type) {
             "custom-waste-marker",
 
         html: `
+
             <div class="waste-marker">
                 ${emoji}
             </div>
+
         `,
 
         iconSize:
@@ -459,7 +923,7 @@ function getWasteIcon(type) {
 }
 
 
-/* ================= ADD REPORT MARKER ================= */
+/* ================= ADD MARKER ================= */
 
 function addReportMarker(report) {
 
@@ -472,7 +936,9 @@ function addReportMarker(report) {
         report.latitude === null ||
         report.longitude === null
     ) {
+
         return;
+
     }
 
 
@@ -484,20 +950,26 @@ function addReportMarker(report) {
             ],
             {
                 icon:
-                    getWasteIcon(report.type)
+                    getWasteIcon(
+                        report.type
+                    )
             }
         );
 
 
     const photoHTML =
         report.photo
+
             ? `
+
                 <img
                     src="${report.photo}"
                     class="popup-photo"
                     alt="Waste photo"
                 >
+
             `
+
             : "";
 
 
@@ -519,10 +991,13 @@ function addReportMarker(report) {
 
             <p>
                 <strong>Status:</strong>
-                <span class="popup-status">
-                    ${getStatusEmoji(report.status)}
-                    ${escapeHTML(report.status)}
-                </span>
+                ${getStatusEmoji(report.status)}
+                ${escapeHTML(report.status)}
+            </p>
+
+            <p>
+                <strong>Reported By:</strong>
+                ${escapeHTML(report.reportedBy || "User")}
             </p>
 
             <p>
@@ -551,7 +1026,7 @@ function addReportMarker(report) {
 }
 
 
-/* ================= LOAD SAVED MARKERS ================= */
+/* ================= LOAD MARKERS ================= */
 
 function loadSavedMarkers() {
 
@@ -560,42 +1035,43 @@ function loadSavedMarkers() {
     }
 
 
-    /*
-     * Remove old markers
-     */
-    reportMarkers.forEach(function (item) {
+    reportMarkers.forEach(
+        function (item) {
 
-        if (map.hasLayer(item.marker)) {
+            if (
+                map.hasLayer(
+                    item.marker
+                )
+            ) {
 
-            map.removeLayer(item.marker);
+                map.removeLayer(
+                    item.marker
+                );
+
+            }
 
         }
-
-    });
+    );
 
 
     reportMarkers = [];
 
 
-    /*
-     * Add new markers
-     */
-    reports.forEach(function (report) {
+    reports.forEach(
+        function (report) {
 
-        addReportMarker(report);
+            addReportMarker(report);
 
-    });
+        }
+    );
 
 
-    /*
-     * Apply current filters
-     */
     filterMapMarkers();
 
 }
 
 
-/* ================= MAP FILTER ================= */
+/* ================= FILTER MARKERS ================= */
 
 function filterMapMarkers() {
 
@@ -616,113 +1092,116 @@ function filterMapMarkers() {
         )?.value || "All";
 
 
-    reportMarkers.forEach(function (item) {
+    reportMarkers.forEach(
+        function (item) {
 
-        const report =
-            reports.find(
-                function (r) {
-                    return r.id === item.id;
-                }
-            );
-
-
-        if (!report) {
-            return;
-        }
-
-
-        const typeMatch =
-            typeFilter === "All" ||
-            report.type === typeFilter;
-
-
-        const statusMatch =
-            statusFilter === "All" ||
-            report.status === statusFilter;
-
-
-        if (
-            typeMatch &&
-            statusMatch
-        ) {
-
-            if (
-                !map.hasLayer(item.marker)
-            ) {
-
-                item.marker.addTo(map);
-
-            }
-
-        } else {
-
-            if (
-                map.hasLayer(item.marker)
-            ) {
-
-                map.removeLayer(
-                    item.marker
+            const report =
+                reports.find(
+                    r =>
+                        r.id ===
+                        item.id
                 );
 
+
+            if (!report) {
+                return;
+            }
+
+
+            const typeMatch =
+                typeFilter === "All" ||
+                report.type ===
+                    typeFilter;
+
+
+            const statusMatch =
+                statusFilter === "All" ||
+                report.status ===
+                    statusFilter;
+
+
+            if (
+                typeMatch &&
+                statusMatch
+            ) {
+
+                if (
+                    !map.hasLayer(
+                        item.marker
+                    )
+                ) {
+
+                    item.marker.addTo(map);
+
+                }
+
+            } else {
+
+                if (
+                    map.hasLayer(
+                        item.marker
+                    )
+                ) {
+
+                    map.removeLayer(
+                        item.marker
+                    );
+
+                }
+
             }
 
         }
-
-    });
+    );
 
 }
 
 
 /* =====================================================
-   STEP 3.3
-   WASTE HEATMAP
+   HEATMAP
 ===================================================== */
 
-
-/* ================= GET HEATMAP INTENSITY ================= */
-
 function getHeatIntensity(report) {
-
-    /*
-     * Different waste types can have slightly
-     * different intensity values.
-     */
 
     let intensity = 0.6;
 
 
-    if (report.type === "Plastic") {
+    if (
+        report.type === "Plastic"
+    ) {
 
         intensity = 0.8;
 
-    } else if (report.type === "Organic") {
+    } else if (
+        report.type === "Organic"
+    ) {
 
         intensity = 0.6;
 
-    } else if (report.type === "Electronic") {
+    } else if (
+        report.type === "Electronic"
+    ) {
 
         intensity = 1.0;
 
-    } else if (report.type === "Other") {
+    } else if (
+        report.type === "Other"
+    ) {
 
         intensity = 0.5;
 
     }
 
 
-    /*
-     * Increase intensity for unresolved reports
-     */
-    if (report.status === "Pending") {
+    if (
+        report.status === "Pending"
+    ) {
 
         intensity += 0.2;
 
     }
 
 
-    /*
-     * Limit maximum
-     */
     return Math.min(
         intensity,
         1
@@ -740,9 +1219,6 @@ function updateHeatmap() {
     }
 
 
-    /*
-     * Remove old heatmap
-     */
     if (heatLayer) {
 
         map.removeLayer(
@@ -754,27 +1230,24 @@ function updateHeatmap() {
     }
 
 
-    /*
-     * Stop if heatmap disabled
-     */
     if (!heatmapEnabled) {
 
         return;
+
     }
 
 
-    /*
-     * Make sure plugin loaded
-     */
     if (
-        typeof L.heatLayer !== "function"
+        typeof L.heatLayer !==
+        "function"
     ) {
 
         console.warn(
-            "Leaflet Heatmap plugin not loaded."
+            "Heatmap plugin not loaded."
         );
 
         return;
+
     }
 
 
@@ -790,386 +1263,40 @@ function updateHeatmap() {
         )?.value || "All";
 
 
-    /*
-     * Build heat points
-     */
     const heatPoints =
         reports
-            .filter(function (report) {
-
-                const typeMatch =
-                    typeFilter === "All" ||
-                    report.type === typeFilter;
-
-
-                const statusMatch =
-                    statusFilter === "All" ||
-                    report.status === statusFilter;
-
-
-                return (
-                    typeMatch &&
-                    statusMatch &&
-                    report.latitude !== null &&
-                    report.longitude !== null
-                );
-
-            })
-            .map(function (report) {
-
-                return [
-
-                    Number(report.latitude),
-
-                    Number(report.longitude),
-
-                    getHeatIntensity(report)
-
-                ];
-
-            });
-
-
-    /*
-     * No data
-     */
-    if (heatPoints.length === 0) {
-
-        return;
-
-    }
-
-
-    /*
-     * Create heat layer
-     */
-    heatLayer =
-        L.heatLayer(
-            heatPoints,
-            {
-
-                radius: 35,
-
-                blur: 25,
-
-                maxZoom: 17,
-
-                max: 1.0,
-
-                minOpacity: 0.35
-
-            }
-        ).addTo(map);
-
-}
-
-
-/* ================= TOGGLE HEATMAP ================= */
-
-function toggleHeatmap() {
-
-    heatmapEnabled =
-        !heatmapEnabled;
-
-
-    const button =
-        document.getElementById(
-            "heatmapToggleBtn"
-        );
-
-
-    if (heatmapEnabled) {
-
-        button.textContent =
-            "🔥 Heatmap ON";
-
-        button.classList.add(
-            "active"
-        );
-
-        updateHeatmap();
-
-    } else {
-
-        button.textContent =
-            "🔥 Heatmap OFF";
-
-        button.classList.remove(
-            "active"
-        );
-
-
-        if (heatLayer) {
-
-            map.removeLayer(
-                heatLayer
-            );
-
-            heatLayer = null;
-
-        }
-
-    }
-
-}
-
-
-/* ================= DISPLAY REPORTS ================= */
-
-function displayReports() {
-
-    const container =
-        document.getElementById(
-            "reportsContainer"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const search =
-        document.getElementById(
-            "searchReports"
-        )?.value
-        .toLowerCase()
-        .trim() || "";
-
-
-    const typeFilter =
-        document.getElementById(
-            "reportTypeFilter"
-        )?.value || "All";
-
-
-    const statusFilter =
-        document.getElementById(
-            "reportStatusFilter"
-        )?.value || "All";
-
-
-    const filteredReports =
-        reports.filter(function (report) {
-
-            const searchMatch =
-                report.description
-                    .toLowerCase()
-                    .includes(search) ||
-                report.type
-                    .toLowerCase()
-                    .includes(search) ||
-                report.status
-                    .toLowerCase()
-                    .includes(search);
-
-
-            const typeMatch =
-                typeFilter === "All" ||
-                report.type === typeFilter;
-
-
-            const statusMatch =
-                statusFilter === "All" ||
-                report.status === statusFilter;
-
-
-            return (
-                searchMatch &&
-                typeMatch &&
-                statusMatch
-            );
-
-        });
-
-
-    /*
-     * Empty state
-     */
-    if (filteredReports.length === 0) {
-
-        container.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    🗑️
-                </div>
-
-                <h3>
-                    No waste reports found
-                </h3>
-
-                <p>
-                    Try changing your filters
-                    or submit a new report.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        filteredReports
-            .map(function (report) {
-
-                return createReportCard(
-                    report
-                );
-
-            })
-            .join("");
-
-}
-
-
-/* ================= CREATE REPORT CARD ================= */
-
-function createReportCard(report) {
-
-    const photoHTML =
-        report.photo
-
-            ? `
-                <img
-                    src="${report.photo}"
-                    alt="Waste photo"
-                    class="report-image"
-                >
-            `
-
-            : `
-                <div class="no-photo">
-                    📷 No Photo
-                </div>
-            `;
-
-
-    return `
-
-        <div class="report-card">
-
-            <div class="report-card-header">
-
-                <div>
-
-                    <span class="waste-type-badge ${getTypeClass(report.type)}">
-
-                        ${getWasteEmoji(report.type)}
-
-                        ${escapeHTML(report.type)}
-
-                    </span>
-
-                </div>
-
-                <span class="status-badge ${getStatusClass(report.status)}">
-
-                    ${getStatusEmoji(report.status)}
-
-                    ${escapeHTML(report.status)}
-
-                </span>
-
-            </div>
-
-
-            ${photoHTML}
-
-
-            <div class="report-content">
-
-                <h3>
-                    ${escapeHTML(report.type)} Waste Report
-                </h3>
-
-                <p class="report-description">
-                    ${escapeHTML(report.description)}
-                </p>
-
-
-                <div class="report-info">
-
-                    <p>
-                        📍
-                        <strong>Location:</strong>
-                        ${Number(report.latitude).toFixed(5)},
-                        ${Number(report.longitude).toFixed(5)}
-                    </p>
-
-                    <p>
-                        🕒
-                        <strong>Reported:</strong>
-                        ${escapeHTML(report.createdAt)}
-                    </p>
-
-                </div>
-
-
-                <div class="report-actions">
-
-                    <button
-                        class="map-view-btn"
-                        onclick="focusReportOnMap('${report.id}')"
-                    >
-                        📍 View on Map
-                    </button>
-
-
-                    <select
-                        class="status-select"
-                        onchange="changeStatus('${report.id}', this.value)"
-                    >
-
-                        <option
-                            value="Pending"
-                            ${report.status === "Pending" ? "selected" : ""}
-                        >
-                            ⏳ Pending
-                        </option>
-
-                        <option
-                            value="In Progress"
-                            ${report.status === "In Progress" ? "selected" : ""}
-                        >
-                            🚛 In Progress
-                        </option>
-
-                        <option
-                            value="Collected"
-                            ${report.status === "Collected" ? "selected" : ""}
-                        >
-                            ✅ Collected
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* ================= FOCUS REPORT ON MAP ================= */
-
-function focusReportOnMap(reportId) {
-
-    const report =
-        reports.find(
-            function (r) {
-                return r.id === reportId;
-            }
-        );
-
-
-    if
+            .filter(
+                function (report) {
+
+                    const typeMatch =
+                        typeFilter ===
+                            "All" ||
+                        report.type ===
+                            typeFilter;
+
+
+                    const statusMatch =
+                        statusFilter ===
+                            "All" ||
+                        report.status ===
+                            statusFilter;
+
+
+                    return (
+                        typeMatch &&
+                        statusMatch &&
+                        report.latitude !==
+                            null &&
+                        report.longitude !==
+                            null
+                    );
+
+                }
+            )
+            .map(
+                function (report) {
+
+                    return [
+
+                        Number(
+                            report.latitude
