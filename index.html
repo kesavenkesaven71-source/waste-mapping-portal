@@ -10,7 +10,7 @@
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    >
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
@@ -18,17 +18,15 @@
 
 <body>
 
-<!-- =====================================================
+<!-- =========================================================
      AUTH PAGE
-===================================================== -->
+========================================================= -->
 
 <div id="authPage" class="auth-page">
 
     <div class="auth-box">
 
-        <div class="auth-logo">
-            ♻️
-        </div>
+        <div class="auth-logo">♻️</div>
 
         <h1>Waste Mapping Portal</h1>
 
@@ -36,7 +34,8 @@
             Geo-Tracking & Smart Waste Management
         </p>
 
-        <!-- LOGIN -->
+
+        <!-- ================= LOGIN ================= -->
 
         <div id="loginSection">
 
@@ -45,7 +44,8 @@
             <form id="loginForm">
 
                 <div class="input-group">
-                    <label>Username</label>
+                    <label for="loginUsername">Username</label>
+
                     <input
                         type="text"
                         id="loginUsername"
@@ -55,7 +55,8 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Password</label>
+                    <label for="loginPassword">Password</label>
+
                     <input
                         type="password"
                         id="loginPassword"
@@ -64,7 +65,10 @@
                     >
                 </div>
 
-                <button type="submit" class="primary-btn">
+                <button
+                    type="submit"
+                    class="primary-btn"
+                >
                     Login
                 </button>
 
@@ -72,26 +76,39 @@
 
             <p id="loginMessage" class="auth-message"></p>
 
-            <p class="switch-auth">
-                Don't have an account?
-                <button type="button" onclick="showSignup()">
-                    Create Account
+
+            <!-- CREATE ACCOUNT -->
+            <div class="create-account-area">
+
+                <span>Don't have an account?</span>
+
+                <button
+                    type="button"
+                    id="createAccountBtn"
+                    class="create-account-btn"
+                >
+                    📝 Create Account
                 </button>
-            </p>
+
+            </div>
 
         </div>
 
 
-        <!-- SIGN UP -->
+        <!-- ================= SIGN UP ================= -->
 
-        <div id="signupSection" class="hidden">
+        <div
+            id="signupSection"
+            class="hidden"
+        >
 
             <h2>📝 Create Account</h2>
 
             <form id="signupForm">
 
                 <div class="input-group">
-                    <label>Full Name</label>
+                    <label for="signupName">Full Name</label>
+
                     <input
                         type="text"
                         id="signupName"
@@ -101,7 +118,8 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Username</label>
+                    <label for="signupUsername">Username</label>
+
                     <input
                         type="text"
                         id="signupUsername"
@@ -111,7 +129,8 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Password</label>
+                    <label for="signupPassword">Password</label>
+
                     <input
                         type="password"
                         id="signupPassword"
@@ -121,7 +140,10 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Confirm Password</label>
+                    <label for="signupConfirmPassword">
+                        Confirm Password
+                    </label>
+
                     <input
                         type="password"
                         id="signupConfirmPassword"
@@ -130,20 +152,31 @@
                     >
                 </div>
 
-                <button type="submit" class="primary-btn">
-                    Create Account
+                <button
+                    type="submit"
+                    class="primary-btn"
+                >
+                    🚀 Create Account
                 </button>
 
             </form>
 
             <p id="signupMessage" class="auth-message"></p>
 
-            <p class="switch-auth">
-                Already have an account?
-                <button type="button" onclick="showLogin()">
-                    Login
+
+            <div class="create-account-area">
+
+                <span>Already have an account?</span>
+
+                <button
+                    type="button"
+                    id="backToLoginBtn"
+                    class="login-link-btn"
+                >
+                    🔐 Login
                 </button>
-            </p>
+
+            </div>
 
         </div>
 
@@ -152,9 +185,9 @@
 </div>
 
 
-<!-- =====================================================
+<!-- =========================================================
      MAIN PORTAL
-===================================================== -->
+========================================================= -->
 
 <div id="portalPage" class="hidden">
 
@@ -170,10 +203,14 @@
 
             <div>
                 <h1>Waste Mapping Portal</h1>
-                <span>Smart Waste Management System</span>
+
+                <span>
+                    Smart Waste Management System
+                </span>
             </div>
 
         </div>
+
 
         <div class="header-right">
 
@@ -182,8 +219,8 @@
             </span>
 
             <button
+                id="logoutBtn"
                 class="logout-btn"
-                onclick="logoutUser()"
             >
                 Logout
             </button>
@@ -195,9 +232,10 @@
 
     <main class="container">
 
+
         <!-- =================================================
-             DASHBOARD STATS
-        ================================================== -->
+             DASHBOARD
+        ================================================= -->
 
         <section class="section">
 
@@ -209,30 +247,37 @@
 
                 <div class="stat-card">
                     <div class="stat-icon">🗑️</div>
+
                     <div>
                         <h3 id="totalReports">0</h3>
                         <p>Total Reports</p>
                     </div>
                 </div>
 
+
                 <div class="stat-card plastic-card">
                     <div class="stat-icon">🔵</div>
+
                     <div>
                         <h3 id="plasticCount">0</h3>
                         <p>Plastic Waste</p>
                     </div>
                 </div>
 
+
                 <div class="stat-card organic-card">
                     <div class="stat-icon">🟢</div>
+
                     <div>
                         <h3 id="organicCount">0</h3>
                         <p>Organic Waste</p>
                     </div>
                 </div>
 
+
                 <div class="stat-card electronic-card">
                     <div class="stat-icon">🟣</div>
+
                     <div>
                         <h3 id="electronicCount">0</h3>
                         <p>Electronic Waste</p>
@@ -245,8 +290,8 @@
 
 
         <!-- =================================================
-             SMART PRIORITY DASHBOARD
-        ================================================== -->
+             SMART PRIORITY
+        ================================================= -->
 
         <section class="section">
 
@@ -262,61 +307,46 @@
 
             </div>
 
+
             <div class="priority-grid">
 
                 <div class="priority-card urgent">
-
-                    <div class="priority-icon">
-                        🔴
-                    </div>
+                    <div class="priority-icon">🔴</div>
 
                     <div>
                         <h3 id="highPriorityCount">0</h3>
                         <p>High Priority</p>
                     </div>
-
                 </div>
 
 
                 <div class="priority-card medium">
-
-                    <div class="priority-icon">
-                        🟠
-                    </div>
+                    <div class="priority-icon">🟠</div>
 
                     <div>
                         <h3 id="mediumPriorityCount">0</h3>
                         <p>Medium Priority</p>
                     </div>
-
                 </div>
 
 
                 <div class="priority-card normal">
-
-                    <div class="priority-icon">
-                        🟢
-                    </div>
+                    <div class="priority-icon">🟢</div>
 
                     <div>
                         <h3 id="lowPriorityCount">0</h3>
                         <p>Low Priority</p>
                     </div>
-
                 </div>
 
 
                 <div class="priority-card hotspot">
-
-                    <div class="priority-icon">
-                        🔥
-                    </div>
+                    <div class="priority-icon">🔥</div>
 
                     <div>
                         <h3 id="hotspotCount">0</h3>
                         <p>Hotspot Areas</p>
                     </div>
-
                 </div>
 
             </div>
@@ -326,7 +356,7 @@
 
         <!-- =================================================
              COLLECTION STATUS
-        ================================================== -->
+        ================================================= -->
 
         <section class="section">
 
@@ -336,22 +366,27 @@
 
                 <div class="status-summary pending-summary">
                     <span>⏳</span>
+
                     <div>
                         <h3 id="pendingCount">0</h3>
                         <p>Pending</p>
                     </div>
                 </div>
 
+
                 <div class="status-summary progress-summary">
                     <span>🚛</span>
+
                     <div>
                         <h3 id="progressCount">0</h3>
                         <p>In Progress</p>
                     </div>
                 </div>
 
+
                 <div class="status-summary collected-summary">
                     <span>✅</span>
+
                     <div>
                         <h3 id="collectedCount">0</h3>
                         <p>Collected</p>
@@ -365,7 +400,7 @@
 
         <!-- =================================================
              REPORT WASTE
-        ================================================== -->
+        ================================================= -->
 
         <section class="section">
 
@@ -377,7 +412,9 @@
 
                     <div class="input-group">
 
-                        <label>Waste Type</label>
+                        <label for="wasteType">
+                            Waste Type
+                        </label>
 
                         <select id="wasteType" required>
 
@@ -408,7 +445,9 @@
 
                     <div class="input-group">
 
-                        <label>Waste Quantity</label>
+                        <label for="wasteQuantity">
+                            Waste Quantity
+                        </label>
 
                         <select id="wasteQuantity">
 
@@ -433,7 +472,9 @@
 
                 <div class="input-group">
 
-                    <label>Description</label>
+                    <label for="wasteDescription">
+                        Description
+                    </label>
 
                     <textarea
                         id="wasteDescription"
@@ -447,7 +488,9 @@
 
                 <div class="input-group">
 
-                    <label>Photo</label>
+                    <label for="wastePhoto">
+                        Photo
+                    </label>
 
                     <input
                         type="file"
@@ -495,27 +538,28 @@
 
             </form>
 
-            <p id="reportMessage" class="success-message"></p>
+            <p
+                id="reportMessage"
+                class="success-message"
+            ></p>
 
         </section>
 
 
         <!-- =================================================
-             MAP
-        ================================================== -->
+             SMART MAP
+        ================================================= -->
 
         <section class="section">
 
             <div class="section-title">
 
                 <div>
-
                     <h2>🗺️ Smart Waste Map</h2>
 
                     <p class="section-description">
                         View waste reports, priority levels and hotspots.
                     </p>
-
                 </div>
 
             </div>
@@ -635,17 +679,9 @@
 
                     <hr>
 
-                    <div>
-                        🔴 High Priority
-                    </div>
-
-                    <div>
-                        🟠 Medium Priority
-                    </div>
-
-                    <div>
-                        🟢 Low Priority
-                    </div>
+                    <div>🔴 High Priority</div>
+                    <div>🟠 Medium Priority</div>
+                    <div>🟢 Low Priority</div>
 
                 </div>
 
@@ -656,20 +692,18 @@
 
         <!-- =================================================
              REPORTS
-        ================================================== -->
+        ================================================= -->
 
         <section class="section">
 
             <div class="section-title">
 
                 <div>
-
                     <h2>📋 Waste Reports</h2>
 
                     <p class="section-description">
                         Manage and update reported waste.
                     </p>
-
                 </div>
 
             </div>
@@ -732,14 +766,17 @@
             </div>
 
 
-            <div id="reportsContainer" class="reports-container"></div>
+            <div
+                id="reportsContainer"
+                class="reports-container"
+            ></div>
 
         </section>
 
 
         <!-- =================================================
              ANALYTICS
-        ================================================== -->
+        ================================================= -->
 
         <section class="section">
 
@@ -749,7 +786,9 @@
 
                 <div class="chart-box">
 
-                    <h3>Waste Type Distribution</h3>
+                    <h3>
+                        Waste Type Distribution
+                    </h3>
 
                     <canvas id="wasteChart"></canvas>
 
@@ -758,48 +797,10 @@
 
                 <div class="chart-box">
 
-                    <h3>Collection Status</h3>
+                    <h3>
+                        Collection Status
+                    </h3>
 
                     <canvas id="statusChart"></canvas>
 
                 </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- FOOTER -->
-
-    <footer>
-
-        <p>
-            ♻️ Geo-Tracking and Waste Mapping Portal
-        </p>
-
-        <p>
-            Smart Waste Management • Community Reporting
-        </p>
-
-    </footer>
-
-</div>
-
-
-<!-- =====================================================
-     LIBRARIES
-===================================================== -->
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Main JS -->
-<script src="script.js"></script>
-
-</body>
-</html>
