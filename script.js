@@ -1,4 +1,10 @@
 /* =====================================================
+   WASTE MAPPING PORTAL - STEP 3.4
+   COMPLETE CORRECTED SCRIPT.JS
+===================================================== */
+
+
+/* =====================================================
    AUTHENTICATION
 ===================================================== */
 
@@ -117,6 +123,30 @@ function createAccount(event) {
     }
 
 
+    if (username.length < 3) {
+
+        message.textContent =
+            "❌ Username must contain at least 3 characters.";
+
+        message.className =
+            "auth-message error";
+
+        return;
+    }
+
+
+    if (password.length < 4) {
+
+        message.textContent =
+            "❌ Password must contain at least 4 characters.";
+
+        message.className =
+            "auth-message error";
+
+        return;
+    }
+
+
     const existingUser =
         users.find(
             user =>
@@ -179,6 +209,10 @@ function createAccount(event) {
             "loginUsername"
         ).value = username;
 
+        document.getElementById(
+            "loginPassword"
+        ).focus();
+
     }, 800);
 
 }
@@ -192,13 +226,16 @@ function loginUser(event) {
 
     event.preventDefault();
 
+
     const username =
-        document.getElementById("loginUsername")
+        document
+            .getElementById("loginUsername")
             .value
             .trim();
 
     const password =
-        document.getElementById("loginPassword")
+        document
+            .getElementById("loginPassword")
             .value;
 
     const message =
@@ -209,7 +246,7 @@ function loginUser(event) {
         users.find(
             item =>
                 item.username.toLowerCase() ===
-                username.toLowerCase() &&
+                    username.toLowerCase() &&
                 item.password === password
         );
 
@@ -257,13 +294,25 @@ function loginUser(event) {
 
 function openPortal() {
 
-    document
-        .getElementById("authPage")
-        .classList.add("hidden");
+    const authPage =
+        document.getElementById("authPage");
 
-    document
-        .getElementById("portalPage")
-        .classList.remove("hidden");
+    const portalPage =
+        document.getElementById("portalPage");
+
+
+    if (authPage) {
+
+        authPage.classList.add("hidden");
+
+    }
+
+
+    if (portalPage) {
+
+        portalPage.classList.remove("hidden");
+
+    }
 
 
     const currentUserName =
@@ -344,7 +393,12 @@ function initializeMap() {
 
     if (!mapElement) {
 
-        console.error("Map element not found.");
+        return;
+
+    }
+
+
+    if (map) {
 
         return;
 
@@ -416,6 +470,64 @@ function getWasteIcon(type) {
 
 
 /* =====================================================
+   WASTE EMOJI
+===================================================== */
+
+function getWasteEmoji(type) {
+
+    if (type === "Plastic") {
+
+        return "🔵";
+
+    }
+
+    if (type === "Organic") {
+
+        return "🟢";
+
+    }
+
+    if (type === "Electronic") {
+
+        return "🟣";
+
+    }
+
+    return "⚫";
+
+}
+
+
+/* =====================================================
+   STATUS EMOJI
+===================================================== */
+
+function getStatusEmoji(status) {
+
+    if (status === "Pending") {
+
+        return "⏳";
+
+    }
+
+    if (status === "In Progress") {
+
+        return "🚛";
+
+    }
+
+    if (status === "Collected") {
+
+        return "✅";
+
+    }
+
+    return "📋";
+
+}
+
+
+/* =====================================================
    PRIORITY CALCULATION
 ===================================================== */
 
@@ -475,7 +587,7 @@ function calculatePriority(report) {
     }
 
 
-    /* Urgent Description Keywords */
+    /* Description */
 
     const description =
         (report.description || "").toLowerCase();
@@ -551,13 +663,11 @@ function getPriorityEmoji(priority) {
 
     }
 
-
     if (priority === "Medium") {
 
         return "🟠";
 
     }
-
 
     return "🟢";
 
@@ -758,6 +868,13 @@ function updatePriorityDashboard() {
 
 function addReportMarker(report) {
 
+    if (!map) {
+
+        return;
+
+    }
+
+
     if (
         report.latitude === null ||
         report.latitude === undefined ||
@@ -822,22 +939,17 @@ function addReportMarker(report) {
 
             <p>
                 <strong>Status:</strong>
-                ${escapeHTML(
-                    report.status || "Pending"
-                )}
+                ${getStatusEmoji(report.status)}
+                ${escapeHTML(report.status)}
             </p>
 
             <p>
                 <strong>Quantity:</strong>
-                ${escapeHTML(
-                    report.quantity || "Small"
-                )}
+                ${escapeHTML(report.quantity || "Small")}
             </p>
 
             <p>
-                ${escapeHTML(
-                    report.description || ""
-                )}
+                ${escapeHTML(report.description)}
             </p>
 
         </div>
@@ -860,7 +972,11 @@ function addReportMarker(report) {
 
 function loadSavedMarkers() {
 
-    if (!map) return;
+    if (!map) {
+
+        return;
+
+    }
 
 
     Object.values(reportMarkers)
@@ -896,7 +1012,11 @@ function loadSavedMarkers() {
 
 function filterMapMarkers() {
 
-    if (!map) return;
+    if (!map) {
+
+        return;
+
+    }
 
 
     const typeElement =
@@ -946,7 +1066,11 @@ function filterMapMarkers() {
             reportMarkers[report.id];
 
 
-        if (!marker) return;
+        if (!marker) {
+
+            return;
+
+        }
 
 
         const priority =
@@ -960,8 +1084,7 @@ function filterMapMarkers() {
 
         const statusMatch =
             statusFilter === "All" ||
-            (report.status || "Pending") ===
-                statusFilter;
+            report.status === statusFilter;
 
 
         const priorityMatch =
@@ -1036,16 +1159,16 @@ function getHeatIntensity(report) {
 
 function updateHeatmap() {
 
-    if (!map) return;
+    if (!map) {
+
+        return;
+
+    }
 
 
     if (heatLayer) {
 
-        if (map.hasLayer(heatLayer)) {
-
-            map.removeLayer(heatLayer);
-
-        }
+        map.removeLayer(heatLayer);
 
         heatLayer = null;
 
@@ -1060,7 +1183,8 @@ function updateHeatmap() {
 
 
     if (
-        typeof L.heatLayer !== "function"
+        typeof L.heatLayer !==
+        "function"
     ) {
 
         console.warn(
@@ -1141,8 +1265,7 @@ function updateHeatmap() {
 
         const statusMatch =
             statusFilter === "All" ||
-            (report.status || "Pending") ===
-                statusFilter;
+            report.status === statusFilter;
 
 
         const priorityMatch =
@@ -1176,97 +1299,3 @@ function updateHeatmap() {
         return;
 
     }
-
-
-    heatLayer =
-        L.heatLayer(
-            points,
-            {
-                radius: 30,
-                blur: 20,
-                maxZoom: 15
-            }
-        ).addTo(map);
-
-}
-
-
-/* =====================================================
-   HEATMAP TOGGLE
-===================================================== */
-
-function toggleHeatmap() {
-
-    heatmapEnabled =
-        !heatmapEnabled;
-
-
-    const button =
-        document.getElementById(
-            "heatmapToggle"
-        );
-
-
-    if (!button) return;
-
-
-    if (heatmapEnabled) {
-
-        button.textContent =
-            "❌ Hide Heatmap";
-
-        button.classList.add(
-            "active"
-        );
-
-    } else {
-
-        button.textContent =
-            "🔥 Show Heatmap";
-
-        button.classList.remove(
-            "active"
-        );
-
-    }
-
-
-    updateHeatmap();
-
-}
-
-
-/* =====================================================
-   GET LOCATION
-===================================================== */
-
-function getLocation() {
-
-    const locationText =
-        document.getElementById(
-            "locationText"
-        );
-
-
-    if (!navigator.geolocation) {
-
-        locationText.textContent =
-            "❌ Geolocation not supported.";
-
-        return;
-
-    }
-
-
-    locationText.textContent =
-        "📡 Getting location...";
-
-
-    navigator.geolocation.getCurrentPosition(
-
-        position => {
-
-            latitude =
-                position.coords.latitude;
-
-            longitude =
