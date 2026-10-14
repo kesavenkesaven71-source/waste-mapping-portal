@@ -1,318 +1,542 @@
-// ===============================
-// WASTE MAPPING PORTAL - SCRIPT
-// ===============================
+
+const SUPABASE_URL =
+    "https://bpapvncrqygkpekesuhp.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_Wj5xsptHKI3f7jp-oV_DGA_3v2LkAD_";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // -------------------------------
+    // =========================
     // ELEMENTS
-    // -------------------------------
+    // =========================
 
-    const authPage = document.getElementById("authPage");
-    const portalPage = document.getElementById("portalPage");
+    const $ = id => document.getElementById(id);
 
-    const loginSection = document.getElementById("loginSection");
-    const signupSection = document.getElementById("signupSection");
+    const authPage = $("authPage");
+    const portalPage = $("portalPage");
 
-    const loginForm = document.getElementById("loginForm");
-    const signupForm = document.getElementById("signupForm");
+    const loginSection = $("loginSection");
+    const signupSection = $("signupSection");
 
-    const createAccountBtn = document.getElementById("createAccountBtn");
-    const backToLoginBtn = document.getElementById("backToLoginBtn");
+    const loginForm = $("loginForm");
+    const signupForm = $("signupForm");
 
-    const loginMessage = document.getElementById("loginMessage");
-    const signupMessage = document.getElementById("signupMessage");
+    const loginMessage = $("loginMessage");
+    const signupMessage = $("signupMessage");
 
-    const logoutBtn = document.getElementById("logoutBtn");
-    const currentUserName = document.getElementById("currentUserName");
+    const createAccountBtn = $("createAccountBtn");
+    const backToLoginBtn = $("backToLoginBtn");
 
+    const forgotPasswordBtn = $("forgotPasswordBtn");
+    const resetPasswordSection = $("resetPasswordSection");
+    const resetPasswordForm = $("resetPasswordForm");
+    const resetMessage = $("resetMessage");
 
-    // -------------------------------
-    // DEFAULT USER
-    // -------------------------------
+    const logoutBtn = $("logoutBtn");
+    const currentUserName = $("currentUserName");
 
-    const defaultUser = {
-        name: "Admin",
-        username: "admin",
-        password: "admin123"
-    };
+    let map = null;
+    let markers = [];
+    let heatLayer = null;
+    let wasteChart = null;
+    let statusChart = null;
 
-    // Create default account if no users exist
-    if (!localStorage.getItem("wasteUsers")) {
-        localStorage.setItem(
-            "wasteUsers",
-            JSON.stringify([defaultUser])
-        );
-    }
+    let portalInitialized = false;
+    let recoveryMode = false;
 
-
-    // -------------------------------
-    // SHOW LOGIN
-    // -------------------------------
+    // =========================
+    // AUTH PAGE
+    // =========================
 
     function showLogin() {
+
+        recoveryMode = false;
+
+        authPage.classList.remove("hidden");
+        portalPage.classList.add("hidden");
+
         loginSection.classList.remove("hidden");
         signupSection.classList.add("hidden");
 
+        resetPasswordSection?.classList.add("hidden");
+
         loginMessage.textContent = "";
         signupMessage.textContent = "";
+
     }
 
-
-    // -------------------------------
-    // SHOW SIGNUP
-    // -------------------------------
-
     function showSignup() {
+
         loginSection.classList.add("hidden");
         signupSection.classList.remove("hidden");
 
         loginMessage.textContent = "";
         signupMessage.textContent = "";
+
     }
 
+    createAccountBtn.addEventListener("click", showSignup);
 
-    // -------------------------------
-    // CREATE ACCOUNT PAGE
-    // -------------------------------
+    backToLoginBtn.addEventListener("click", showLogin);
 
-    createAccountBtn.addEventListener("click", () => {
-        showSignup();
-    });
+    // =========================
+    // OPEN DASHBOARD
+    // =========================
 
+    function openDashboard(user) {
 
-    // -------------------------------
-    // BACK TO LOGIN
-    // -------------------------------
-
-    backToLoginBtn.addEventListener("click", () => {
-        showLogin();
-    });
-
-
-    // -------------------------------
-    // LOGIN
-    // -------------------------------
-
-    loginForm.addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-        const username =
-            document.getElementById("loginUsername").value.trim();
-
-        const password =
-            document.getElementById("loginPassword").value;
-
-        const users =
-            JSON.parse(localStorage.getItem("wasteUsers")) || [];
-
-        const user = users.find(
-            u =>
-                u.username === username &&
-                u.password === password
-        );
-
-
-        if (user) {
-
-            // Save logged-in user
-            localStorage.setItem(
-                "loggedInUser",
-                JSON.stringify(user)
-            );
-
-            loginMessage.textContent =
-                "Login successful! Opening dashboard...";
-
-            loginMessage.style.color = "green";
-
-
-            // Show portal
-            setTimeout(() => {
-
-                authPage.classList.add("hidden");
-                portalPage.classList.remove("hidden");
-
-                currentUserName.textContent = user.name;
-
-                // Load portal functions
-                initializePortal();
-
-            }, 500);
-
-        } else {
-
-            loginMessage.textContent =
-                "❌ Invalid username or password.";
-
-            loginMessage.style.color = "red";
-        }
-
-    });
-
-
-    // -------------------------------
-    // SIGNUP
-    // -------------------------------
-
-    signupForm.addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-        const name =
-            document.getElementById("signupName").value.trim();
-
-        const username =
-            document.getElementById("signupUsername").value.trim();
-
-        const password =
-            document.getElementById("signupPassword").value;
-
-        const confirmPassword =
-            document.getElementById("signupConfirmPassword").value;
-
-
-        if (password !== confirmPassword) {
-
-            signupMessage.textContent =
-                "❌ Passwords do not match.";
-
-            signupMessage.style.color = "red";
-
-            return;
-        }
-
-
-        const users =
-            JSON.parse(localStorage.getItem("wasteUsers")) || [];
-
-
-        const existingUser = users.find(
-            u => u.username === username
-        );
-
-
-        if (existingUser) {
-
-            signupMessage.textContent =
-                "❌ Username already exists.";
-
-            signupMessage.style.color = "red";
-
-            return;
-        }
-
-
-        const newUser = {
-            name: name,
-            username: username,
-            password: password
-        };
-
-
-        users.push(newUser);
-
-        localStorage.setItem(
-            "wasteUsers",
-            JSON.stringify(users)
-        );
-
-
-        signupMessage.textContent =
-            "✅ Account created successfully!";
-
-        signupMessage.style.color = "green";
-
-
-        signupForm.reset();
-
-
-        setTimeout(() => {
-            showLogin();
-
-            document.getElementById(
-                "loginUsername"
-            ).value = username;
-
-        }, 800);
-
-    });
-
-
-    // -------------------------------
-    // LOGOUT
-    // -------------------------------
-
-    logoutBtn.addEventListener("click", () => {
-
-        localStorage.removeItem("loggedInUser");
-
-        portalPage.classList.add("hidden");
-        authPage.classList.remove("hidden");
-
-        loginForm.reset();
-
-        showLogin();
-
-    });
-
-
-    // -------------------------------
-    // CHECK LOGIN ON PAGE LOAD
-    // -------------------------------
-
-    const loggedInUser =
-        JSON.parse(localStorage.getItem("loggedInUser"));
-
-
-    if (loggedInUser) {
+        if (!user || recoveryMode) return;
 
         authPage.classList.add("hidden");
         portalPage.classList.remove("hidden");
 
         currentUserName.textContent =
-            loggedInUser.name;
+            user.user_metadata?.name ||
+            user.email ||
+            "User";
 
         initializePortal();
 
-    } else {
+        if (map) {
+            setTimeout(() => map.invalidateSize(), 150);
+        }
+
+    }
+
+    // =========================
+    // LOGIN
+    // =========================
+
+    loginForm.addEventListener("submit", async event => {
+
+        event.preventDefault();
+
+        const email = $("loginUsername").value.trim();
+        const password = $("loginPassword").value;
+
+        loginMessage.textContent = "Logging in...";
+        loginMessage.style.color = "orange";
+
+        try {
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+            if (error) throw error;
+
+            loginMessage.textContent =
+                "✅ Login successful!";
+
+            loginMessage.style.color = "green";
+
+            openDashboard(data.user);
+
+        } catch (error) {
+
+            loginMessage.textContent =
+                "❌ " + error.message;
+
+            loginMessage.style.color = "red";
+
+        }
+
+    });
+
+    // =========================
+    // SIGNUP
+    // =========================
+
+    signupForm.addEventListener("submit", async event => {
+
+        event.preventDefault();
+
+        const name = $("signupName").value.trim();
+
+        const email = $("signupUsername").value.trim();
+
+        const password = $("signupPassword").value;
+
+        const confirmPassword =
+            $("signupConfirmPassword").value;
+
+        if (password !== confirmPassword) {
+
+            signupMessage.textContent =
+                "❌ Passwords do not match!";
+
+            signupMessage.style.color = "red";
+            return;
+
+        }
+
+        if (password.length < 6) {
+
+            signupMessage.textContent =
+                "❌ Password must contain at least 6 characters!";
+
+            signupMessage.style.color = "red";
+            return;
+
+        }
+
+        signupMessage.textContent = "Creating account...";
+        signupMessage.style.color = "orange";
+
+        try {
+
+            const { data, error } =
+                await supabaseClient.auth.signUp({
+
+                    email,
+                    password,
+
+                    options: {
+                        data: {
+                            name
+                        }
+                    }
+
+                });
+
+            if (error) throw error;
+
+            signupMessage.style.color = "green";
+
+            if (data.session && data.user) {
+
+                signupMessage.textContent =
+                    "✅ Account created successfully!";
+
+                signupForm.reset();
+
+                openDashboard(data.user);
+
+            } else {
+
+                signupMessage.textContent =
+                    "✅ Signup request completed. If email confirmation is enabled, check your inbox. If already registered, use Forgot Password.";
+
+                signupForm.reset();
+
+            }
+
+        } catch (error) {
+
+            signupMessage.textContent =
+                "❌ " + error.message;
+
+            signupMessage.style.color = "red";
+
+        }
+
+    });
+
+    // =========================
+    // FORGOT PASSWORD
+    // =========================
+
+    forgotPasswordBtn.addEventListener("click", async () => {
+
+        const email = $("loginUsername").value.trim();
+
+        if (!email) {
+
+            loginMessage.textContent =
+                "❌ First enter your email address.";
+
+            loginMessage.style.color = "red";
+            return;
+
+        }
+
+        forgotPasswordBtn.disabled = true;
+
+        loginMessage.textContent =
+            "Sending password reset email...";
+
+        loginMessage.style.color = "orange";
+
+        try {
+
+            const redirectURL =
+                window.location.origin +
+                window.location.pathname;
+
+            const { error } =
+                await supabaseClient.auth.resetPasswordForEmail(
+                    email,
+                    {
+                        redirectTo: redirectURL
+                    }
+                );
+
+            if (error) throw error;
+
+            loginMessage.textContent =
+                "✅ If this email has an account, a password reset link will be sent. Check Inbox and Spam.";
+
+            loginMessage.style.color = "green";
+
+        } catch (error) {
+
+            loginMessage.textContent =
+                "❌ " + error.message;
+
+            loginMessage.style.color = "red";
+
+        } finally {
+
+            forgotPasswordBtn.disabled = false;
+
+        }
+
+    });
+
+    // =========================
+    // PASSWORD RECOVERY SCREEN
+    // =========================
+
+    function showResetPassword() {
+
+        recoveryMode = true;
 
         authPage.classList.remove("hidden");
         portalPage.classList.add("hidden");
 
+        signupSection.classList.add("hidden");
+        loginSection.classList.remove("hidden");
+
+        loginForm.classList.add("hidden");
+
+        forgotPasswordBtn.classList.add("hidden");
+
+        resetPasswordSection.classList.remove("hidden");
+
+        loginMessage.textContent =
+            "Enter your new password below.";
+
+        loginMessage.style.color = "green";
+
     }
 
+    function restoreLoginScreen() {
 
-    // =================================================
-    // PORTAL FUNCTIONS
-    // =================================================
+        loginForm.classList.remove("hidden");
+
+        forgotPasswordBtn.classList.remove("hidden");
+
+        resetPasswordSection.classList.add("hidden");
+
+        recoveryMode = false;
+
+        showLogin();
+
+    }
+
+    // =========================
+    // UPDATE PASSWORD
+    // =========================
+
+    resetPasswordForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const password = $("newPassword").value;
+
+            const confirmPassword =
+                $("confirmNewPassword").value;
+
+            if (password !== confirmPassword) {
+
+                resetMessage.textContent =
+                    "❌ Passwords do not match!";
+
+                resetMessage.style.color = "red";
+                return;
+
+            }
+
+            if (password.length < 6) {
+
+                resetMessage.textContent =
+                    "❌ Minimum 6 characters required.";
+
+                resetMessage.style.color = "red";
+                return;
+
+            }
+
+            resetMessage.textContent =
+                "Updating password...";
+
+            resetMessage.style.color = "orange";
+
+            try {
+
+                const { data, error } =
+                    await supabaseClient.auth.updateUser({
+                        password
+                    });
+
+                if (error) throw error;
+
+                resetMessage.textContent =
+                    "✅ Password updated successfully!";
+
+                resetMessage.style.color = "green";
+
+                resetPasswordForm.reset();
+
+                await supabaseClient.auth.signOut();
+
+                restoreLoginScreen();
+
+                loginMessage.textContent =
+                    "✅ Password changed. Login using your new password.";
+
+                loginMessage.style.color = "green";
+
+            } catch (error) {
+
+                resetMessage.textContent =
+                    "❌ " + error.message;
+
+                resetMessage.style.color = "red";
+
+            }
+
+        }
+    );
+
+    // =========================
+    // AUTH STATE
+    // =========================
+
+    supabaseClient.auth.onAuthStateChange(
+        (event, session) => {
+
+            if (event === "PASSWORD_RECOVERY") {
+
+                showResetPassword();
+                return;
+
+            }
+
+            if (event === "SIGNED_OUT" && !recoveryMode) {
+
+                portalPage.classList.add("hidden");
+                authPage.classList.remove("hidden");
+
+            }
+
+        }
+    );
+
+    // =========================
+    // LOGOUT
+    // =========================
+
+    logoutBtn.addEventListener("click", async () => {
+
+        const { error } =
+            await supabaseClient.auth.signOut();
+
+        if (error) {
+
+            alert(error.message);
+            return;
+
+        }
+
+        loginForm.reset();
+
+        restoreLoginScreen();
+
+    });
+
+    // =========================
+    // CHECK LOGIN
+    // =========================
+
+    async function checkLogin() {
+
+        try {
+
+            const { data, error } =
+                await supabaseClient.auth.getUser();
+
+            if (recoveryMode) return;
+
+            if (error || !data.user) {
+
+                showLogin();
+                return;
+
+            }
+
+            openDashboard(data.user);
+
+        } catch (error) {
+
+            console.error(error);
+
+            if (!recoveryMode) showLogin();
+
+        }
+
+    }
+
+    // =========================
+    // PORTAL INITIALIZATION
+    // =========================
 
     function initializePortal() {
+
+        if (portalInitialized) return;
+
+        portalInitialized = true;
 
         initializeReports();
         initializeLocation();
         initializePhotoPreview();
+
         initializeMap();
         initializeFilters();
         initializeHeatmap();
-        initializeCharts();
+
+        refreshPortal();
 
     }
 
-
-    // -------------------------------
-    // WASTE REPORT STORAGE
-    // -------------------------------
+    // =========================
+    // REPORT STORAGE
+    // =========================
 
     function getReports() {
 
-        return JSON.parse(
-            localStorage.getItem("wasteReports")
-        ) || [];
+        try {
+
+            return JSON.parse(
+                localStorage.getItem("wasteReports") || "[]"
+            );
+
+        } catch {
+
+            return [];
+
+        }
 
     }
-
 
     function saveReports(reports) {
 
@@ -323,419 +547,498 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    // =========================
+    // PHOTO UPLOAD
+    // =========================
 
-    // -------------------------------
-    // REPORT FORM
-    // -------------------------------
+    async function uploadWastePhoto() {
 
-    function initializeReports() {
+        const file = $("wastePhoto")?.files[0];
 
-        const reportForm =
-            document.getElementById("reportForm");
+        if (!file) return null;
 
-        if (!reportForm) return;
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
 
+        if (!allowedTypes.includes(file.type)) {
 
-        reportForm.onsubmit = function (event) {
+            throw new Error(
+                "Only JPG, PNG and WEBP images are allowed."
+            );
 
-            event.preventDefault();
+        }
 
+        if (file.size > 5 * 1024 * 1024) {
 
-            const wasteType =
-                document.getElementById("wasteType").value;
+            throw new Error(
+                "Photo must be below 5 MB."
+            );
 
-            const wasteQuantity =
-                document.getElementById("wasteQuantity").value;
+        }
 
-            const description =
-                document.getElementById("wasteDescription").value;
+        const { data: userData, error: userError } =
+            await supabaseClient.auth.getUser();
 
-            const locationText =
-                document.getElementById("locationText").textContent;
+        if (userError || !userData.user) {
 
+            throw new Error(
+                "Please login before uploading."
+            );
 
-            if (!wasteType || !description) {
+        }
 
-                alert("Please fill all required fields.");
+        const extension = file.type
+            .split("/")[1]
+            .replace("jpeg", "jpg");
 
-                return;
-            }
+        const fileName =
+            userData.user.id + "/" +
+            crypto.randomUUID() + "." + extension;
 
+        const { data, error } =
+            await supabaseClient.storage
+                .from("waste-photos")
+                .upload(fileName, file, {
 
-            const reports = getReports();
+                    contentType: file.type,
+                    upsert: false
 
+                });
 
-            const report = {
+        if (error) throw error;
 
-                id: Date.now(),
+        const { data: urlData } =
+            supabaseClient.storage
+                .from("waste-photos")
+                .getPublicUrl(data.path);
 
-                wasteType: wasteType,
-
-                quantity: wasteQuantity,
-
-                description: description,
-
-                location: locationText,
-
-                status: "Pending",
-
-                priority:
-                    wasteQuantity === "Large"
-                        ? "High"
-                        : wasteQuantity === "Medium"
-                            ? "Medium"
-                            : "Low",
-
-                date: new Date().toLocaleString()
-
-            };
-
-
-            reports.push(report);
-
-            saveReports(reports);
-
-
-            document.getElementById(
-                "reportMessage"
-            ).textContent =
-                "✅ Waste report submitted successfully!";
-
-
-            reportForm.reset();
-
-
-            updateDashboard();
-
-            displayReports();
-
-            updateMap();
-
-        };
+        return urlData.publicUrl;
 
     }
 
+    // =========================
+    // REPORT FORM
+    // =========================
 
-    // -------------------------------
+    function initializeReports() {
+
+        const reportForm = $("reportForm");
+
+        if (!reportForm) return;
+
+        reportForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+                const wasteType = $("wasteType").value;
+
+                const quantity = $("wasteQuantity").value;
+
+                const description =
+                    $("wasteDescription").value.trim();
+
+                const location =
+                    $("locationText").textContent;
+
+                const message = $("reportMessage");
+
+                if (!wasteType || !description) {
+
+                    message.textContent =
+                        "❌ Please fill all required fields.";
+
+                    return;
+
+                }
+
+                const submitBtn =
+                    reportForm.querySelector(
+                        '[type="submit"]'
+                    );
+
+                submitBtn.disabled = true;
+
+                message.textContent =
+                    "Submitting report...";
+
+                try {
+
+                    const photoURL =
+                        await uploadWastePhoto();
+
+                    const report = {
+
+                        id: Date.now(),
+
+                        wasteType,
+
+                        quantity,
+
+                        description,
+
+                        location,
+
+                        photoURL,
+
+                        status: "Pending",
+
+                        priority:
+                            quantity === "Large"
+                                ? "High"
+                                : quantity === "Medium"
+                                    ? "Medium"
+                                    : "Low",
+
+                        date:
+                            new Date().toLocaleString()
+
+                    };
+
+                    const reports = getReports();
+
+                    reports.push(report);
+
+                    saveReports(reports);
+
+                    message.textContent =
+                        "✅ Waste report submitted successfully!";
+
+                    message.style.color = "green";
+
+                    reportForm.reset();
+
+                    $("photoPreview").innerHTML = "";
+
+                    $("locationText").textContent =
+                        "Location not selected";
+
+                    refreshPortal();
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    message.textContent =
+                        "❌ " + error.message;
+
+                    message.style.color = "red";
+
+                } finally {
+
+                    submitBtn.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+    // =========================
     // GPS LOCATION
-    // -------------------------------
+    // =========================
 
     function initializeLocation() {
 
-        const locationBtn =
-            document.getElementById("locationBtn");
+        const locationBtn = $("locationBtn");
 
         if (!locationBtn) return;
 
-
-        locationBtn.onclick = function () {
-
-            const locationText =
-                document.getElementById("locationText");
-
+        locationBtn.addEventListener("click", () => {
 
             if (!navigator.geolocation) {
 
-                locationText.textContent =
-                    "Geolocation is not supported.";
+                $("locationText").textContent =
+                    "Geolocation not supported.";
 
                 return;
+
             }
 
-
-            locationText.textContent =
-                "📍 Getting location...";
-
+            $("locationText").textContent =
+                "Getting location...";
 
             navigator.geolocation.getCurrentPosition(
 
                 position => {
 
-                    const latitude =
-                        position.coords.latitude;
+                    const lat =
+                        position.coords.latitude.toFixed(6);
 
-                    const longitude =
-                        position.coords.longitude;
+                    const lng =
+                        position.coords.longitude.toFixed(6);
 
-
-                    locationText.textContent =
-                        `Lat: ${latitude.toFixed(6)}, ` +
-                        `Lng: ${longitude.toFixed(6)}`;
+                    $("locationText").textContent =
+                        `Lat: ${lat}, Lng: ${lng}`;
 
                 },
 
                 error => {
 
-                    locationText.textContent =
-                        "❌ Unable to get location.";
+                    $("locationText").textContent =
+                        "Unable to get location.";
 
-                    console.log(error);
+                    console.error(error);
 
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000
                 }
 
             );
 
-        };
+        });
 
     }
 
-
-    // -------------------------------
+    // =========================
     // PHOTO PREVIEW
-    // -------------------------------
+    // =========================
 
     function initializePhotoPreview() {
 
-        const photoInput =
-            document.getElementById("wastePhoto");
+        const photoInput = $("wastePhoto");
+        const preview = $("photoPreview");
 
-        const photoPreview =
-            document.getElementById("photoPreview");
+        if (!photoInput || !preview) return;
 
+        photoInput.addEventListener("change", () => {
 
-        if (!photoInput) return;
+            preview.innerHTML = "";
 
-
-        photoInput.onchange = function () {
-
-            photoPreview.innerHTML = "";
-
-
-            const file =
-                photoInput.files[0];
-
+            const file = photoInput.files[0];
 
             if (!file) return;
 
-
-            const img =
+            const image =
                 document.createElement("img");
 
-
-            img.src =
+            const objectURL =
                 URL.createObjectURL(file);
 
+            image.src = objectURL;
 
-            img.style.maxWidth = "200px";
-            img.style.marginTop = "10px";
-            img.style.borderRadius = "8px";
+            image.style.maxWidth = "200px";
+            image.style.marginTop = "10px";
+            image.style.borderRadius = "8px";
 
+            image.onload = () =>
+                URL.revokeObjectURL(objectURL);
 
-            photoPreview.appendChild(img);
+            preview.appendChild(image);
 
-        };
+        });
 
     }
 
-
-    // -------------------------------
+    // =========================
     // DISPLAY REPORTS
-    // -------------------------------
+    // =========================
 
     function displayReports() {
 
-        const reportsList =
-            document.getElementById("reportsList");
+        const reportsList = $("reportsList");
 
         if (!reportsList) return;
 
-
         const reports = getReports();
-
-
-        if (reports.length === 0) {
-
-            reportsList.innerHTML =
-                "<p>No waste reports available.</p>";
-
-            updateDashboard();
-
-            return;
-        }
-
 
         reportsList.innerHTML = "";
 
+        if (reports.length === 0) {
 
-        reports.forEach(report => {
+            reportsList.textContent =
+                "No waste reports available.";
+
+            return;
+
+        }
+
+        reports.slice().reverse().forEach(report => {
 
             const card =
                 document.createElement("div");
 
-
             card.className = "report-card";
 
+            const heading =
+                document.createElement("h3");
 
-            card.innerHTML = `
+            heading.textContent = report.wasteType;
 
-                <h3>${report.wasteType}</h3>
+            card.appendChild(heading);
 
-                <p>
-                    <strong>Quantity:</strong>
-                    ${report.quantity}
-                </p>
+            function addDetail(label, value) {
 
-                <p>
-                    <strong>Description:</strong>
-                    ${report.description}
-                </p>
+                const p =
+                    document.createElement("p");
 
-                <p>
-                    <strong>Location:</strong>
-                    ${report.location}
-                </p>
+                const strong =
+                    document.createElement("strong");
 
-                <p>
-                    <strong>Status:</strong>
-                    ${report.status}
-                </p>
+                strong.textContent = label + ": ";
 
-                <p>
-                    <strong>Priority:</strong>
-                    ${report.priority}
-                </p>
+                p.appendChild(strong);
 
-                <small>${report.date}</small>
+                p.appendChild(
+                    document.createTextNode(value || "-")
+                );
 
-            `;
+                card.appendChild(p);
 
+            }
+
+            addDetail("Quantity", report.quantity);
+            addDetail("Description", report.description);
+            addDetail("Location", report.location);
+            addDetail("Status", report.status);
+            addDetail("Priority", report.priority);
+            addDetail("Date", report.date);
+
+            if (report.photoURL) {
+
+                const img =
+                    document.createElement("img");
+
+                img.src = report.photoURL;
+
+                img.alt = "Waste Report Photo";
+
+                img.style.width = "180px";
+                img.style.maxWidth = "100%";
+                img.style.borderRadius = "8px";
+                img.style.marginTop = "10px";
+
+                card.appendChild(img);
+
+            }
 
             reportsList.appendChild(card);
 
         });
 
-
-        updateDashboard();
-
     }
 
-
-    // -------------------------------
+    // =========================
     // DASHBOARD COUNTS
-    // -------------------------------
+    // =========================
 
     function updateDashboard() {
 
         const reports = getReports();
 
+        function setText(id, value) {
 
-        const setText = (id, value) => {
-
-            const element =
-                document.getElementById(id);
+            const element = $(id);
 
             if (element) {
                 element.textContent = value;
             }
 
-        };
+        }
 
+        const count = (field, value) =>
+            reports.filter(
+                report => report[field] === value
+            ).length;
 
-        setText(
-            "totalReports",
-            reports.length
-        );
-
+        setText("totalReports", reports.length);
 
         setText(
             "plasticCount",
-            reports.filter(
-                r => r.wasteType === "Plastic"
-            ).length
+            count("wasteType", "Plastic")
         );
-
 
         setText(
             "organicCount",
-            reports.filter(
-                r => r.wasteType === "Organic"
-            ).length
+            count("wasteType", "Organic")
         );
-
 
         setText(
             "electronicCount",
-            reports.filter(
-                r => r.wasteType === "Electronic"
-            ).length
+            count("wasteType", "Electronic")
         );
-
 
         setText(
             "highPriorityCount",
-            reports.filter(
-                r => r.priority === "High"
-            ).length
+            count("priority", "High")
         );
-
 
         setText(
             "mediumPriorityCount",
-            reports.filter(
-                r => r.priority === "Medium"
-            ).length
+            count("priority", "Medium")
         );
-
 
         setText(
             "lowPriorityCount",
-            reports.filter(
-                r => r.priority === "Low"
-            ).length
+            count("priority", "Low")
         );
-
 
         setText(
             "pendingCount",
-            reports.filter(
-                r => r.status === "Pending"
-            ).length
+            count("status", "Pending")
         );
-
 
         setText(
             "progressCount",
-            reports.filter(
-                r => r.status === "In Progress"
-            ).length
+            count("status", "In Progress")
         );
-
 
         setText(
             "collectedCount",
-            reports.filter(
-                r => r.status === "Collected"
-            ).length
+            count("status", "Collected")
         );
+
+        const frequency = {};
+
+        reports.forEach(report => {
+
+            const coords =
+                getCoordinates(report.location);
+
+            if (!coords) return;
+
+            const key = coords
+                .map(value => value.toFixed(3))
+                .join(",");
+
+            frequency[key] =
+                (frequency[key] || 0) + 1;
+
+        });
+
+        const hotspots =
+            Object.values(frequency)
+                .filter(total => total >= 3)
+                .length;
+
+        setText("hotspotCount", hotspots);
 
     }
 
-
-    // -------------------------------
+    // =========================
     // MAP
-    // -------------------------------
-
-    let map = null;
-    let markers = [];
-
+    // =========================
 
     function initializeMap() {
 
-        const mapElement =
-            document.getElementById("map");
-
-
-        if (!mapElement) return;
-
+        if (!$("map") || typeof L === "undefined") {
+            return;
+        }
 
         if (map) return;
-
 
         map = L.map("map").setView(
             [13.0827, 80.2707],
             10
         );
-
 
         L.tileLayer(
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -745,289 +1048,394 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         ).addTo(map);
 
-
         updateMap();
 
     }
 
+    function getCoordinates(location) {
+
+        if (!location) return null;
+
+        const match = location.match(
+            /Lat:\s*(-?[\d.]+),\s*Lng:\s*(-?[\d.]+)/
+        );
+
+        if (!match) return null;
+
+        const lat = parseFloat(match[1]);
+        const lng = parseFloat(match[2]);
+
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        ) {
+            return null;
+        }
+
+        if (
+            Math.abs(lat) > 90 ||
+            Math.abs(lng) > 180
+        ) {
+            return null;
+        }
+
+        return [lat, lng];
+
+    }
+
+    // =========================
+    // FILTER REPORTS
+    // =========================
+
+    function getFilteredReports() {
+
+        const type =
+            $("mapTypeFilter")?.value || "All";
+
+        const status =
+            $("mapStatusFilter")?.value || "All";
+
+        const priority =
+            $("priorityFilter")?.value || "All";
+
+        return getReports().filter(report =>
+
+            (type === "All" ||
+                report.wasteType === type) &&
+
+            (status === "All" ||
+                report.status === status) &&
+
+            (priority === "All" ||
+                report.priority === priority)
+
+        );
+
+    }
+
+    // =========================
+    // UPDATE MAP
+    // =========================
 
     function updateMap() {
 
         if (!map) return;
 
-
         markers.forEach(marker => {
-
             map.removeLayer(marker);
-
         });
-
 
         markers = [];
 
+        if (heatLayer) {
 
-        const reports = getReports();
+            map.removeLayer(heatLayer);
+            heatLayer = null;
 
+        }
+
+        const reports = getFilteredReports();
 
         reports.forEach(report => {
 
-            if (!report.location) return;
+            const coords =
+                getCoordinates(report.location);
 
-
-            const match =
-                report.location.match(
-                    /Lat:\s*([-0-9.]+),\s*Lng:\s*([-0-9.]+)/
-                );
-
-
-            if (!match) return;
-
-
-            const lat =
-                parseFloat(match[1]);
-
-            const lng =
-                parseFloat(match[2]);
-
+            if (!coords) return;
 
             const marker =
-                L.marker([lat, lng])
-                    .addTo(map);
+                L.marker(coords).addTo(map);
 
+            const popup =
+                document.createElement("div");
 
-            marker.bindPopup(`
+            const heading =
+                document.createElement("strong");
 
-                <strong>${report.wasteType}</strong><br>
+            heading.textContent = report.wasteType;
 
-                Quantity: ${report.quantity}<br>
+            popup.appendChild(heading);
 
-                Priority: ${report.priority}<br>
+            [
+                ["Quantity", report.quantity],
+                ["Priority", report.priority],
+                ["Status", report.status]
+            ].forEach(([label, value]) => {
 
-                Status: ${report.status}
+                const p =
+                    document.createElement("p");
 
-            `);
+                p.textContent =
+                    label + ": " + value;
 
+                popup.appendChild(p);
+
+            });
+
+            marker.bindPopup(popup);
 
             markers.push(marker);
 
         });
 
+        const heatButton = $("heatmapToggle");
+
+        if (
+            heatButton?.dataset.active === "true" &&
+            typeof L.heatLayer === "function"
+        ) {
+
+            const heatPoints = reports
+                .map(report =>
+                    getCoordinates(report.location)
+                )
+                .filter(Boolean)
+                .map(coords => [...coords, 0.7]);
+
+            heatLayer = L.heatLayer(
+                heatPoints,
+                {
+                    radius: 25,
+                    blur: 15
+                }
+            ).addTo(map);
+
+        }
+
     }
 
-
-    // -------------------------------
+    // =========================
     // MAP FILTERS
-    // -------------------------------
+    // =========================
 
     function initializeFilters() {
 
-        const typeFilter =
-            document.getElementById("mapTypeFilter");
+        [
+            "mapTypeFilter",
+            "mapStatusFilter",
+            "priorityFilter"
+        ].forEach(id => {
 
-        const statusFilter =
-            document.getElementById("mapStatusFilter");
+            const element = $(id);
 
-        const priorityFilter =
-            document.getElementById("priorityFilter");
+            if (element) {
 
+                element.addEventListener(
+                    "change",
+                    updateMap
+                );
 
-        if (typeFilter) {
+            }
 
-            typeFilter.onchange =
-                applyFilters;
-
-        }
-
-
-        if (statusFilter) {
-
-            statusFilter.onchange =
-                applyFilters;
-
-        }
-
-
-        if (priorityFilter) {
-
-            priorityFilter.onchange =
-                applyFilters;
-
-        }
+        });
 
     }
 
-
-    function applyFilters() {
-
-        const type =
-            document.getElementById(
-                "mapTypeFilter"
-            ).value;
-
-
-        const status =
-            document.getElementById(
-                "mapStatusFilter"
-            ).value;
-
-
-        const priority =
-            document.getElementById(
-                "priorityFilter"
-            ).value;
-
-
-        const reports =
-            getReports().filter(report =>
-
-                (type === "All" ||
-                    report.wasteType === type) &&
-
-                (status === "All" ||
-                    report.status === status) &&
-
-                (priority === "All" ||
-                    report.priority === priority)
-
-            );
-
-
-        console.log(
-            "Filtered Reports:",
-            reports
-        );
-
-    }
-
-
-    // -------------------------------
+    // =========================
     // HEATMAP
-    // -------------------------------
+    // =========================
 
     function initializeHeatmap() {
 
-        const heatmapToggle =
-            document.getElementById(
-                "heatmapToggle"
-            );
+        const button = $("heatmapToggle");
 
+        if (!button) return;
 
-        if (!heatmapToggle) return;
+        button.dataset.active = "false";
 
+        button.addEventListener("click", () => {
 
-        heatmapToggle.onclick = function () {
+            if (typeof L.heatLayer !== "function") {
 
-            alert(
-                "Heatmap feature is ready for GPS-based reports."
-            );
+                alert(
+                    "Heatmap library is not loaded."
+                );
 
-        };
+                return;
+
+            }
+
+            const active =
+                button.dataset.active === "true";
+
+            button.dataset.active = String(!active);
+
+            button.textContent = active
+                ? "🔥 Show Heatmap"
+                : "🔥 Hide Heatmap";
+
+            updateMap();
+
+        });
 
     }
 
-
-    // -------------------------------
+    // =========================
     // CHARTS
-    // -------------------------------
+    // =========================
 
-    function initializeCharts() {
+    function updateCharts() {
+
+        if (typeof Chart === "undefined") return;
+
+        const reports = getReports();
+
+        const count = (field, value) =>
+            reports.filter(
+                report => report[field] === value
+            ).length;
+
+        const wasteCanvas = $("wasteChart");
+
+        if (wasteChart) {
+
+            wasteChart.destroy();
+            wasteChart = null;
+
+        }
+
+        if (wasteCanvas) {
+
+            wasteChart = new Chart(wasteCanvas, {
+
+                type: "bar",
+
+                data: {
+
+                    labels: [
+                        "Plastic",
+                        "Organic",
+                        "Electronic",
+                        "Other"
+                    ],
+
+                    datasets: [{
+
+                        label: "Waste Reports",
+
+                        data: [
+
+                            count("wasteType", "Plastic"),
+
+                            count("wasteType", "Organic"),
+
+                            count("wasteType", "Electronic"),
+
+                            count("wasteType", "Other")
+
+                        ]
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+                                precision: 0
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            });
+
+        }
+
+        const statusCanvas = $("statusChart");
+
+        if (statusChart) {
+
+            statusChart.destroy();
+            statusChart = null;
+
+        }
+
+        if (statusCanvas) {
+
+            statusChart = new Chart(statusCanvas, {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+                        "Pending",
+                        "In Progress",
+                        "Collected"
+                    ],
+
+                    datasets: [{
+
+                        label: "Collection Status",
+
+                        data: [
+
+                            count("status", "Pending"),
+
+                            count("status", "In Progress"),
+
+                            count("status", "Collected")
+
+                        ]
+
+                    }]
+
+                },
+
+                options: {
+                    responsive: true
+                }
+
+            });
+
+        }
+
+    }
+
+    // =========================
+    // REFRESH PORTAL
+    // =========================
+
+    function refreshPortal() {
+
+        displayReports();
+
+        updateDashboard();
+
+        updateMap();
 
         updateCharts();
 
     }
 
+    // =========================
+    // START APPLICATION
+    // =========================
 
-    function updateCharts() {
+    const recoveryHash =
+        window.location.hash.includes("type=recovery");
 
-        if (typeof Chart === "undefined") {
-            return;
-        }
+    if (recoveryHash) {
 
+        recoveryMode = true;
+        showResetPassword();
 
-        const reports = getReports();
+    } else {
 
+        checkLogin();
 
-        const plastic =
-            reports.filter(
-                r => r.wasteType === "Plastic"
-            ).length;
-
-
-        const organic =
-            reports.filter(
-                r => r.wasteType === "Organic"
-            ).length;
-
-
-        const electronic =
-            reports.filter(
-                r => r.wasteType === "Electronic"
-            ).length;
-
-
-        const other =
-            reports.filter(
-                r => r.wasteType === "Other"
-            ).length;
-
-
-        const wasteCanvas =
-            document.getElementById(
-                "wasteChart"
-            );
-
-
-        if (wasteCanvas) {
-
-            new Chart(
-                wasteCanvas,
-                {
-
-                    type: "bar",
-
-                    data: {
-
-                        labels: [
-                            "Plastic",
-                            "Organic",
-                            "Electronic",
-                            "Other"
-                        ],
-
-                        datasets: [
-                            {
-                                label:
-                                    "Waste Reports",
-
-                                data: [
-                                    plastic,
-                                    organic,
-                                    electronic,
-                                    other
-                                ]
-                            }
-                        ]
-
-                    },
-
-                    options: {
-                        responsive: true
-                    }
-
-                }
-            );
-
-        }
-
-    }
-
-
-    // -------------------------------
-    // INITIAL LOAD
-    // -------------------------------
-
-    if (!localStorage.getItem("loggedInUser")) {
-        showLogin();
     }
 
 });
