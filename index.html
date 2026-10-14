@@ -1,17 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Waste Mapping Portal</title>
 
+    <!-- LEAFLET CSS -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
+    <!-- YOUR CSS -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -29,8 +40,17 @@
         <p class="auth-subtitle">
             Geo-Tracking & Smart Waste Management
         </p>
+        
+<button
+    type="button"
+    id="forgotPasswordBtn"
+    onclick="resetPassword()"
+>
+    Forgot Password?
+</button>
 
-        <!-- LOGIN -->
+
+        <!-- LOGIN SECTION -->
 
         <div id="loginSection">
 
@@ -39,26 +59,41 @@
             <form id="loginForm">
 
                 <div class="input-group">
-                    <label>Username</label>
+
+                    <label for="loginUsername">
+                        Email Address
+                    </label>
+
                     <input
-                        type="text"
+                        type="email"
                         id="loginUsername"
-                        placeholder="Enter username"
+                        placeholder="Enter your email"
+                        autocomplete="email"
                         required
                     >
+
                 </div>
 
                 <div class="input-group">
-                    <label>Password</label>
+
+                    <label for="loginPassword">
+                        Password
+                    </label>
+
                     <input
                         type="password"
                         id="loginPassword"
                         placeholder="Enter password"
+                        autocomplete="current-password"
                         required
                     >
+
                 </div>
 
-                <button class="primary-btn" type="submit">
+                <button
+                    class="primary-btn"
+                    type="submit"
+                >
                     Login
                 </button>
 
@@ -67,15 +102,66 @@
             <p id="loginMessage" class="auth-message"></p>
 
             <p class="switch-auth">
+
                 Don't have an account?
-                <button id="createAccountBtn" type="button">
+
+                <button
+                    id="createAccountBtn"
+                    type="button"
+                >
                     Create Account
                 </button>
+
             </p>
 
         </div>
 
-        <!-- SIGNUP -->
+<button type="button" id="forgotPasswordBtn">
+    Forgot Password?
+</button>
+
+<div id="resetPasswordSection" class="hidden">
+
+    <h2>🔑 Set New Password</h2>
+
+    <form id="resetPasswordForm">
+
+        <div class="input-group">
+            <label>New Password</label>
+            <input
+                type="password"
+                id="newPassword"
+                placeholder="Enter new password"
+                minlength="6"
+                autocomplete="new-password"
+                required
+            >
+        </div>
+
+        <div class="input-group">
+            <label>Confirm New Password</label>
+            <input
+                type="password"
+                id="confirmNewPassword"
+                placeholder="Confirm new password"
+                minlength="6"
+                autocomplete="new-password"
+                required
+            >
+        </div>
+
+        <button type="submit" class="primary-btn">
+            Update Password
+        </button>
+
+    </form>
+
+    <p id="resetMessage" class="auth-message"></p>
+
+</div>
+
+
+        <!-- SIGNUP SECTION -->
 
         <div id="signupSection" class="hidden">
 
@@ -84,46 +170,75 @@
             <form id="signupForm">
 
                 <div class="input-group">
-                    <label>Full Name</label>
+
+                    <label for="signupName">
+                        Full Name
+                    </label>
+
                     <input
                         type="text"
                         id="signupName"
                         placeholder="Enter your name"
+                        autocomplete="name"
                         required
                     >
+
                 </div>
 
                 <div class="input-group">
-                    <label>Username</label>
+
+                    <label for="signupUsername">
+                        Email Address
+                    </label>
+
                     <input
-                        type="text"
+                        type="email"
                         id="signupUsername"
-                        placeholder="Create username"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
                         required
                     >
+
                 </div>
 
                 <div class="input-group">
-                    <label>Password</label>
+
+                    <label for="signupPassword">
+                        Password
+                    </label>
+
                     <input
                         type="password"
                         id="signupPassword"
                         placeholder="Create password"
+                        autocomplete="new-password"
+                        minlength="6"
                         required
                     >
+
                 </div>
 
                 <div class="input-group">
-                    <label>Confirm Password</label>
+
+                    <label for="signupConfirmPassword">
+                        Confirm Password
+                    </label>
+
                     <input
                         type="password"
                         id="signupConfirmPassword"
                         placeholder="Confirm password"
+                        autocomplete="new-password"
+                        minlength="6"
                         required
                     >
+
                 </div>
 
-                <button class="primary-btn" type="submit">
+                <button
+                    class="primary-btn"
+                    type="submit"
+                >
                     Create Account
                 </button>
 
@@ -132,10 +247,16 @@
             <p id="signupMessage" class="auth-message"></p>
 
             <p class="switch-auth">
+
                 Already have an account?
-                <button id="backToLoginBtn" type="button">
+
+                <button
+                    id="backToLoginBtn"
+                    type="button"
+                >
                     Login
                 </button>
+
             </p>
 
         </div>
@@ -144,8 +265,7 @@
 
 </div>
 
-
-<!-- ================= PORTAL ================= -->
+<!-- ================= PORTAL PAGE ================= -->
 
 <div id="portalPage" class="hidden">
 
@@ -160,8 +280,13 @@
             </div>
 
             <div>
+
                 <h1>Waste Mapping Portal</h1>
-                <span>Smart Waste Management System</span>
+
+                <span>
+                    Smart Waste Management System
+                </span>
+
             </div>
 
         </div>
@@ -184,7 +309,6 @@
 
     </header>
 
-
     <main class="container">
 
         <!-- DASHBOARD -->
@@ -196,41 +320,52 @@
             <div class="stats-grid">
 
                 <div class="stat-card">
+
                     <div class="stat-icon">🗑️</div>
+
                     <div>
                         <h3 id="totalReports">0</h3>
                         <p>Total Reports</p>
                     </div>
+
                 </div>
 
                 <div class="stat-card plastic-card">
+
                     <div class="stat-icon">🔵</div>
+
                     <div>
                         <h3 id="plasticCount">0</h3>
                         <p>Plastic Waste</p>
                     </div>
+
                 </div>
 
                 <div class="stat-card organic-card">
+
                     <div class="stat-icon">🟢</div>
+
                     <div>
                         <h3 id="organicCount">0</h3>
                         <p>Organic Waste</p>
                     </div>
+
                 </div>
 
                 <div class="stat-card electronic-card">
+
                     <div class="stat-icon">🟣</div>
+
                     <div>
                         <h3 id="electronicCount">0</h3>
                         <p>Electronic Waste</p>
                     </div>
+
                 </div>
 
             </div>
 
         </section>
-
 
         <!-- SMART PRIORITY -->
 
@@ -245,43 +380,54 @@
             <div class="priority-grid">
 
                 <div class="priority-card urgent">
+
                     <div class="priority-icon">🔴</div>
+
                     <div>
                         <h3 id="highPriorityCount">0</h3>
                         <p>High Priority</p>
                     </div>
+
                 </div>
 
                 <div class="priority-card medium">
+
                     <div class="priority-icon">🟠</div>
+
                     <div>
                         <h3 id="mediumPriorityCount">0</h3>
                         <p>Medium Priority</p>
                     </div>
+
                 </div>
 
                 <div class="priority-card normal">
+
                     <div class="priority-icon">🟢</div>
+
                     <div>
                         <h3 id="lowPriorityCount">0</h3>
                         <p>Low Priority</p>
                     </div>
+
                 </div>
 
                 <div class="priority-card hotspot">
+
                     <div class="priority-icon">🔥</div>
+
                     <div>
                         <h3 id="hotspotCount">0</h3>
                         <p>Hotspot Areas</p>
                     </div>
+
                 </div>
 
             </div>
 
         </section>
 
-
-        <!-- STATUS -->
+        <!-- COLLECTION STATUS -->
 
         <section class="section">
 
@@ -290,35 +436,43 @@
             <div class="status-summary-grid">
 
                 <div class="status-summary pending-summary">
+
                     <span>⏳</span>
+
                     <div>
                         <h3 id="pendingCount">0</h3>
                         <p>Pending</p>
                     </div>
+
                 </div>
 
                 <div class="status-summary progress-summary">
+
                     <span>🚛</span>
+
                     <div>
                         <h3 id="progressCount">0</h3>
                         <p>In Progress</p>
                     </div>
+
                 </div>
 
                 <div class="status-summary collected-summary">
+
                     <span>✅</span>
+
                     <div>
                         <h3 id="collectedCount">0</h3>
                         <p>Collected</p>
                     </div>
+
                 </div>
 
             </div>
 
         </section>
 
-
-        <!-- REPORT -->
+        <!-- REPORT WASTE -->
 
         <section class="section">
 
@@ -330,7 +484,9 @@
 
                     <div class="input-group">
 
-                        <label>Waste Type</label>
+                        <label for="wasteType">
+                            Waste Type
+                        </label>
 
                         <select id="wasteType" required>
 
@@ -358,10 +514,11 @@
 
                     </div>
 
-
                     <div class="input-group">
 
-                        <label>Waste Quantity</label>
+                        <label for="wasteQuantity">
+                            Waste Quantity
+                        </label>
 
                         <select id="wasteQuantity">
 
@@ -383,10 +540,11 @@
 
                 </div>
 
-
                 <div class="input-group">
 
-                    <label>Description</label>
+                    <label for="wasteDescription">
+                        Description
+                    </label>
 
                     <textarea
                         id="wasteDescription"
@@ -397,21 +555,21 @@
 
                 </div>
 
-
                 <div class="input-group">
 
-                    <label>Photo</label>
+                    <label for="wastePhoto">
+                        Photo
+                    </label>
 
                     <input
                         type="file"
                         id="wastePhoto"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp"
                     >
 
                     <div id="photoPreview"></div>
 
                 </div>
-
 
                 <div class="location-box">
 
@@ -435,7 +593,6 @@
 
                 </div>
 
-
                 <button
                     type="submit"
                     class="primary-btn submit-btn"
@@ -445,12 +602,16 @@
 
             </form>
 
-            <p id="reportMessage" class="success-message"></p>
+            <p
+                id="reportMessage"
+                class="success-message"
+                role="status"
+                aria-live="polite"
+            ></p>
 
         </section>
 
-
-        <!-- MAP -->
+        <!-- SMART WASTE MAP -->
 
         <section class="section">
 
@@ -488,7 +649,6 @@
 
                     </select>
 
-
                     <select id="mapStatusFilter">
 
                         <option value="All">
@@ -508,7 +668,6 @@
                         </option>
 
                     </select>
-
 
                     <select id="priorityFilter">
 
@@ -532,7 +691,6 @@
 
                 </div>
 
-
                 <button
                     id="heatmapToggle"
                     class="heatmap-toggle"
@@ -543,17 +701,13 @@
 
             </div>
 
-
             <div class="map-wrapper">
-
                 <div id="map"></div>
-
             </div>
 
         </section>
 
-
-        <!-- REPORTS -->
+        <!-- REPORT LIST -->
 
         <section class="section">
 
@@ -562,7 +716,6 @@
             <div id="reportsList"></div>
 
         </section>
-
 
         <!-- ANALYTICS -->
 
@@ -584,12 +737,15 @@
 
 </div>
 
+<!-- JAVASCRIPT LIBRARIES -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- YOUR JAVASCRIPT -->
 
 <script src="script.js"></script>
 
